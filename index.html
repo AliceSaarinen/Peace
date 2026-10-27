@@ -333,6 +333,8 @@ textarea.let:focus{background:#FFFDF9;border-color:#E3B7C4;box-shadow:none}
 .gear svg{width:21px;height:21px}
 .gear[aria-current="page"]{color:var(--rose-ink);background:var(--rose-soft)}
 .backrow{display:flex}
+.edbar{position:sticky;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:20;display:flex;align-items:center;gap:8px;padding:8px 8px 8px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,250,242,.94);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(140,100,70,.12)}
+.edbar .grow{font-family:var(--f-display);font-weight:700;font-size:1.2rem;color:var(--rose-ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Historia Tarkista-sivulla */
 .hfold .foldh{padding:4px 2px}
 .hfold .htitle{font-family:var(--f-display);font-size:1.45rem;font-weight:700;color:var(--blue);flex:0 0 auto}
@@ -2428,6 +2430,45 @@ Täytä kakku mansikoilla ja kermalla.`;
       renderCheck();
     }
   }
+  /* Reseptin kuva tekstiksi: rivit säilytetään, katkenneet lauseet yhdistetään. Useampi kuva lisätään peräkkäin. */
+  function cleanRecipeOcr(t) {
+    const ls = String(t || '').replace(/\r/g, '').replace(/-\n(?=[a-zäöå])/g, '').split('\n').map(l => l.replace(/[ \t]+/g, ' ').trim()).filter(Boolean);
+    const out = [];
+    ls.forEach(l => {
+      const prev = out[out.length - 1];
+      if (prev && /^[a-zäöå(]/.test(l) && prev.length > 25 && !/[.:!?]$/.test(prev) && !/^[\d½¼¾⅓-]/.test(prev)) out[out.length - 1] = prev + ' ' + l;
+      else out.push(l);
+    });
+    return out.join('\n');
+  }
+  async function ocrRecipe(file, cropped) {
+    const r = S.rin;
+    syncRecipe();
+    let last = Date.now(), wd = null;
+    const prog = (st, p) => { last = Date.now(); const el = $('#rOcrMsg'); if (el) el.textContent = (/load|initial/i.test(st) ? 'Ladataan tekstintunnistusta… ' : 'Luetaan kuvaa… ') + Math.round(p * 100) + ' %'; };
+    r.busy = 'Ladataan tekstintunnistusta…'; r.ocrErr = null; renderRecipe();
+    try {
+      const why = await ocrPreflight();
+      if (why) throw { why };
+      const stall = new Promise((_, rej) => { wd = setInterval(() => { if (Date.now() - last > 45000) rej({ why: 'stall' }); }, 2000); });
+      const work = (async () => { const w = await getWorker(prog); last = Date.now(); const cv = await prepOcr(cropped || file); return w.recognize(cv); })();
+      const res = await Promise.race([work, stall]);
+      clearInterval(wd);
+      const txt = cleanRecipeOcr(res && res.data ? res.data.text : '');
+      r.busy = null;
+      if (!txt || txt.length < 8) { renderRecipe(); toast('Kuvasta ei löytynyt tekstiä. Kuvaa resepti lähempää ja suoraan edestä.'); return; }
+      r.ingDraft = (r.ingDraft && r.ingDraft.trim() ? r.ingDraft.trim() + '\n\n' : '') + txt;
+      renderRecipe();
+      const ta = $('#rIng'); if (ta) { ta.focus({ preventScroll: true }); ta.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+      toast('Teksti lisätty. Tarkista se, tai lisää seuraava kuva.');
+    } catch (e) {
+      clearInterval(wd);
+      r.busy = null;
+      if (e && e.why === 'stall') { try { if (tessWorker) tessWorker.terminate(); } catch (x) { } tessWorker = null; }
+      r.ocrErr = OCR_WHY[(e && e.why) || ''] || 'tunnistus ei käynnistynyt (' + String((e && e.message) || e || '').slice(0, 80) + ')';
+      renderRecipe();
+    }
+  }
   async function readPhoto(file) {
     const c = S.check;
     const thumb = URL.createObjectURL(file);
@@ -2742,6 +2783,12 @@ Täytä kakku mansikoilla ja kermalla.`;
       <div class="card">
         <label class="flabel" for="rName"><span class="label">Reseptin nimi</span></label>
         <input id="rName" type="text" value="${esc(r.nameDraft || '')}">
+        <div class="iconpick">
+          <label aria-label="Kuvaa resepti" title="Kuvaa resepti">${icon('i-cam')}<input id="rOcrCam" type="file" accept="image/*" capture="environment"></label>
+          <label aria-label="Valitse reseptin kuva" title="Valitse reseptin kuva">${icon('i-img')}<input id="rOcrGal" type="file" accept="image/*"></label>
+        </div>
+        ${r.busy ? `<div class="busy"><div class="spinner"></div><span id="rOcrMsg">${esc(r.busy)}</span></div>` : ''}
+        ${r.ocrErr ? `<p class="note warm" style="font-size:.88rem"><b>Tekstintunnistus ei käynnistynyt:</b> ${esc(r.ocrErr)}. Voit myös liittää reseptin tekstinä.</p>` : ''}
         <label class="flabel" for="rIng"><span class="label">Resepti</span></label>
         <textarea id="rIng" style="min-height:160px">${esc(r.ingDraft || '')}</textarea>
         ${foldHTML('rres', 'Rajaukset', sel.map(x => x[1]), `<div class="chips">${RESTR.map(([k, l]) => `<button class="chip" data-act="rres" data-v="${k}" aria-pressed="${pressed(r.restrictions.includes(k))}">${l}</button>`).join('')}</div>
@@ -3000,6 +3047,7 @@ Täytä kakku mansikoilla ja kermalla.`;
     const selCats = r.categories || [];
     return `
       ${vh(r.mode === 'own' && !r.ingredients.length ? 'Kirjoita oma resepti' : 'Muokkaa reseptiä')}
+      <div class="edbar"><span class="grow">${r.mode === 'own' && !r.ingredients.length ? 'Oma resepti' : 'Muokkaus'}</span><button class="btn ghost small" data-act="ecancel">Peruuta</button><button class="btn primary small" data-act="esave">${icon('i-ok')}Tallenna</button></div>
       <div class="card edit">
         <label><span class="label">Nimi</span><input id="eTitle" type="text" value="${esc(r.title)}"></label>
         <div class="row">
@@ -3699,6 +3747,7 @@ Täytä kakku mansikoilla ja kermalla.`;
   });
   document.addEventListener('change', async e => {
     const id = e.target.id;
+    if ((id === 'rOcrCam' || id === 'rOcrGal') && e.target.files[0]) { syncRecipe(); const f = e.target.files[0]; e.target.value = ''; openCrop(f, cv => ocrRecipe(f, cv)); }
     if ((id === 'camIn' || id === 'galIn') && e.target.files[0]) { syncCheck(); const f = e.target.files[0]; openCrop(f, cv => ocrPhoto(f, cv)); }
     if ((id === 'rCam' || id === 'rGal') && e.target.files[0]) {
       syncRecipe(); const f = e.target.files[0];
