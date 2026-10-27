@@ -1387,6 +1387,11 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
   function splitLines(text, bset) {
     return String(text || '').replace(/\r/g, '').replace(/\t+/g, ' ').split('\n').map(l => {
       l = l.replace(/\s+/g, ' ').trim();
+      if (!BULLET_RE.test(l) && /^[^\p{L}\p{N}\s(\[]{1,3}\s*(?=[\d½¼¾⅓])/u.test(l) && !/^[-–+]\d+([.,]\d+)?\s*°/.test(l)) {
+        const t = l.replace(/^[^\p{L}\p{N}\s(\[]{1,3}\s*/u, '').trim();
+        if (t && bset) bset.add(t);
+        return t;
+      }
       if (BULLET_RE.test(l) && !/^[-–]\d+([.,]\d+)?\s*°/.test(l)) {
         const t = l.replace(BULLET_RE, '').trim();
         if (t && bset) bset.add(t);
@@ -2597,6 +2602,9 @@ Täytä kakku mansikoilla ja kermalla.`;
   function fixOcrLine(t) {
     return String(t || '').replace(/[ \t]+/g, ' ').trim()
       .replace(OCR_BULLET_RE, '- ')
+      /* mikä tahansa luettelomerkiksi luettu alku ennen määrää: "»1 kananmuna", "e1 kananmuna", "@ 2 dl" */
+      .replace(/^(?:- )?(?:[^\p{L}\p{N}\s(\[]{1,3}|[oecaª°º])\s*(?=\d+(?:[.,]\d+)?(?:\s*[½¼¾⅓])?\s*\p{L})/u, '- ')
+      .replace(/^(?:- )?(?:[^\p{L}\p{N}\s(\[]{1,3}|[oecaª°º])\s*(?=[½¼¾⅓]\s*\p{L})/u, '- ')
       .replace(/(\d\s?)(dl|tl|rkl|ml|cl|kg|kpl)(?=[a-zäöå]{3})/gi, '$1$2 ')      // 1 tlleivin → 1 tl leivin
       .replace(/(\d)(dl|tl|rkl|ml|cl|kg|g|l|kpl)\b/gi, '$1 $2')                 // 2dl → 2 dl
       .replace(/(\d)\s?([½¼¾⅓])/g, '$1 $2');
@@ -2681,7 +2689,7 @@ Täytä kakku mansikoilla ja kermalla.`;
   function cleanRecipeOcr(t) {
     /* Tunnistus lukee luettelomerkin usein kirjaimeksi tai merkiksi (o, e, c, °, «, ~ …): muutetaan viivaksi */
     const OCR_BULLET = /^(?:[oOeEcC0°º©®¢•·«»*+~>¬=]|[-–—_]{1,2}|\(\s?\)|\[\s?\])\s+(?=[\dA-Za-zÄÖÅäöå½¼¾⅓])/;
-    const ls = String(t || '').replace(/\r/g, '').replace(/-\n(?=[a-zäöå])/g, '').split('\n').map(l => l.replace(/[ \t]+/g, ' ').trim().replace(OCR_BULLET, '- ')).filter(Boolean);
+    const ls = String(t || '').replace(/\r/g, '').replace(/-\n(?=[a-zäöå])/g, '').split('\n').map(l => fixOcrLine(l)).filter(Boolean);
     const out = [];
     ls.forEach(l => {
       const prev = out[out.length - 1];
