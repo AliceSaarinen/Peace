@@ -254,6 +254,11 @@ label.flabel .muted{font-size:.8rem}
 .kpill.k-head{background:var(--blue-soft);color:var(--blue)}
 .kpill.k-step{background:var(--sage-soft);color:var(--sage)}
 .kpill.k-skip{background:#EEE6DA;color:var(--ink-soft)}
+.kpill.k-tool{background:var(--butter);color:var(--butter-ink)}
+.tools{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.tools li{display:flex;gap:10px;align-items:baseline;padding:9px 4px;border-bottom:1px solid #EFE3CF}
+.tools li:last-child{border-bottom:0}
+.tools li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--gold);flex:0 0 auto;transform:translateY(-2px)}
 .ptag{margin-left:6px;font-size:.66rem;font-weight:800;padding:1px 6px;border-radius:99px;background:var(--rose-soft);color:var(--rose-ink);white-space:nowrap;vertical-align:2px}
 .ptag.has{background:transparent;border:1px dashed #E3B7C4}
 .pick{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
@@ -1340,7 +1345,9 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
   }
 
   /* ---------- reseptin jäsentäminen ---------- */
-  const ING_HEAD = /^(ainekset|ainesosat|aineosat|raaka-aineet|tarvitset|tarvikkeet|ingredients|ingredienser|zutaten|taikina|taytte|kuorrute|pohja|kastike)\b/i;
+  const TOOL_HEAD = /^(tarvikkeet|välineet|valineet|tarvitset myös|tarvitset lisäksi|työvälineet|tyovalineet|equipment|tools|you('ll| will) need)\b/i;
+  const TOOL_WORD = /(vuoka|vuoan|kulho|kattila|(^| )pannu( |$)|paistinpannu|uunipelti|leivinpelti|(^| )pelti|leivinpaperi|kakkuvuoka|irtopohjavuoka|muffinssivuoka|muffinssivuoat|muffinssipaperi|sähkövatkain|sahkovatkain|vatkain|sauvasekoitin|tehosekoitin|monitoimikone|yleiskone|kaulin|siivilä|siivila|raastin|nuolija|(^| )lasta( |$)|kauha|mittakannu|mittasarja|tuorekelmu|kelmu|folio|lämpömittari|lampomittari|paistolämpömittari|pursotinpussi|pursotin|tylli|jäätelökone|vohvelirauta|blender|food processor|stand mixer|hand mixer|mixer|baking sheet|baking pan|baking dish|parchment|whisk|mixing bowl|skillet|saucepan|dutch oven|springform|loaf pan|muffin tin|cake pan|rolling pin|sieve|spatula|piping bag|thermometer)/i;
+  const ING_HEAD = /^(ainekset|ainesosat|aineosat|raaka-aineet|tarvitset|ingredients|ingredienser|zutaten|taikina|taytte|kuorrute|pohja|kastike)\b/i;
   const STEP_HEAD = /^(ohje|ohjeet|valmistus|valmistusohje|tee nain|tee näin|instructions|directions|method|steps|preparation|gör så här|gor sa har|zubereitung)\b/i;
   const JUNK = /^(katso myös|lue myös|muita reseptejä|you may also like|related|more recipes|käynnistä ajastin|kaynnista ajastin|ajastin|start timer|set timer|timer|katso video|video|mainos|advertisement|lisää ostoslistalle|lisää suosikkeihin|lisää kauppalistalle|arvostelut|kommentit|reseptin tekijä|kuva:|photo|kuvaaja|lähde|source|avainsanat|tags|ruokavalio|vaikeustaso|hinta|annoshinta|\d+([.,]\d+)?\s*(€|e\/annos)|\d+\s*(min|minuuttia|h|tuntia|tunti)\.?$|kopioi$|lataa |lisää ainekset|lisaa ainekset|määrä\s+ainesosa|maara\s+ainesosa|.*-sovellu|tulosta|jaa resepti|arvostele|cook mode|prevent your screen|jump to recipe|print recipe|pin recipe|save recipe|rate this recipe|nutrition|calories|prep time|cook time|total time|course|cuisine|keyword|author|servings\s*:|yield\s*:|equipment|notes?$|video|watch|share|tulosta|tallenna|arvostele|valmistusaika|kokonaisaika|ravintosisalto|kategoria)/i;
   const NOT_FOOD = /^\s*(\d+([.,]\d+)?\s*)?(minutes?|mins?\.?|min|minuutti[a]?|minuuttia|hours?|hrs?|h|tunti[a]?|tuntia|people|persons?|servings?|serves|henkea|henkiloa|hengelle|annosta|annoksia|portions?|kcal|calories|kalori\w*|prep|cook|total)\s*\.?\s*$|^(prep|cook|total|valmistusaika|kokonaisaika|kypsennysaika|uunissa)\b/;
@@ -1395,6 +1402,7 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
     const push = (t, k) => out.push({ t, k, k0: k });
     lines.forEach(l => {
       if (ign.has(prepText(l).trim())) { push(l, 'skip'); return; }
+      if (TOOL_HEAD.test(l) && l.length < 40) { section = 'tools'; return; }
       if (JUNK.test(l) || PAGE_JUNK.test(l)) { const s2 = l.match(/(servings|serves|yield|annokset|annoksia|makes)\s*:?\s*(\d+)/i); if (s2 && servings == null) servings = parseInt(s2[2], 10); push(l, 'skip'); return; }
       const sv = l.match(/(\d+)\s*(annosta|annos|hengelle|henkilölle|henkiloa|henkeä|kpl|kappaletta|sämpylää|sampylaa|pullaa|palaa|muffinssia|keksiä|servings?|serves|portions?|pieces?)/i) || l.match(/(?:serves|makes|yields|riittää|tekee|annoksia|määrä)\s*:?\s*(\d+)/i);
       if (sv && l.length < 60 && servings == null) { servings = parseInt(sv[1], 10); if (sv[2]) servingsLabel = normLabel(sv[2]); if (!QTY_RE.test(l) || l.length < 25) return; }
@@ -1407,6 +1415,9 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
       if (!QTY_RE.test(l) && STEP_VERB.test(l)) { section = 'steps'; push(l.replace(/^\d+[.)]\s*/, ''), 'step'); return; }
       if (ING_HEAD.test(l) && l.length < 40) { section = 'ings'; if (/[:]\s*$/.test(l) && !/^(ainekset|ainesosat|ingredients)/i.test(l)) push(l.replace(/:\s*$/, ''), 'head'); return; }
       if (/^[^\d].{0,30}:$/.test(l) && section !== 'steps') { push(l.replace(/:$/, ''), 'head'); section = 'ings'; return; }
+      /* Tarvikkeet: oma osionsa tai lyhyt rivi, jossa on keittiövälineen nimi */
+      if (section === 'tools' && l.length < 90 && !STEP_VERB.test(l)) { push(l.replace(/^[-•*·]\s*/, ''), 'tool'); return; }
+      if (section !== 'steps' && l.length < 70 && TOOL_WORD.test(prepText(l)) && !/\d\s*(g|kg|dl|ml|l|rkl|tl|cups?|tbsp|tsp|oz)\b/i.test(l) && !/[.!?]$/.test(l)) { push(l.replace(/^[-•*·]\s*/, ''), 'tool'); return; }
       const isQty = QTY_RE.test(l) && l.length < 140;
       const bullet = /^[-•*·]\s/.test(l);
       if (section === 'steps') {
@@ -1435,13 +1446,14 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
   }
   /* Luokittelusta reseptiksi */
   function buildParsed(cls) {
-    const ings = [], steps = [];
+    const ings = [], steps = [], tools = [];
     cls.lines.forEach(x => {
-      if (x.k === 'ing') { const pi = parseIngredient(x.t); if (pi.name) ings.push(pi); }
+      if (x.k === 'tool') { if (x.t.trim()) tools.push(x.t.trim()); }
+      else if (x.k === 'ing') { const pi = parseIngredient(x.t); if (pi.name) ings.push(pi); }
       else if (x.k === 'head') ings.push({ head: x.t.replace(/:$/, '') });
       else if (x.k === 'step') steps.push(x.t);
     });
-    return { title: cls.title || 'Resepti', servings: cls.servings || 4, servingsLabel: cls.servingsLabel || 'annosta', ingredients: ings, steps };
+    return { title: cls.title || 'Resepti', servings: cls.servings || 4, servingsLabel: cls.servingsLabel || 'annosta', ingredients: ings, steps, tools };
   }
   function parseRecipe(text) { return buildParsed(classify(text, '', [])); }
   function normLabel(s) {
@@ -1647,7 +1659,7 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
       const hits = out.filter(i => !i.head && (avoid || []).some(a => prepText(i.name).includes(prepText(a))));
       if (hits.length) notes.push('Huom. vältettävä aine reseptissä: ' + hits.map(h => h.name).join(', ') + '.');
     }
-    return { title: en && p.title ? p.title : p.title, servings: p.servings, servingsLabel: p.servingsLabel, ingredients: out, steps, changes, notes: notes.join(' '), categories: guessCategories(text), mode: 'rules' };
+    return { title: en && p.title ? p.title : p.title, servings: p.servings, servingsLabel: p.servingsLabel, ingredients: out, steps, tools: p.tools || [], changes, notes: notes.join(' '), categories: guessCategories(text), mode: 'rules' };
   }
   function wordStem(key) {
     if (key === 'lohi' || key === 'kala' || key === 'tonnikala') return null;
@@ -2590,9 +2602,9 @@ Täytä kakku mansikoilla ja kermalla.`;
   }
 
   /* ---------- RIVIEDITORI: rivejä voi muokata, yhdistää, jakaa ja poistaa ---------- */
-  const LEKIND = { ing: 'Aines', head: 'Osio', step: 'Vaihe', skip: 'Ohita' };
+  const LEKIND = { ing: 'Aines', head: 'Osio', step: 'Vaihe', tool: 'Tarvike', skip: 'Ohita' };
   const LE = {
-    kinds: { rv: ['ing', 'head', 'step', 'skip'], ei: ['ing', 'head'], es: null },
+    kinds: { rv: ['ing', 'head', 'step', 'tool', 'skip'], ei: ['ing', 'head', 'tool'], es: null },
     rows(n) { return n === 'rv' ? (S.rin.review && S.rin.review.lines) : n === 'ei' ? (S.ed && S.ed.ings) : n === 'es' ? (S.ed && S.ed.steps) : null; },
     active: {}, caret: {}
   };
@@ -2629,7 +2641,8 @@ Täytä kakku mansikoilla ja kermalla.`;
   function leCount(n) {
     if (n !== 'rv') return;
     const el = $('#rvCount'), rows = LE.rows('rv'); if (!el || !rows) return;
-    el.textContent = `${rows.filter(x => x.k === 'ing').length} ainesta · ${rows.filter(x => x.k === 'step').length} vaihetta`;
+    const nt = rows.filter(x => x.k === 'tool').length;
+    el.textContent = `${rows.filter(x => x.k === 'ing').length} ainesta · ${rows.filter(x => x.k === 'step').length} vaihetta` + (nt ? ` · ${nt} tarviketta` : '');
   }
   function leMerge(a, b, raw) {
     const k = a.k === 'skip' && b.k !== 'skip' ? b.k : a.k;
@@ -2714,8 +2727,8 @@ Täytä kakku mansikoilla ja kermalla.`;
   });
 
   /* ---------- RESEPTIT ---------- */
-  const KLAB = { ing: 'Aines', head: 'Osio', step: 'Vaihe', skip: 'Ohita' };
-  const KNEXT = { ing: 'head', head: 'step', step: 'skip', skip: 'ing' };
+  const KLAB = { ing: 'Aines', head: 'Osio', step: 'Vaihe', tool: 'Tarvike', skip: 'Ohita' };
+  const KNEXT = { ing: 'head', head: 'step', step: 'tool', tool: 'skip', skip: 'ing' };
   function renderRecipe() {
     if (S.tab === 'book' && S.book.reading) { renderBook(); return; }
     const v = $('#v-recipe');
@@ -2744,7 +2757,7 @@ Täytä kakku mansikoilla ja kermalla.`;
     return `<div class="card" id="reviewCard">
       ${ch('Tarkista rivit', 'blue')}
       <div class="row" style="justify-content:space-between">
-        <span class="muted" style="font-size:.84rem;font-weight:700" id="rvCount">${n('ing')} ainesta · ${n('step')} vaihetta</span>
+        <span class="muted" style="font-size:.84rem;font-weight:700" id="rvCount">${n('ing')} ainesta · ${n('step')} vaihetta${n('tool') ? ` · ${n('tool')} tarviketta` : ''}</span>
         <label class="flabel" style="flex:0 0 6.5rem"><span class="label">Annoksia</span><input id="rvServ" type="number" inputmode="numeric" min="1" value="${rv.servings}"></label>
       </div>
       ${leHTML('rv')}
@@ -2871,6 +2884,7 @@ Täytä kakku mansikoilla ja kermalla.`;
         }).join('')}</ul>
         <button class="btn soft small nutbtn" data-act="nut">${icon('i-leaf')}Ravintoarvot annosta kohden</button>
       </div>
+      ${(r.tools || []).length ? `<div class="card">${ch('Tarvikkeet', 'blue')}<ul class="tools">${r.tools.map(t => `<li><span>${esc(t)}</span></li>`).join('')}</ul></div>` : ''}
       <div class="card">${ch('Valmistus', 'rose')}<ol class="steps">${(r.steps || []).map(s => `<li><span>${esc(s)}</span></li>`).join('')}</ol>
         ${S.servings !== r.servings ? `<p class="muted" style="font-size:.85rem">Määrät on skaalattu ${S.servings} ${esc(r.servingsLabel || 'annokselle')}. Jos vuoan koko muuttuu, tarkista paistoaika: matala vuoka kypsyy nopeammin, korkea hitaammin.</p>` : ''}</div>
       ${r.changes && r.changes.length ? `<div class="card" style="margin-top:14px">${ch('Mitä muutettiin', 'blue')}<ul class="changes">${r.changes.map(c => `<li><span class="ft"><s>${esc(c.from)}</s> → ${esc(c.to)}</span><span class="muted">${esc(c.why)}</span></li>`).join('')}</ul></div>` : ''}
@@ -2978,7 +2992,7 @@ Täytä kakku mansikoilla ja kermalla.`;
     const r = S.current;
     const cats = [...new Set([...D.DEFAULT_CATEGORIES, ...S.recipes.flatMap(x => x.categories || []), ...(r.categories || [])])];
     if (!S.ed || S.ed.id !== r.id) {
-      S.ed = { id: r.id, ings: r.ingredients.map(i => i.head ? { t: i.head, k: 'head' } : { t: lineOf(i), k: 'ing', o: i, ot: lineOf(i) }), steps: (r.steps || []).map(t => ({ t, k: 'step' })) };
+      S.ed = { id: r.id, ings: r.ingredients.map(i => i.head ? { t: i.head, k: 'head' } : { t: lineOf(i), k: 'ing', o: i, ot: lineOf(i) }).concat((r.tools || []).map(t => ({ t, k: 'tool' }))), steps: (r.steps || []).map(t => ({ t, k: 'step' })) };
       LE.active.ei = LE.active.es = null;
     }
     if (!S.ed.ings.length) S.ed.ings.push({ t: '', k: 'ing' });
@@ -3006,7 +3020,8 @@ Täytä kakku mansikoilla ja kermalla.`;
     r.servings = Math.max(1, parseInt($('#eServ').value, 10) || r.servings);
     r.servingsLabel = $('#eLabel').value.trim() || 'annosta';
     r.categories = $$('#eCats .chip').filter(b => b.getAttribute('aria-pressed') === 'true').map(b => b.dataset.v);
-    r.ingredients = S.ed.ings.map(x => Object.assign({}, x, { t: x.t.trim() })).filter(x => x.t).map(x => {
+    r.tools = S.ed.ings.filter(x => x.k === 'tool').map(x => x.t.trim()).filter(Boolean);
+    r.ingredients = S.ed.ings.filter(x => x.k !== 'tool').map(x => Object.assign({}, x, { t: x.t.trim() })).filter(x => x.t).map(x => {
       if (x.k === 'head' || (/:$/.test(x.t) && !/^\d/.test(x.t))) return { head: x.t.replace(/:$/, '') };
       if (x.o && x.t === x.ot) return x.o;
       const p = C.parseIngredient(x.t); p.changed = false;
@@ -3246,6 +3261,7 @@ Täytä kakku mansikoilla ja kermalla.`;
     if (K.tab === 'mise' || !n) {
       const list = r.ingredients.map((i, idx) => ({ i, idx }));
       body = `${oven ? `<p class="note">Esilämmitä uuni ${oven} °C.</p>` : ''}
+        ${(r.tools || []).length ? `<div class="cuse"><div class="label">Tarvikkeet</div>${r.tools.map(t => `<div><span>${esc(t)}</span></div>`).join('')}</div>` : ''}
         <ul class="shop cmise">${list.map(({ i, idx }) => i.head ? `<li><div class="label" style="padding:12px 0 2px">${esc(i.head)}</div></li>` : (() => { const a = amt(i); return `<li class="${chk.has(idx) ? 'done' : ''}"><label><input type="checkbox" data-cmise="${idx}" ${chk.has(idx) ? 'checked' : ''}><span class="q">${esc(a.q)}</span><span class="t">${esc(a.e.name)}</span></label></li>`; })()).join('')}</ul>
         ${n ? `<button class="btn primary" data-c="tab" data-v="steps">Aloita valmistus${icon('i-right')}</button>` : ''}`;
     } else {
