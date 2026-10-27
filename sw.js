@@ -1,5 +1,5 @@
 /* Peace: offline-tuki. Sovellus päivittyy verkosta, kun yhteys on; muuten se toimii välimuistista. */
-const VERSION = 'peace-v4';
+const VERSION = 'peace-v5';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 const RUNTIME = 'peace-runtime-v1';
 
