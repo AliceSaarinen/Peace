@@ -293,6 +293,17 @@ textarea.let:focus{background:#FFFDF9;border-color:#E3B7C4;box-shadow:none}
 .le-del svg{width:18px;height:18px}
 .le-tools{grid-column:2 / -1;display:none;flex-wrap:wrap;gap:6px;padding:0 0 4px}
 .le-row.on .le-tools{display:flex}
+/* Rivin tyypin valinta: kaikki vaihtoehdot rinnakkain rivin sisällä */
+.le-pick{grid-column:2 / -1;display:flex;flex-wrap:wrap;gap:6px;padding:2px 0 8px}
+.le-row.picking .le-tools{display:none}
+.kopt{border:1.5px solid transparent;border-radius:99px;padding:7px 13px;font-size:.82rem;font-weight:800;line-height:1.1}
+.kopt.k-ing{background:var(--rose-soft);color:var(--rose-ink)}
+.kopt.k-head{background:var(--blue-soft);color:var(--blue)}
+.kopt.k-step{background:var(--sage-soft);color:var(--sage)}
+.kopt.k-tool{background:var(--butter);color:var(--butter-ink)}
+.kopt.k-skip{background:#EEE6DA;color:var(--ink-soft)}
+.kopt[aria-pressed="true"]{border-color:currentColor;box-shadow:0 1px 3px rgba(140,100,70,.18)}
+.kpill[aria-expanded="true"]{outline:2px solid currentColor;outline-offset:1px}
 .le-tools button{width:44px;height:40px;display:inline-grid;place-items:center;border:1.5px solid var(--line);background:#FFFDF9;border-radius:12px;padding:0;color:var(--ink)}
 .le-tools button:active{background:var(--rose-soft)}
 .le-tools svg{width:21px;height:21px;color:var(--rose-ink)}
@@ -1362,7 +1373,10 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
   /* ---------- reseptin jäsentäminen ---------- */
   const TOOL_HEAD = /^(tarvikkeet|välineet|valineet|tarvitset myös|tarvitset lisäksi|työvälineet|tyovalineet|equipment|tools|you('ll| will) need)\b/i;
   const TOOL_WORD = /(vuoka|vuoan|kulho|kattila|(^| )pannu( |$)|paistinpannu|uunipelti|leivinpelti|(^| )pelti|leivinpaperi|kakkuvuoka|irtopohjavuoka|muffinssivuoka|muffinssivuoat|muffinssipaperi|sähkövatkain|sahkovatkain|vatkain|sauvasekoitin|tehosekoitin|monitoimikone|yleiskone|kaulin|siivilä|siivila|raastin|nuolija|(^| )lasta( |$)|kauha|mittakannu|mittasarja|tuorekelmu|kelmu|folio|lämpömittari|lampomittari|paistolämpömittari|pursotinpussi|pursotin|tylli|jäätelökone|vohvelirauta|blender|food processor|stand mixer|hand mixer|mixer|baking sheet|baking pan|baking dish|parchment|whisk|mixing bowl|skillet|saucepan|dutch oven|springform|loaf pan|muffin tin|cake pan|rolling pin|sieve|spatula|piping bag|thermometer)/i;
-  const ING_HEAD = /^(ainekset|ainesosat|aineosat|raaka-aineet|tarvitset|ingredients|ingredienser|zutaten|taikina|taytte|kuorrute|pohja|kastike)\b/i;
+  const ING_HEAD = /^(ainekset|ainesosat|aineosat|raaka-aineet|tarvitset|ingredients|ingredienser|zutaten|taikina|tayte|kuorrute|kuorrutus|pohja|kastike)\b/i;
+  const GENERIC_ING = /^(ainekset|ainesosat|aineosat|raaka-aineet|tarvitset|tarvitaan|ingredients|ingredienser|zutaten)\s*:?\s*$/i;
+  const SECTION_WORD = /^(pohja|murupohja|keksipohja|taikina|tayte|taytteet|kuorrute|kuorrutus|glaseeraus|kiille|kastike|dippi|salaatti|marinadi|pinta|pinnalle|koristeluun|koristelu|koriste|liemi|tahna|pesto|siirappi|kreemi|vaahto|kakku|kakkupohja|pullat|leipa|keitto|kastikkeeseen|tarjoiluun|lisukkeet|lisuke|frosting|filling|crust|topping|sauce|dressing|dough|glaze|for the .+)$/;
+  const TAIL_QTY = /[\s:,]\s*(\d+([.,]\d+)?|[½¼¾⅓])\s*(g|kg|dl|ml|l|cl|tl|rkl|mm|kpl|tlk|pkt|prk|rs|ps|kappaletta)\.?$/i;
   const STEP_HEAD = /^(ohje|ohjeet|valmistus|valmistusohje|tee nain|tee näin|instructions|directions|method|steps|preparation|gör så här|gor sa har|zubereitung)\b/i;
   const JUNK = /^(katso myös|lue myös|muita reseptejä|you may also like|related|more recipes|käynnistä ajastin|kaynnista ajastin|ajastin|start timer|set timer|timer|katso video|video|mainos|advertisement|lisää ostoslistalle|lisää suosikkeihin|lisää kauppalistalle|arvostelut|kommentit|reseptin tekijä|kuva:|photo|kuvaaja|lähde|source|avainsanat|tags|ruokavalio|vaikeustaso|hinta|annoshinta|\d+([.,]\d+)?\s*(€|e\/annos)|\d+\s*(min|minuuttia|h|tuntia|tunti)\.?$|kopioi$|lataa |lisää ainekset|lisaa ainekset|määrä\s+ainesosa|maara\s+ainesosa|.*-sovellu|tulosta|jaa resepti|arvostele|cook mode|prevent your screen|jump to recipe|print recipe|pin recipe|save recipe|rate this recipe|nutrition|calories|prep time|cook time|total time|course|cuisine|keyword|author|servings\s*:|yield\s*:|equipment|notes?$|video|watch|share|tulosta|tallenna|arvostele|valmistusaika|kokonaisaika|ravintosisalto|kategoria)/i;
   const NOT_FOOD = /^\s*(\d+([.,]\d+)?\s*)?(minutes?|mins?\.?|min|minuutti[a]?|minuuttia|hours?|hrs?|h|tunti[a]?|tuntia|people|persons?|servings?|serves|henkea|henkiloa|hengelle|annosta|annoksia|portions?|kcal|calories|kalori\w*|prep|cook|total)\s*\.?\s*$|^(prep|cook|total|valmistusaika|kokonaisaika|kypsennysaika|uunissa)\b/;
@@ -1425,32 +1439,52 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
     let title = '', servings = null, servingsLabel = 'annosta';
     const out = [];
     let section = null;
-    const push = (t, k) => out.push({ t, k, k0: k });
-    lines.forEach(l => {
+    /* Vaihe, joka jatkuu seuraavalle riville pienellä alkukirjaimella, yhdistetään edelliseen */
+    const unfinished = () => { const p = out[out.length - 1]; return p && p.k === 'step' && !/[.!?:]$/.test(p.t) ? p : null; };
+    const push = (t, k) => {
+      const prev = unfinished();
+      if (k === 'step' && prev && /^[a-zäöå(]/.test(t)) { prev.t += ' ' + t; return; }
+      out.push({ t, k, k0: k });
+    };
+    const isQtyL = l => QTY_RE.test(l) || TAIL_QTY.test(l);
+    /* Osion otsikko: lyhyt rivi ilman numeroita, jota seuraa ainesrivi (esim. "Täyte", "Kastike:", "POHJA") */
+    const headLike = (l, nx) => {
+      if (l.length > 32 || /\d/.test(l) || /[.!?]$/.test(l) || l.split(' ').length > 4 || STEP_VERB.test(l)) return false;
+      const t = prepText(l).replace(/:$/, '').trim();
+      const known = SECTION_WORD.test(t), colon = /:$/.test(l), caps = l === l.toUpperCase() && /[A-ZÄÖÅ]{3}/.test(l);
+      return (known || colon || caps) && !!nx && isQtyL(nx);
+    };
+    lines.forEach((l, li) => {
+      const nx = lines[li + 1];
       if (ign.has(prepText(l).trim())) { push(l, 'skip'); return; }
       if (TOOL_HEAD.test(l) && l.length < 40) { section = 'tools'; return; }
       if (JUNK.test(l) || PAGE_JUNK.test(l)) { const s2 = l.match(/(servings|serves|yield|annokset|annoksia|makes)\s*:?\s*(\d+)/i); if (s2 && servings == null) servings = parseInt(s2[2], 10); push(l, 'skip'); return; }
       const sv = l.match(/(\d+)\s*(annosta|annos|hengelle|henkilölle|henkiloa|henkeä|kpl|kappaletta|sämpylää|sampylaa|pullaa|palaa|muffinssia|keksiä|servings?|serves|portions?|pieces?)/i) || l.match(/(?:serves|makes|yields|riittää|tekee|annoksia|määrä)\s*:?\s*(\d+)/i);
-      if (sv && l.length < 60 && servings == null) { servings = parseInt(sv[1], 10); if (sv[2]) servingsLabel = normLabel(sv[2]); if (!QTY_RE.test(l) || l.length < 25) return; }
+      if (sv && l.length < 60 && servings == null && !TAIL_QTY.test(l)) { servings = parseInt(sv[1], 10); if (sv[2]) servingsLabel = normLabel(sv[2]); if (!QTY_RE.test(l) || l.length < 25) return; }
       if (!opts.noTitle && !title && !QTY_RE.test(l) && l.length < 80 && !ING_HEAD.test(l) && !STEP_HEAD.test(l) && !STEP_VERB.test(l)) { title = l.replace(/^#+\s*/, ''); return; }
       if (STEP_HEAD.test(l) && l.length < 40) { section = 'steps'; return; }
+      if (GENERIC_ING.test(prepText(l)) && l.length < 40) { section = 'ings'; return; }
+      if (headLike(l, nx)) { push(l.replace(/:\s*$/, ''), 'head'); section = 'ings'; return; }
       const vm = l.match(/^(vaihe|step|steg|schritt)\s*\d+\s*[:.)-]?\s*(.*)$/i);
       if (vm) { section = 'steps'; if (vm[2] && vm[2].length > 3) push(vm[2], 'step'); return; }
       const fm = l.match(/^(for the|for|til|för)\s+(.{2,40}?):?$/i);
       if (fm && section !== 'steps' && !QTY_RE.test(l)) { push(l.replace(/:$/, ''), 'head'); section = 'ings'; return; }
       if (!QTY_RE.test(l) && STEP_VERB.test(l)) { section = 'steps'; push(l.replace(/^\d+[.)]\s*/, ''), 'step'); return; }
-      if (ING_HEAD.test(l) && l.length < 40) { section = 'ings'; if (/[:]\s*$/.test(l) && !/^(ainekset|ainesosat|ingredients)/i.test(l)) push(l.replace(/:\s*$/, ''), 'head'); return; }
+      if (ING_HEAD.test(prepText(l)) && l.length < 40 && !/\d/.test(l)) { section = 'ings'; if (!GENERIC_ING.test(prepText(l))) push(l.replace(/:\s*$/, ''), 'head'); return; }
       if (/^[^\d].{0,30}:$/.test(l) && section !== 'steps') { push(l.replace(/:$/, ''), 'head'); section = 'ings'; return; }
       /* Tarvikkeet: oma osionsa tai lyhyt rivi, jossa on keittiövälineen nimi */
       if (section === 'tools' && l.length < 90 && !STEP_VERB.test(l)) { push(l.replace(/^[-•*·]\s*/, ''), 'tool'); return; }
       if (section !== 'steps' && l.length < 70 && TOOL_WORD.test(prepText(l)) && !/\d\s*(g|kg|dl|ml|l|rkl|tl|cups?|tbsp|tsp|oz)\b/i.test(l) && !/[.!?]$/.test(l)) { push(l.replace(/^[-•*·]\s*/, ''), 'tool'); return; }
-      const isQty = QTY_RE.test(l) && l.length < 140;
+      const isQty = isQtyL(l) && l.length < 140;
       const bullet = bset.has(l) || /^[-•*·]\s/.test(l);
       if (section === 'steps') {
         if (/^\d{1,2}[.)]?$/.test(l)) { push(l, 'skip'); return; }
-        if (QTY_RE.test(l) && l.length < 60 && !/[.!?]$/.test(l)) { push(l, 'skip'); return; }
-        push(l.replace(/^\d+[.)]\s*/, ''), 'step'); return;
+        if (unfinished() && /^[a-zäöå(]/.test(l)) { push(l, 'step'); return; }
+        /* Ainesrivi ohjeen jälkeen: moniosaisen reseptin seuraava aineslista */
+        if (isQtyL(l) && l.length < 60 && !/[.!?]$/.test(l)) section = 'ings';
+        else { push(l.replace(/^\d+[.)]\s*/, ''), 'step'); return; }
       }
+      if (unfinished() && /^[a-zäöå(]/.test(l) && !isQty) { push(l, 'step'); return; }
       const looseOk = section === 'ings' && l.length < 50 && !/[.!?:]$/.test(l) && !/\d\s*$/.test(l) && l.split(' ').length <= 6;
       if (isQty || (bullet && l.length < 70) || looseOk) {
         const pi = parseIngredient(l);
@@ -2766,7 +2800,7 @@ Täytä kakku mansikoilla ja kermalla.`;
   const LE = {
     kinds: { rv: ['ing', 'head', 'step', 'tool', 'skip'], ei: ['ing', 'head', 'tool'], es: null },
     rows(n) { return n === 'rv' ? (S.rin.review && S.rin.review.lines) : n === 'ei' ? (S.ed && S.ed.ings) : n === 'es' ? (S.ed && S.ed.steps) : null; },
-    active: {}, caret: {}
+    active: {}, caret: {}, pick: {}
   };
   const LEGEND = ` <span class="legend"><span>${icon('i-joinu')}yhdistä ylös</span><span>${icon('i-joind')}alas</span><span>${icon('i-cut')}jaa</span><span>${icon('i-plus')}uusi</span><span>${icon('i-trash')}poista</span></span>`;
   const lineOf = i => C.ingText(i) + (i.note ? ' (' + i.note + ')' : '');
@@ -2774,10 +2808,11 @@ Täytä kakku mansikoilla ja kermalla.`;
   function leInner(n, hint) {
     const rows = LE.rows(n) || [], kinds = LE.kinds[n], act = LE.active[n];
     let num = 0;
-    return `${hint ? `<p class="le-hint">${hint}</p>` : ''}<ul class="le${kinds ? '' : ' nok'}">${rows.map((x, i) => `<li class="le-row le-${x.k}${act === i ? ' on' : ''}" data-i="${i}">
-      ${kinds ? `<button type="button" class="kpill k-${x.k}" data-le-act="kind" aria-label="Rivin tyyppi: ${LEKIND[x.k]}. Vaihda napauttamalla.">${LEKIND[x.k]}</button>` : `<span class="le-num" aria-hidden="true">${++num}</span>`}
+    return `${hint ? `<p class="le-hint">${hint}</p>` : ''}<ul class="le${kinds ? '' : ' nok'}">${rows.map((x, i) => `<li class="le-row le-${x.k}${act === i ? ' on' : ''}${LE.pick[n] === i ? ' picking' : ''}" data-i="${i}">
+      ${kinds ? `<button type="button" class="kpill k-${x.k}" data-le-act="kind" aria-expanded="${LE.pick[n] === i}" aria-label="Rivin tyyppi: ${LEKIND[x.k]}. Valitse toinen napauttamalla.">${LEKIND[x.k]}</button>` : `<span class="le-num" aria-hidden="true">${++num}</span>`}
       <textarea class="let" rows="1" data-le-i="${i}" aria-label="Rivi ${i + 1}">${esc(x.t)}</textarea>
       <button type="button" class="le-del" data-le-act="del" aria-label="Poista rivi">${icon('i-trash')}</button>
+      ${kinds && LE.pick[n] === i ? `<div class="le-pick" role="group" aria-label="Valitse rivin tyyppi">${kinds.map(k => `<button type="button" class="kopt k-${k}" data-le-act="setk" data-k="${k}" aria-pressed="${x.k === k}">${LEKIND[k]}</button>`).join('')}</div>` : ''}
       <div class="le-tools">
         ${i > 0 ? `<button type="button" data-le-act="up" aria-label="Yhdistä ylempään" title="Yhdistä ylempään">${icon('i-joinu')}</button>` : ''}
         ${i < rows.length - 1 ? `<button type="button" data-le-act="down" aria-label="Yhdistä alempaan" title="Yhdistä alempaan">${icon('i-joind')}</button>` : ''}
@@ -2808,14 +2843,15 @@ Täytä kakku mansikoilla ja kermalla.`;
     const k = a.k === 'skip' && b.k !== 'skip' ? b.k : a.k;
     return { t: raw ? (a.t + b.t).trim() : (a.t.trim() + ' ' + b.t.trim()).trim(), k, o: a.o || b.o };
   }
-  function leOp(n, op, i, pos) {
+  function leOp(n, op, i, pos, val) {
     const rows = LE.rows(n); if (!rows) return;
     const snap = rows.map(x => Object.assign({}, x));
     const undo = msg => toast(msg, 'Kumoa', () => { rows.splice(0, rows.length, ...snap); leRedraw(n); });
     const kinds = LE.kinds[n], def = kinds ? (rows[i] ? rows[i].k : (rows.length ? rows[rows.length - 1].k : kinds[0])) : 'step';
     const kd = def === 'skip' || def === 'head' ? (kinds ? kinds[0] : 'step') : def;
     switch (op) {
-      case 'kind': { const x = rows[i]; x.k = kinds[(kinds.indexOf(x.k) + 1) % kinds.length]; leRedraw(n, 'keep'); break; }
+      case 'kind': { LE.pick[n] = LE.pick[n] === i ? null : i; leRedraw(n, 'keep'); break; }
+      case 'setk': { const x = rows[i]; if (val && kinds.includes(val)) x.k = val; LE.pick[n] = null; leRedraw(n, 'keep'); leCount(n); break; }
       case 'del': rows.splice(i, 1); leRedraw(n); undo('Rivi poistettu'); break;
       case 'up': { if (i < 1) break; const p = rows[i - 1].t.trim().length + 1; rows.splice(i - 1, 2, leMerge(rows[i - 1], rows[i])); leRedraw(n, i - 1, p); undo('Rivit yhdistetty'); break; }
       case 'bkup': { if (i < 1) break; const p = rows[i - 1].t.length; rows.splice(i - 1, 2, leMerge(rows[i - 1], rows[i], true)); leRedraw(n, i - 1, p); break; }
@@ -2835,12 +2871,13 @@ Täytä kakku mansikoilla ja kermalla.`;
   }
   const leOf = el => { const w = el.closest('.le-wrap'); if (!w) return null; const li = el.closest('.le-row'); return { n: w.dataset.le, i: li ? parseInt(li.dataset.i, 10) : -1 }; };
   // Painikkeet eivät vie kursoria pois rivistä
-  ['pointerdown', 'mousedown'].forEach(ev => document.addEventListener(ev, e => { if (e.target.closest('.le-tools button')) e.preventDefault(); }));
+  ['pointerdown', 'mousedown'].forEach(ev => document.addEventListener(ev, e => { if (e.target.closest('.le-tools button, .le-pick button')) e.preventDefault(); }));
   document.addEventListener('click', e => {
     const b = e.target.closest('[data-le-act]'); if (!b) return;
     const L = leOf(b); if (!L) return;
     const c = LE.caret[L.n];
-    leOp(L.n, b.dataset.leAct, L.i, c && c.i === L.i ? c.pos : null);
+    if (b.dataset.leAct !== 'kind' && b.dataset.leAct !== 'setk') LE.pick[L.n] = null;
+    leOp(L.n, b.dataset.leAct, L.i, c && c.i === L.i ? c.pos : null, b.dataset.k);
   });
   document.addEventListener('focusin', e => {
     if (!e.target.classList || !e.target.classList.contains('let')) return;
