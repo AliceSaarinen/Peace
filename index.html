@@ -2106,7 +2106,7 @@ Täytä kakku mansikoilla ja kermalla.`;
       <div class="card">
         <div class="iconpick">
           <label aria-label="Kuvaa ainesosat" title="Kuvaa ainesosat">${icon('i-cam')}<input id="camIn" type="file" accept="image/*" capture="environment"></label>
-          <label aria-label="Valitse kuva" title="Valitse kuva">${icon('i-img')}<input id="galIn" type="file" accept="image/*"></label>
+          <label aria-label="Valitse kuva" title="Valitse kuva">${icon('i-img')}<input id="galIn" type="file" accept="image/*" multiple></label>
           <label aria-label="Lue viivakoodi" title="Lue viivakoodi">${icon('i-barcode')}<input id="bcIn" type="file" accept="image/*" capture="environment"></label>
         </div>
         ${c.code ? `<div class="bcchip">${icon('i-barcode')}<span>${esc(c.code)}</span><button data-act="bcclear" aria-label="Poista viivakoodi">×</button></div>` : ''}
@@ -2114,12 +2114,65 @@ Täytä kakku mansikoilla ja kermalla.`;
         ${c.ocrErr ? `<p class="note warm" style="font-size:.88rem"><b>Tekstintunnistus ei käynnistynyt:</b> ${esc(c.ocrErr)}. Voit kopioida tekstin kuvasta puhelimen omalla toiminnolla (iPhone: paina tekstiä kuvassa pitkään · Android: Google Lens → Kopioi teksti) ja liittää sen kenttään.</p>` : ''}
         <label class="flabel" for="ingText"><span class="label">Ainesosat</span></label>
         <textarea id="ingText">${esc(c.draft)}</textarea>
-        <label class="flabel" for="prodName"><span class="label">Tuotteen nimi</span></label><input id="prodName" type="text" value="${esc(c.product)}">
+        ${c.draft && c.draft.trim() && !c.busy ? `<div class="row"><label class="btn soft small" style="position:relative">${icon('i-plus')}Lisää kuva jatkoksi<input id="addIn" type="file" accept="image/*" multiple class="hidein"></label></div>` : ''}
+        <label class="flabel" for="prodName"><span class="label">Tuotteen nimi</span></label>
+        <div class="cfrow"><input id="prodName" type="search" enterkeyhint="search" value="${esc(c.product)}"><button class="iconbtn" style="flex:0 0 auto" data-act="offfind" aria-label="Hae tuotetta nimellä" title="Hae tuotetta nimellä">${icon('i-check')}</button></div>
+        ${c.off ? offHTML(c.off) : ''}
         <button class="btn primary" data-act="run">${icon('i-check')}Tarkista ainesosat</button>
       </div>
       <div id="resultBox">${c.res ? sentHTML() + resultHTML() : ''}</div>
       <div class="card" id="cfCard">${cfHTML()}</div>
       <div class="card" id="histCard">${histHTML()}</div>`;
+  }
+  /* ---------- TUOTEHAKU: Open Food Facts (avoin, ilmainen tietokanta) ---------- */
+  const OFF_FIELDS = 'code,product_name,product_name_fi,brands,ingredients_text_fi,ingredients_text,ingredients_text_en,ingredients_analysis_tags,labels_tags,image_front_small_url';
+  const offStr = v => typeof v === 'string' ? v : Array.isArray(v) ? v.filter(x => typeof x === 'string').join(', ') : v && typeof v === 'object' ? (v.fi || v.main || v.en || Object.values(v).find(x => typeof x === 'string') || '') : '';
+  function offNorm(x) {
+    const ing = offStr(x.ingredients_text_fi) || offStr(x.ingredients_text) || offStr(x.ingredients_text_en);
+    const tags = [].concat(x.ingredients_analysis_tags || [], x.labels_tags || []).map(String);
+    const vegan = tags.some(t => /^en:vegan$/.test(t)) ? 'vegan' : tags.some(t => /^en:non-vegan$/.test(t)) ? 'non' : tags.some(t => /^en:maybe-vegan$/.test(t)) ? 'maybe' : null;
+    return { code: String(x.code || ''), name: offStr(x.product_name_fi) || offStr(x.product_name) || 'Nimetön tuote', brand: offStr(x.brands).split(',')[0].trim(), ing: ing.trim(), vegan, labelVegan: tags.some(t => /vegan/.test(t) && /^en:(vegan|v-label|vegan-society)/.test(t) && !/non|maybe/.test(t)), img: offStr(x.image_front_small_url) };
+  }
+  async function offSearch(q) {
+    const e = encodeURIComponent(q);
+    const urls = [`https://search.openfoodfacts.org/search?q=${e}&langs=fi,en&page_size=8&fields=${OFF_FIELDS}`,
+      `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${e}&search_simple=1&action=process&json=1&page_size=8&fields=${OFF_FIELDS}`];
+    let lastErr = null;
+    for (const u of urls) {
+      try { const r = await fetch(u); if (!r.ok) { lastErr = r.status; continue; } const d = await r.json(); const list = d.hits || d.products; if (Array.isArray(list)) return list.map(offNorm); }
+      catch (er) { lastErr = er; }
+    }
+    throw lastErr || new Error('off');
+  }
+  async function offProduct(code) {
+    try { const r = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=${OFF_FIELDS}`); if (!r.ok) return null; const d = await r.json(); return d && d.product ? offNorm(Object.assign({ code }, d.product)) : null; }
+    catch (e) { return null; }
+  }
+  const OFF_VEG = { vegan: 'merkitty vegaaniseksi', non: 'ei vegaaninen', maybe: 'mahdollisesti vegaaninen' };
+  function offHTML(o) {
+    if (o.busy) return `<div class="busy"><div class="spinner"></div>Haetaan tuotetta…</div>`;
+    if (o.error) return `<p class="note warm" style="font-size:.88rem">${esc(o.error)}</p>`;
+    if (!o.list) return '';
+    return `<div class="list">${o.list.map((p, i) => `<button class="hitem" data-act="offpick" data-i="${i}" style="text-align:left;width:100%">${p.img ? `<img src="${esc(p.img)}" alt="" style="width:42px;height:42px;object-fit:cover;border-radius:8px;flex:0 0 auto">` : ''}<span class="txt"><b>${esc(p.name)}</b><span>${esc([p.brand, p.ing ? 'ainesosat löytyvät' : 'ei ainesosia', p.vegan ? OFF_VEG[p.vegan] : ''].filter(Boolean).join(' · '))}</span></span></button>`).join('')}
+      <p class="muted" style="font-size:.8rem">Tiedot: Open Food Facts, avoin tietokanta. Tarkista tiedot pakkauksesta.</p><button class="btn ghost small" data-act="offclose">Sulje haku</button></div>`;
+  }
+  async function offFind() {
+    syncCheck();
+    const c = S.check, q = (c.product || '').trim();
+    if (q.length < 2) { toast('Kirjoita ensin tuotteen nimi.'); return; }
+    c.off = { busy: true }; renderCheck();
+    try {
+      const list = await offSearch(q);
+      c.off = list.length ? { list } : { error: 'Tuotetta ei löytynyt. Kokeile merkkiä ja nimeä, esimerkiksi "Oatly kaurajuoma", tai kuvaa ainesosaluettelo.' };
+    } catch (e) { c.off = { error: e === 503 || e === 429 ? 'Tietokantaa on käytetty juuri paljon. Yritä minuutin päästä uudelleen.' : 'Tuotehaku ei onnistunut. Tarkista verkkoyhteys ja yritä uudelleen.' }; }
+    renderCheck();
+  }
+  async function offUse(p) {
+    const c = S.check;
+    c.off = null;
+    if (!p.ing) { c.product = p.name; renderCheck(); toast('Tuotteelta puuttuu ainesosaluettelo tietokannasta. Kuvaa ainesosat pakkauksesta.'); return; }
+    if (p.code && /^\d{6,}$/.test(p.code) && !c.code) c.code = p.code;
+    await submitCheck(p.ing, { product: [p.brand, p.name].filter(Boolean).join(' '), certs: p.labelVegan ? ['vegan'] : [], source: 'off' });
   }
   function sentHTML() {
     const s = S.check.sub; if (!s) return '';
@@ -2128,6 +2181,7 @@ Täytä kakku mansikoilla ja kermalla.`;
         ${s.thumb ? `<img class="thumb" src="${s.thumb}" alt="Lähetetty kuva">` : `<div class="ticon">${icon('i-text')}</div>`}
         <div class="txt">
           <div class="row" style="gap:6px"><b>${esc(s.product || (s.thumb ? 'Kuvasta luettu' : 'Ainesosaluettelo'))}</b>${s.example ? '<span class="example-tag">Esimerkki</span>' : ''}</div>
+          ${s.source === 'off' ? `<span class="muted" style="font-size:.8rem">Ainesosat: Open Food Facts</span>` : ''}
           <details><summary class="muted" style="font-size:.86rem">Näytä tarkistettu teksti</summary><p class="muted" style="margin-top:6px;white-space:pre-wrap">${esc(s.text)}</p></details>
           <div class="row"><button class="btn ghost small" data-act="fixtext">${icon('i-edit')}Korjaa tekstiä</button></div>
         </div>
@@ -2198,6 +2252,7 @@ Täytä kakku mansikoilla ja kermalla.`;
 
   /* Lähettää tekstin tarkistukseen: syöte tyhjenee ja tulos ilmestyy alle */
   async function submitCheck(text, meta) {
+    S.check.off = null;
     const c = S.check;
     if (!text || !text.trim()) { toast('Liitä ensin ainesosaluettelo tai valitse kuva.'); return; }
     c.sub = Object.assign({ text, product: '', thumb: null, certs: [], example: false }, meta || {});
@@ -2307,7 +2362,7 @@ Täytä kakku mansikoilla ja kermalla.`;
     return t.replace(/\n+/g, ' ').replace(/\s+([,.;)])/g, '$1').replace(/\s{2,}/g, ' ').trim();
   }
   /* Rajaus, kääntö ja suoristus: käyttäjä vetää kehyksen ainesosaluettelon ympärille */
-  async function openCrop(file, done) {
+  async function openCrop(file, done, cancel) {
     let base;
     try { const bmp = await createImageBitmap(file); const k = Math.min(1, 2600 / Math.max(bmp.width, bmp.height)); base = document.createElement('canvas'); base.width = Math.round(bmp.width * k); base.height = Math.round(bmp.height * k); base.getContext('2d').drawImage(bmp, 0, 0, base.width, base.height); }
     catch (e) { toast('Kuvaa ei voitu avata.'); return; }
@@ -2375,7 +2430,7 @@ Täytä kakku mansikoilla ja kermalla.`;
     stage.addEventListener('pointerup', end); stage.addEventListener('pointercancel', end);
     root.querySelector('.crop').addEventListener('click', e => {
       const k = (e.target.closest('[data-k]') || {}).dataset; if (!k || !k.k) return;
-      if (k.k === 'no') { close(); return; }
+      if (k.k === 'no') { close(); if (cancel) cancel(); return; }
       if (k.k === 'tminus') { setAngle(angle - 0.5); return; }
       if (k.k === 'tplus') { setAngle(angle + 0.5); return; }
       if (k.k === 'tzero') { setAngle(0); return; }
@@ -2414,7 +2469,19 @@ Täytä kakku mansikoilla ja kermalla.`;
     return ocrCheck;
   }
   const OCR_WHY = { worker: 'taustalaskenta on estetty', wasm: 'tunnistusohjelman ajaminen (WebAssembly) on estetty', import: 'tunnistusohjelman lataus on estetty', fetch: 'suomen kielen tiedostoa ei saatu ladattua (tarvitaan verkkoyhteys ensimmäisellä kerralla)', timeout: 'lataus ei edennyt', stall: 'lataus pysähtyi' };
-  async function ocrPhoto(file, cropped) {
+  /* Useampi kuva: jokainen rajataan vuorollaan ja teksti lisätään edellisen perään */
+  function ocrQueue(files, run) {
+    const list = [...files];
+    let i = 0;
+    const next = () => {
+      if (i >= list.length) return;
+      const f = list[i++], k = i - 1;
+      if (list.length > 1) toast(`Kuva ${i} / ${list.length}: rajaa ja hyväksy`);
+      openCrop(f, async cv => { await run(f, cv, k); next(); }, next);
+    };
+    next();
+  }
+  async function ocrPhoto(file, cropped, append) {
     const c = S.check;
     const thumb = URL.createObjectURL(file);
     let last = Date.now();
@@ -2432,7 +2499,7 @@ Täytä kakku mansikoilla ja kermalla.`;
       const txt = pickIngredients(raw);
       c.busy = null;
       if (!txt || txt.length < 8) { renderCheck(); toast('Kuvasta ei löytynyt tekstiä. Kuvaa ainesosaluettelo lähempää ja suoraan edestä.'); return; }
-      c.draft = txt; c.thumb = thumb; renderCheck();
+      c.draft = append && c.draft && c.draft.trim() ? c.draft.trim() + ' ' + txt : txt; if (!append || !c.thumb) c.thumb = thumb; renderCheck();
       const ta = $('#ingText'); if (ta) { ta.focus(); ta.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
       toast('Tarkista teksti ja korjaa tarvittaessa');
     } catch (e) {
@@ -2798,7 +2865,7 @@ Täytä kakku mansikoilla ja kermalla.`;
         <input id="rName" type="text" value="${esc(r.nameDraft || '')}">
         <div class="iconpick">
           <label aria-label="Kuvaa resepti" title="Kuvaa resepti">${icon('i-cam')}<input id="rOcrCam" type="file" accept="image/*" capture="environment"></label>
-          <label aria-label="Valitse reseptin kuva" title="Valitse reseptin kuva">${icon('i-img')}<input id="rOcrGal" type="file" accept="image/*"></label>
+          <label aria-label="Valitse reseptin kuva" title="Valitse reseptin kuva">${icon('i-img')}<input id="rOcrGal" type="file" accept="image/*" multiple></label>
         </div>
         ${r.busy ? `<div class="busy"><div class="spinner"></div><span id="rOcrMsg">${esc(r.busy)}</span></div>` : ''}
         ${r.ocrErr ? `<p class="note warm" style="font-size:.88rem"><b>Tekstintunnistus ei käynnistynyt:</b> ${esc(r.ocrErr)}. Voit myös liittää reseptin tekstinä.</p>` : ''}
@@ -3200,21 +3267,33 @@ Täytä kakku mansikoilla ja kermalla.`;
     if (!code) { renderCheck(); toast('Viivakoodia ei tunnistettu. Kuvaa se lähempää ja suoraan edestä.'); return; }
     const known = S.history.filter(h => h.barcode === code).sort((a, b) => (b.ts || 0) - (a.ts || 0))[0];
     if (known) { c.code = null; openHist(known); toast('Tuttu tuote'); return; }
-    c.code = code; renderCheck();
-    toast(c.histId ? 'Uusi viivakoodi' : 'Uusi tuote: tarkista ainesosat, niin se muistetaan');
+    c.code = code;
+    c.busy = 'Haetaan tuotetta tietokannasta…'; renderCheck();
+    const p = await offProduct(code);
+    c.busy = null;
+    if (p && p.ing) { await offUse(p); toast('Tuote löytyi Open Food Factsista'); return; }
+    if (p && p.name) c.product = [p.brand, p.name].filter(Boolean).join(' ');
+    renderCheck();
+    toast(c.histId ? 'Uusi viivakoodi' : 'Uusi tuote: kuvaa ainesosat, niin se muistetaan');
   }
 
   /* ---------- CRUELTY FREE -HAKU ---------- */
   const CFV = { cruelty_free: { t: 'Cruelty free', v: 'vegan', i: 'i-ok' }, not_cruelty_free: { t: 'Ei cruelty free', v: 'animal', i: 'i-no' }, unclear: { t: 'Epäselvä', v: 'maybe', i: 'i-q' }, unknown: { t: 'Ei tietoa', v: 'maybe', i: 'i-q' } };
   const cfLinks = q => q ? `<div class="links"><a href="https://www.google.com/search?q=${encodeURIComponent(q + ' cruelty free')}" target="_blank" rel="noopener">${icon('i-check')}Google</a><a href="https://www.crueltyfreekitty.com/?s=${encodeURIComponent(q)}" target="_blank" rel="noopener">${icon('i-check')}Cruelty-Free Kitty</a><a href="https://www.google.com/search?q=${encodeURIComponent('site:crueltyfree.peta.org ' + q)}" target="_blank" rel="noopener">${icon('i-check')}PETA</a></div>` : '';
   function cfHTML() {
-    const F = S.check.cf || {}, img = S.sample && S.imgOk;
+    const F = S.check.cf || {};
     return `${ch('Cruelty free', 'rose')}
-      <div class="cfrow"><input id="cfIn" type="search" placeholder="Brändi tai tuote" value="${esc(F.q || '')}" aria-label="Brändi tai tuote">${img ? `<label class="iconbtn" style="flex:0 0 auto" aria-label="Kuvaa tuote" title="Kuvaa tuote tai valitse kuva">${icon('i-cam')}<input id="cfCam" type="file" accept="image/*" class="hidein"></label>` : ''}</div>
-      <button class="btn primary" data-act="cfrun">${icon('i-check')}Hae</button>
-      ${F.busy ? `<div class="busy"><div class="spinner"></div>${esc(F.busy)}</div>` : ''}
-      ${F.error ? `<p class="note warm">${esc(F.error)}</p>` : ''}
-      ${F.data ? cfResHTML(F.data) : F.ran && F.q && !F.busy ? `<p class="muted" style="font-size:.88rem">Hae tietoa suoraan:</p>${cfLinks(F.q)}` : ''}`;
+      <div class="cfrow"><input id="cfIn" type="search" enterkeyhint="search" placeholder="Brändi tai tuote" value="${esc(F.q || '')}" aria-label="Brändi tai tuote"></div>
+      <button class="btn primary" data-act="cfrun">${icon('i-check')}Hae Googlesta</button>
+      <p class="muted" style="font-size:.82rem">Avaa Google-haun "is … cruelty free".</p>`;
+  }
+  function openCF() {
+    const inp = $('#cfIn'), q = (inp ? inp.value : '').trim();
+    if (!q) { toast('Kirjoita brändin tai tuotteen nimi.'); return; }
+    S.check.cf = { q };
+    const url = 'https://www.google.com/search?q=' + encodeURIComponent('is ' + q + ' cruelty free');
+    const w = window.open(url, '_blank');
+    if (w) { try { w.opener = null; } catch (e) { } } else toast('Salli ponnahdusikkunat, niin haku aukeaa.');
   }
   function cfResHTML(d) {
     const V = CFV[d.status] || CFV.unknown, name = d.brand || d.product || '';
@@ -3663,7 +3742,10 @@ Täytä kakku mansikoilla ja kermalla.`;
       case 'fav': { const it = S.history.find(x => x.id === c.histId); if (it) { it.fav = !it.fav; await put('history', it); syncCheck(); renderCheck(); toast(it.fav ? 'Lisätty suosikkeihin' : 'Poistettu suosikeista'); } break; }
       case 'selfcheck': { const it = S.history.find(x => x.id === c.histId); if (it) { it.selfChecked = !it.selfChecked; await put('history', it); syncCheck(); renderCheck(); } break; }
       case 'askai': syncCheck(); await askAI(); break;
-      case 'cfrun': await runCF(); break;
+      case 'cfrun': openCF(); break;
+      case 'offfind': await offFind(); break;
+      case 'offclose': c.off = null; renderCheck(); break;
+      case 'offpick': { const p = c.off && c.off.list && c.off.list[parseInt(t.dataset.i, 10)]; if (p) { syncCheck(); await offUse(p); } break; }
       case 'cook': syncRecipe(); openCook(); break;
       case 'bkexp': await exportBackup(); break;
       case 'rres': { const r = S.rin; syncRecipe(); r.restrictions = r.restrictions.includes(val) ? r.restrictions.filter(x => x !== val) : [...r.restrictions, val]; renderRecipe(); break; }
@@ -3760,8 +3842,9 @@ Täytä kakku mansikoilla ja kermalla.`;
   });
   document.addEventListener('change', async e => {
     const id = e.target.id;
-    if ((id === 'rOcrCam' || id === 'rOcrGal') && e.target.files[0]) { syncRecipe(); const f = e.target.files[0]; e.target.value = ''; openCrop(f, cv => ocrRecipe(f, cv)); }
-    if ((id === 'camIn' || id === 'galIn') && e.target.files[0]) { syncCheck(); const f = e.target.files[0]; openCrop(f, cv => ocrPhoto(f, cv)); }
+    if ((id === 'rOcrCam' || id === 'rOcrGal') && e.target.files[0]) { syncRecipe(); const fs = [...e.target.files]; e.target.value = ''; ocrQueue(fs, (f, cv) => ocrRecipe(f, cv)); }
+    if ((id === 'camIn' || id === 'galIn') && e.target.files[0]) { syncCheck(); const fs = [...e.target.files]; e.target.value = ''; ocrQueue(fs, (f, cv, k) => ocrPhoto(f, cv, k > 0)); }
+    if (id === 'addIn' && e.target.files[0]) { syncCheck(); const fs = [...e.target.files]; e.target.value = ''; ocrQueue(fs, (f, cv) => ocrPhoto(f, cv, true)); }
     if ((id === 'rCam' || id === 'rGal') && e.target.files[0]) {
       syncRecipe(); const f = e.target.files[0];
       S.rin.file = f; S.rin.thumb = URL.createObjectURL(f);
@@ -3778,7 +3861,8 @@ Täytä kakku mansikoilla ja kermalla.`;
   });
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter' && e.target.id === 'avIn') { e.preventDefault(); $('[data-act="avadd"]').click(); }
-    if (e.key === 'Enter' && e.target.id === 'cfIn') { e.preventDefault(); runCF(); }
+    if (e.key === 'Enter' && e.target.id === 'cfIn') { e.preventDefault(); openCF(); }
+    if (e.key === 'Enter' && e.target.id === 'prodName') { e.preventDefault(); offFind(); }
     if (e.key === 'Enter' && e.target.id === 'eNewCat') { e.preventDefault(); $('[data-act="eaddcat"]').click(); }
   });
 
