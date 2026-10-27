@@ -612,18 +612,16 @@ textarea.let:focus{background:#FFFDF9;border-color:#E3B7C4;box-shadow:none}
       <use href="#forget" x="84" y="2" width="7" height="7"/><use href="#forget" x="110" y="17" width="6" height="6"/>
     </symbol>`;
   }
-  /* Tyhjien näkymien sommitelma: keskellä ruusu, sivuilla pienemmät ruusut ja peilikuvana lehdet ja oksat */
+  /* Tyhjien näkymien sommitelma: pieni, epäsymmetrinen mutta tasapainoinen kimppu */
   function emptyBunch(id) {
     const u = (h, x, y, w, ht, rot) => `<use href="#${h}" x="${x}" y="${y}" width="${w}" height="${ht}"${rot ? ` transform="rotate(${rot} ${x + w / 2} ${y + ht / 2})"` : ''}/>`;
-    const back = u('sprig', 132, 22, 78, 39, -4) + u('leafA', 136, 50, 50, 29, -24) + u('leafB', 134, 70, 46, 27, 20) + u('leafB', 118, 82, 34, 20, 62);
-    const side = u('bud', 150, 14, 16, 24, 28) + u('forget', 176, 58, 13, 13) + u('forget', 142, 86, 12, 12);
     return `<symbol id="${id}" viewBox="0 0 220 120" overflow="visible">
-      <g transform="translate(220 0) scale(-1 1)">${back}</g>${back}
-      ${u('leafA', 92, 74, 36, 21, 90)}<g transform="translate(220 0) scale(-1 1)">${u('leafB', 112, 18, 32, 19, -58)}</g>${u('leafB', 112, 18, 32, 19, -58)}
-      <g transform="translate(220 0) scale(-1 1)">${side}</g>${side}
-      ${u('roseB', 40, 44, 40, 40, 30)}${u('roseB', 140, 44, 40, 40, -20)}
-      ${u('roseA', 76, 24, 68, 68)}
-      ${u('yellow', 103, 88, 15, 15)}${u('forget', 104, 8, 12, 12)}
+      ${u('leafA', 60, 36, 48, 28, 200)}${u('leafB', 70, 62, 40, 23, 150)}${u('leafA', 126, 28, 44, 26, -38)}${u('leafB', 132, 72, 42, 25, 28)}${u('leafB', 100, 80, 28, 17, 96)}
+      ${u('bud', 80, 16, 14, 22, -32)}
+      ${u('yellow', 72, 56, 17, 17)}
+      ${u('roseA', 86, 26, 60, 60)}
+      ${u('roseB', 131, 52, 33, 33, -18)}
+      ${u('forget', 82, 76, 11, 11)}${u('forget', 154, 44, 10, 10)}${u('forget', 124, 84, 9, 9)}
     </symbol>`;
   }
   const svg = `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
