@@ -1368,8 +1368,18 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
   const NOT_FOOD = /^\s*(\d+([.,]\d+)?\s*)?(minutes?|mins?\.?|min|minuutti[a]?|minuuttia|hours?|hrs?|h|tunti[a]?|tuntia|people|persons?|servings?|serves|henkea|henkiloa|hengelle|annosta|annoksia|portions?|kcal|calories|kalori\w*|prep|cook|total)\s*\.?\s*$|^(prep|cook|total|valmistusaika|kokonaisaika|kypsennysaika|uunissa)\b/;
   const STEP_VERB = /^(\d+[.)]\s*)?(lisää|sekoita|kaada|keitä|paista|vatkaa|anna|leikkaa|kuori|pese|hienonna|sulata|kuumenna|lämmitä|mausta|tarjoile|valmista|laita|nosta|siivilöi|sekoittele|hauduta|kypsennä|jäähdytä|levitä|yhdistä|ripottele|käännä|tarkista|viimeistele|huuhtele|pilko|paloittele|raasta|soseuta|liota|valuta|kuullota|ruskista|voitele|vuoraa|muotoile|kaulitse|nostata|pyöritä|aseta|jätä|peitä|purista|silppua|viipaloi|esilämmitä|add|mix|stir|bake|cook|preheat|heat|serve|place|whisk|pour|combine|fold|let|remove|cut|chop|slice|bring|simmer|boil|transfer|season|drain|rinse|beat|blend|spread|sprinkle|cover|top|garnish)\b/i;
   const PAGE_JUNK = /^(step by step|get ahead|freezable|easy|more effort|a challenge|method$|ingredients$|nutrition|per serving|low|medium|high|vegetarian|vegan|healthy|dairy-free|gluten-free|egg-free|nut-free|(kcal|fat|saturates|carbs|sugars|fibre|fiber|protein|salt)\s*[\d.,]+\s*(g|mg)?\s*(low|med|medium|high)?$|[\d.,]+\s*(g|kcal|mg)$|prep:|cook:|serves \d+$|makes \d+$|by [A-Z]|recipe from|top tip|tips?$|alternatives?$|you('ll| will) need|frequently asked|faq|related recipes|reviews?$|comments?$)/i;
-  function splitLines(text) {
-    return String(text || '').replace(/\r/g, '').replace(/\t+/g, ' ').split('\n').map(l => l.replace(/\s+/g, ' ').trim()).filter(Boolean);
+  /* Luettelomerkit rivin alussa: pallurat, viivat, nuolet, tähdet, ruudut ja valintamerkit */
+  const BULLET_RE = /^\s*(?:[-‐‑‒–—―•●○◦⦁∙·⋅▪▫■□◆◇◈►▻▸▹▶‣⁃⁌⁍➢➤➔→⇒*+>»«~✓✔✗☐☑☒▢❖❥♡♥❀✿❁★☆✦✧◉◎⊙]|\.(?=\s))\s*/;
+  function splitLines(text, bset) {
+    return String(text || '').replace(/\r/g, '').replace(/\t+/g, ' ').split('\n').map(l => {
+      l = l.replace(/\s+/g, ' ').trim();
+      if (BULLET_RE.test(l) && !/^[-–]\d+([.,]\d+)?\s*°/.test(l)) {
+        const t = l.replace(BULLET_RE, '').trim();
+        if (t && bset) bset.add(t);
+        return t;
+      }
+      return l;
+    }).filter(Boolean);
   }
   /* Määrä omalla rivillään ja aines seuraavalla yhdistetään */
   function mergeAmountLines(raw) {
@@ -1410,7 +1420,8 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
   function classify(text, stepsText, ignore, opts) {
     opts = opts || {};
     const ign = new Set((ignore || []).map(x => prepText(x).trim()));
-    const lines = mergeAmountLines(splitLines(text));
+    const bset = new Set();
+    const lines = mergeAmountLines(splitLines(text, bset));
     let title = '', servings = null, servingsLabel = 'annosta';
     const out = [];
     let section = null;
@@ -1434,7 +1445,7 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
       if (section === 'tools' && l.length < 90 && !STEP_VERB.test(l)) { push(l.replace(/^[-•*·]\s*/, ''), 'tool'); return; }
       if (section !== 'steps' && l.length < 70 && TOOL_WORD.test(prepText(l)) && !/\d\s*(g|kg|dl|ml|l|rkl|tl|cups?|tbsp|tsp|oz)\b/i.test(l) && !/[.!?]$/.test(l)) { push(l.replace(/^[-•*·]\s*/, ''), 'tool'); return; }
       const isQty = QTY_RE.test(l) && l.length < 140;
-      const bullet = /^[-•*·]\s/.test(l);
+      const bullet = bset.has(l) || /^[-•*·]\s/.test(l);
       if (section === 'steps') {
         if (/^\d{1,2}[.)]?$/.test(l)) { push(l, 'skip'); return; }
         if (QTY_RE.test(l) && l.length < 60 && !/[.!?]$/.test(l)) { push(l, 'skip'); return; }
@@ -2538,11 +2549,13 @@ Täytä kakku mansikoilla ja kermalla.`;
   }
   /* Reseptin kuva tekstiksi: rivit säilytetään, katkenneet lauseet yhdistetään. Useampi kuva lisätään peräkkäin. */
   function cleanRecipeOcr(t) {
-    const ls = String(t || '').replace(/\r/g, '').replace(/-\n(?=[a-zäöå])/g, '').split('\n').map(l => l.replace(/[ \t]+/g, ' ').trim()).filter(Boolean);
+    /* Tunnistus lukee luettelomerkin usein kirjaimeksi tai merkiksi (o, e, c, °, «, ~ …): muutetaan viivaksi */
+    const OCR_BULLET = /^(?:[oOeEcC0°º©®¢•·«»*+~>¬=]|[-–—_]{1,2}|\(\s?\)|\[\s?\])\s+(?=[\dA-Za-zÄÖÅäöå½¼¾⅓])/;
+    const ls = String(t || '').replace(/\r/g, '').replace(/-\n(?=[a-zäöå])/g, '').split('\n').map(l => l.replace(/[ \t]+/g, ' ').trim().replace(OCR_BULLET, '- ')).filter(Boolean);
     const out = [];
     ls.forEach(l => {
       const prev = out[out.length - 1];
-      if (prev && /^[a-zäöå(]/.test(l) && prev.length > 25 && !/[.:!?]$/.test(prev) && !/^[\d½¼¾⅓-]/.test(prev)) out[out.length - 1] = prev + ' ' + l;
+      if (prev && /^[a-zäöå(]/.test(l) && prev.length > 25 && !/[.:!?]$/.test(prev) && !/^(?:- )?[\d½¼¾⅓]/.test(prev)) out[out.length - 1] = prev + ' ' + l;
       else out.push(l);
     });
     return out.join('\n');
