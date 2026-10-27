@@ -612,16 +612,17 @@ textarea.let:focus{background:#FFFDF9;border-color:#E3B7C4;box-shadow:none}
       <use href="#forget" x="84" y="2" width="7" height="7"/><use href="#forget" x="110" y="17" width="6" height="6"/>
     </symbol>`;
   }
-  /* Tyhjien näkymien sommitelma: pieni, epäsymmetrinen mutta tasapainoinen kimppu */
+  /* Tyhjien näkymien sommitelma: kolmen ruusun kaari, keltaisia kukkia ja lemmikkejä, vähän lehtiä */
   function emptyBunch(id) {
     const u = (h, x, y, w, ht, rot) => `<use href="#${h}" x="${x}" y="${y}" width="${w}" height="${ht}"${rot ? ` transform="rotate(${rot} ${x + w / 2} ${y + ht / 2})"` : ''}/>`;
     return `<symbol id="${id}" viewBox="0 0 220 120" overflow="visible">
-      ${u('leafA', 60, 36, 48, 28, 200)}${u('leafB', 70, 62, 40, 23, 150)}${u('leafA', 126, 28, 44, 26, -38)}${u('leafB', 132, 72, 42, 25, 28)}${u('leafB', 100, 80, 28, 17, 96)}
-      ${u('bud', 80, 16, 14, 22, -32)}
-      ${u('yellow', 72, 56, 17, 17)}
-      ${u('roseA', 86, 26, 60, 60)}
-      ${u('roseB', 131, 52, 33, 33, -18)}
-      ${u('forget', 82, 76, 11, 11)}${u('forget', 154, 44, 10, 10)}${u('forget', 124, 84, 9, 9)}
+      ${u('leafA', 46, 46, 44, 26, 196)}${u('leafB', 144, 56, 40, 24, 4)}${u('leafB', 98, 74, 28, 17, 98)}
+      ${u('roseB', 60, 46, 36, 36, 15)}
+      ${u('yellow', 125, 30, 19, 19)}
+      ${u('roseB', 128, 54, 32, 32, -24)}
+      ${u('roseA', 84, 28, 54, 54)}
+      ${u('yellow', 77, 75, 13, 13)}
+      ${u('forget', 80, 33, 11, 11)}${u('forget', 120, 80, 11, 11)}${u('forget', 155, 47, 10, 10)}${u('forget', 56, 44, 9, 9)}${u('forget', 104, 24, 9, 9)}
     </symbol>`;
   }
   const svg = `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
