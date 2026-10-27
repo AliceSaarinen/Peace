@@ -2133,28 +2133,54 @@ Täytä kakku mansikoilla ja kermalla.`;
     const vegan = tags.some(t => /^en:vegan$/.test(t)) ? 'vegan' : tags.some(t => /^en:non-vegan$/.test(t)) ? 'non' : tags.some(t => /^en:maybe-vegan$/.test(t)) ? 'maybe' : null;
     return { code: String(x.code || ''), name: offStr(x.product_name_fi) || offStr(x.product_name) || 'Nimetön tuote', brand: offStr(x.brands).split(',')[0].trim(), ing: ing.trim(), vegan, labelVegan: tags.some(t => /vegan/.test(t) && /^en:(vegan|v-label|vegan-society)/.test(t) && !/non|maybe/.test(t)), img: offStr(x.image_front_small_url) };
   }
+  /* Open Food Facts -perhe: ruoka, kosmetiikka ja muut tuotteet. Suomessa myytävät ensin. */
+  const OFF_DB = { food: 'world.openfoodfacts.org', beauty: 'world.openbeautyfacts.org', products: 'world.openproductsfacts.org' };
+  const OFF_CAT = { food: 'food', beauty: 'cosmetic', products: 'other' };
+  const OFF_LAB = { food: 'ruoka', beauty: 'kosmetiikka', products: 'muu tuote' };
+  async function offGet(u) { const r = await fetch(u); if (!r.ok) throw r.status; return r.json(); }
   async function offSearch(q) {
-    const e = encodeURIComponent(q);
-    const urls = [`https://search.openfoodfacts.org/search?q=${e}&langs=fi,en&page_size=8&fields=${OFF_FIELDS}`,
-      `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${e}&search_simple=1&action=process&json=1&page_size=8&fields=${OFF_FIELDS}`];
-    let lastErr = null;
-    for (const u of urls) {
-      try { const r = await fetch(u); if (!r.ok) { lastErr = r.status; continue; } const d = await r.json(); const list = d.hits || d.products; if (Array.isArray(list)) return list.map(offNorm); }
-      catch (er) { lastErr = er; }
-    }
-    throw lastErr || new Error('off');
+    const e = encodeURIComponent(q), F = `&page_size=8&fields=${OFF_FIELDS},countries_tags`;
+    const legacy = (db, fin) => `https://${OFF_DB[db]}/cgi/search.pl?search_terms=${e}&search_simple=1&action=process&json=1${fin ? '&tagtype_0=countries&tag_contains_0=contains&tag_0=finland' : ''}${F}`;
+    const jobs = [
+      ['food', true, () => offGet(legacy('food', true)).then(d => d.products)],
+      ['food', false, () => offGet(`https://search.openfoodfacts.org/search?q=${e}&langs=fi,en${F}`).then(d => d.hits).catch(() => offGet(legacy('food', false)).then(d => d.products))],
+      ['beauty', false, () => offGet(legacy('beauty', false)).then(d => d.products)],
+      ['products', false, () => offGet(legacy('products', false)).then(d => d.products)]
+    ];
+    const res = await Promise.allSettled(jobs.map(j => j[2]()));
+    const out = [], seen = new Set(); let ok = false, busy = false;
+    res.forEach((r, i) => {
+      if (r.status !== 'fulfilled') { if (r.reason === 503 || r.reason === 429) busy = true; return; }
+      ok = true;
+      (Array.isArray(r.value) ? r.value : []).forEach(x => {
+        const n = offNorm(x); n.db = jobs[i][0];
+        n.fi = [].concat(x.countries_tags || []).some(t => /finland/.test(t)) || jobs[i][1];
+        const k = n.code || n.name + n.brand; if (seen.has(k)) return; seen.add(k); out.push(n);
+      });
+    });
+    if (!ok) throw busy ? 503 : new Error('off');
+    out.sort((a, b) => (b.fi - a.fi) || (!!b.ing - !!a.ing));
+    return out.slice(0, 12);
   }
   async function offProduct(code) {
-    try { const r = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=${OFF_FIELDS}`); if (!r.ok) return null; const d = await r.json(); return d && d.product ? offNorm(Object.assign({ code }, d.product)) : null; }
-    catch (e) { return null; }
+    const c = encodeURIComponent(code), f = `fields=${OFF_FIELDS}`;
+    /* product_type=all etsii kaikista tietokannoista ja ohjaa oikeaan */
+    for (const u of [`https://${OFF_DB.food}/api/v2/product/${c}.json?product_type=all&${f}`, `https://${OFF_DB.food}/api/v2/product/${c}.json?${f}`, `https://${OFF_DB.beauty}/api/v2/product/${c}.json?${f}`, `https://${OFF_DB.products}/api/v2/product/${c}.json?${f}`]) {
+      try {
+        const r = await fetch(u); if (!r.ok) continue; const d = await r.json();
+        if (d && d.product) { const n = offNorm(Object.assign({ code }, d.product)); const h = r.url || u; n.db = /beauty/.test(h) ? 'beauty' : /products/.test(h) ? 'products' : 'food'; return n; }
+      } catch (e) { }
+    }
+    return null;
   }
+  const shopLinks = q => `<div class="links"><a href="https://www.google.com/search?q=${encodeURIComponent('site:s-kaupat.fi ' + q)}" target="_blank" rel="noopener">${icon('i-check')}S-kaupat</a><a href="https://www.google.com/search?q=${encodeURIComponent('site:k-ruoka.fi ' + q)}" target="_blank" rel="noopener">${icon('i-check')}K-Ruoka</a><a href="https://www.google.com/search?q=${encodeURIComponent(q + ' ainesosat')}" target="_blank" rel="noopener">${icon('i-check')}Google</a></div>`;
   const OFF_VEG = { vegan: 'merkitty vegaaniseksi', non: 'ei vegaaninen', maybe: 'mahdollisesti vegaaninen' };
   function offHTML(o) {
     if (o.busy) return `<div class="busy"><div class="spinner"></div>Haetaan tuotetta…</div>`;
-    if (o.error) return `<p class="note warm" style="font-size:.88rem">${esc(o.error)}</p>`;
+    if (o.error) return `<p class="note warm" style="font-size:.88rem">${esc(o.error)}</p>${o.q ? shopLinks(o.q) : ''}`;
     if (!o.list) return '';
-    return `<div class="list">${o.list.map((p, i) => `<button class="hitem" data-act="offpick" data-i="${i}" style="text-align:left;width:100%">${p.img ? `<img src="${esc(p.img)}" alt="" style="width:42px;height:42px;object-fit:cover;border-radius:8px;flex:0 0 auto">` : ''}<span class="txt"><b>${esc(p.name)}</b><span>${esc([p.brand, p.ing ? 'ainesosat löytyvät' : 'ei ainesosia', p.vegan ? OFF_VEG[p.vegan] : ''].filter(Boolean).join(' · '))}</span></span></button>`).join('')}
-      <p class="muted" style="font-size:.8rem">Tiedot: Open Food Facts, avoin tietokanta. Tarkista tiedot pakkauksesta.</p><button class="btn ghost small" data-act="offclose">Sulje haku</button></div>`;
+    return `<div class="list">${o.list.map((p, i) => `<button class="hitem" data-act="offpick" data-i="${i}" style="text-align:left;width:100%">${p.img ? `<img src="${esc(p.img)}" alt="" style="width:42px;height:42px;object-fit:cover;border-radius:8px;flex:0 0 auto">` : ''}<span class="txt"><b>${esc(p.name)}</b><span>${esc([p.brand, OFF_LAB[p.db] || '', p.fi ? 'Suomessa' : '', p.ing ? 'ainesosat löytyvät' : 'ei ainesosia', p.vegan ? OFF_VEG[p.vegan] : ''].filter(Boolean).join(' · '))}</span></span></button>`).join('')}
+      <p class="muted" style="font-size:.8rem">Tiedot: Open Food, Beauty ja Products Facts, avoimet tietokannat. Tarkista tiedot pakkauksesta. Etsi ainesosia myös kaupoista:</p>${shopLinks(o.q || '')}<button class="btn ghost small" data-act="offclose">Sulje haku</button></div>`;
   }
   async function offFind() {
     syncCheck();
@@ -2163,7 +2189,7 @@ Täytä kakku mansikoilla ja kermalla.`;
     c.off = { busy: true }; renderCheck();
     try {
       const list = await offSearch(q);
-      c.off = list.length ? { list } : { error: 'Tuotetta ei löytynyt. Kokeile merkkiä ja nimeä, esimerkiksi "Oatly kaurajuoma", tai kuvaa ainesosaluettelo.' };
+      c.off = list.length ? { list, q } : { q, error: 'Tuotetta ei löytynyt avoimista tietokannoista. Kokeile merkkiä ja nimeä, esimerkiksi "Oatly kaurajuoma", katso kaupan sivuilta tai kuvaa ainesosaluettelo.' };
     } catch (e) { c.off = { error: e === 503 || e === 429 ? 'Tietokantaa on käytetty juuri paljon. Yritä minuutin päästä uudelleen.' : 'Tuotehaku ei onnistunut. Tarkista verkkoyhteys ja yritä uudelleen.' }; }
     renderCheck();
   }
@@ -2172,7 +2198,7 @@ Täytä kakku mansikoilla ja kermalla.`;
     c.off = null;
     if (!p.ing) { c.product = p.name; renderCheck(); toast('Tuotteelta puuttuu ainesosaluettelo tietokannasta. Kuvaa ainesosat pakkauksesta.'); return; }
     if (p.code && /^\d{6,}$/.test(p.code) && !c.code) c.code = p.code;
-    await submitCheck(p.ing, { product: [p.brand, p.name].filter(Boolean).join(' '), certs: p.labelVegan ? ['vegan'] : [], source: 'off' });
+    await submitCheck(p.ing, { product: [p.brand, p.name].filter(Boolean).join(' '), certs: p.labelVegan ? ['vegan'] : [], source: 'off', category: OFF_CAT[p.db] === 'food' ? null : OFF_CAT[p.db] });
   }
   function sentHTML() {
     const s = S.check.sub; if (!s) return '';
@@ -2181,7 +2207,7 @@ Täytä kakku mansikoilla ja kermalla.`;
         ${s.thumb ? `<img class="thumb" src="${s.thumb}" alt="Lähetetty kuva">` : `<div class="ticon">${icon('i-text')}</div>`}
         <div class="txt">
           <div class="row" style="gap:6px"><b>${esc(s.product || (s.thumb ? 'Kuvasta luettu' : 'Ainesosaluettelo'))}</b>${s.example ? '<span class="example-tag">Esimerkki</span>' : ''}</div>
-          ${s.source === 'off' ? `<span class="muted" style="font-size:.8rem">Ainesosat: Open Food Facts</span>` : ''}
+          ${s.source === 'off' ? `<span class="muted" style="font-size:.8rem">Ainesosat: avoin tuotetietokanta (Open Facts)</span>` : ''}
           <details><summary class="muted" style="font-size:.86rem">Näytä tarkistettu teksti</summary><p class="muted" style="margin-top:6px;white-space:pre-wrap">${esc(s.text)}</p></details>
           <div class="row"><button class="btn ghost small" data-act="fixtext">${icon('i-edit')}Korjaa tekstiä</button></div>
         </div>
@@ -2256,7 +2282,7 @@ Täytä kakku mansikoilla ja kermalla.`;
     const c = S.check;
     if (!text || !text.trim()) { toast('Liitä ensin ainesosaluettelo tai valitse kuva.'); return; }
     c.sub = Object.assign({ text, product: '', thumb: null, certs: [], example: false }, meta || {});
-    c.res = analyzeText(text, c.category);
+    c.res = analyzeText(text, (meta && meta.category) || c.category);
     c.ai = null; c.histId = null; c.draft = ''; c.product = '';
     if (!c.sub.example && c.res.verdict !== 'empty') {
       const item = { id: uid(), ts: Date.now(), product: c.sub.product || '', text: text.slice(0, 6000), category: c.res.category, verdict: c.res.verdict, certs: c.sub.certs || [], fav: false, selfChecked: false };
