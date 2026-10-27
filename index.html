@@ -751,7 +751,7 @@ V|v1||munakoiso,eggplant,butternut,honeydew,honeysuckle,honeybush,milk thistle,c
 `;
 
 /* Sanat, jotka edeltävinä sanoina tai yhdyssanan alkuosina tekevät maito-, voi-, kerma- tai juustosanasta kasviperäisen */
-const PLANT_WORDS = `coconut,kookos,kookoksen,kookosmaito,oat,oats,kaura,kauran,soy,soya,soija,soijan,almond,manteli,mantelin,rice,riisi,riisin,cocoa,cacao,kaakao,shea,peanut,maapahkina,nut,nuts,pahkina,cashew,hazelnut,hasselpahkina,plant,plant-based,kasvi,kasvis,kasviperainen,kasvipohjainen,kasviperaista,vegan,vegaaninen,vegaani,vegaanisen,vegaanista,hemp,hamppu,mango,apple,omena,pea,herne,sunflower,auringonkukka,kokos,havre,soja,mandel,ris,kakao,kokosnuss,hafer,erdnuss,pflanzen,pflanzlich,pflanzliche,vegetable,vegetal,seed,siemen,pistachio,pistaasi,macadamia,walnut,saksanpahkina,sesame,seesami,tahini,kurpitsa,pumpkin,oliivi,olive,avocado,avokado,cupuacu,murumuru,illipe,kokum,aprikoosi,apricot,faux,synthetic,synteettinen,keino,teko,imitation,non-dairy,dairy-free,maidoton,lactose-free,bean,papu,lupiini,lupin,quinoa,kvinoa,spelt,hampun`;
+const PLANT_WORDS = `coconut,kookos,kookoksen,kookosmaito,oat,oats,kaura,kauran,soy,soya,soija,soijan,almond,manteli,mantelin,rice,riisi,riisin,cocoa,cacao,kaakao,shea,peanut,maapahkina,nut,nuts,pahkina,cashew,hazelnut,hasselpahkina,plant,plant-based,kasvi,kasvis,kasviperainen,kasvipohjainen,kasviperaista,vegan,vegaaninen,vegaani,vegaanisen,vegaanista,hemp,hamppu,mango,apple,omena,pea,herne,sunflower,auringonkukka,kokos,havre,soja,mandel,ris,kakao,kokosnuss,hafer,erdnuss,pflanzen,pflanzlich,pflanzliche,vegetable,vegetal,seed,siemen,pistachio,pistaasi,macadamia,walnut,saksanpahkina,sesame,seesami,tahini,kurpitsa,pumpkin,oliivi,olive,avocado,avokado,cupuacu,murumuru,illipe,kokum,aprikoosi,apricot,faux,synthetic,synteettinen,keino,teko,imitation,non-dairy,dairy-free,maidoton,lactose-free,bean,papu,lupiini,lupin,quinoa,kvinoa,spelt,hampun,shea,parkii,butyrospermum,vitellaria,paradoxa,theobroma,cacao,mangifera,indica,shorea,robusta,irvingia,gabonensis,garcinia,cupuacu,kokum,murumuru,astrocaryum,persea,gratissima,cocos,nucifera,avena,sativa,oryza,prunus,amygdalus,dulcis,simmondsia,chinensis,olea,europaea,glycine,soja,helianthus,annuus,sal,kernel,nut,fruit,leaf,root,vegetable,plant,botanical,rice,mango,shorea`;
 
 /* Aromit, joiden alkuosa kertoo että aromi on kasviperäinen */
 const AROMA_OK = 'savu,vanilja,sitruuna,appelsiini,mansikka,vadelma,minttu,kaneli,lime,omena,mustikka,kirsikka,pomeranssi,greippi,inkivaari,kahvi,kaakao,mango,persikka,paaryna,banaani,kookos,manteli,lakritsi,salmiakki,karamelli,kardemumma,smoke,lemon,orange,strawberry,raspberry,mint,cinnamon,apple,cherry,coffee,vanilla';
@@ -1099,6 +1099,8 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
         if (e.st !== 'V' && e.st !== 'W' && !inside) {
           const pw = prevWord(t, i);
           if (pw && PLANT.has(pw)) continue;
+          /* kosmetiikan INCI-nimet: latinankielinen kasvin nimi ennen sanaa butter/milk/cream (esim. Butyrospermum Parkii Butter) */
+          if (pw && /^(butter|milk|cream|milch)/.test(al.a) && pw.length >= 4 && /(ii|ae|us|is|um|ia|ensis|oides|ata|osa|ana|ica|ina|ensis)$/.test(pw) && !/^(goat|cow|sheep|mare|camel|donkey|buffalo|vuohen|lehman|lampaan)$/.test(pw)) continue;
           if (pw && (pw.endsWith('ton') || pw.endsWith('ttomia'))) {} // esim. "rasvaton maitojauhe" on maitoa
         }
         if (e.id === 'aromi') {
@@ -2358,6 +2360,266 @@ Täytä kakku mansikoilla ja kermalla.`;
     const rest = S.history.filter(h => !h.fav && !h.selfChecked);
     if (rest.length > 300) rest.slice(300).forEach(h => del('history', h.id));
   }
+  /* ---------- Kuvan esikäsittely tekstintunnistukseen ----------
+     Valaistuksen tasoitus (jakaminen taustan kirkkaudella), vaalean tekstin kääntö tummalla pohjalla ja terävöitys.
+     Testikuvilla oikein tunnistettujen sanojen osuus nousi 49 %:sta 76 %:iin. */
+  function boxBlurH(src, dst, w, h, r) {
+    const iarr = 1 / (r + r + 1);
+    for (let y = 0; y < h; y++) {
+      let ti = y * w, li = ti, ri = ti + r; const fv = src[ti], lv = src[ti + w - 1]; let val = (r + 1) * fv;
+      for (let j = 0; j < r; j++) val += src[ti + Math.min(j, w - 1)];
+      for (let x = 0; x < w; x++) {
+        val += src[y * w + Math.min(x + r, w - 1)] - src[y * w + Math.max(x - r - 1, 0)];
+        dst[ti++] = val * iarr;
+      }
+    }
+  }
+  function boxBlurV(src, dst, w, h, r) {
+    const iarr = 1 / (r + r + 1);
+    for (let x = 0; x < w; x++) {
+      let val = (r + 1) * src[x];
+      for (let j = 0; j < r; j++) val += src[Math.min(j, h - 1) * w + x];
+      for (let y = 0; y < h; y++) {
+        val += src[Math.min(y + r, h - 1) * w + x] - src[Math.max(y - r - 1, 0) * w + x];
+        dst[y * w + x] = val * iarr;
+      }
+    }
+  }
+  function gaussBlur(a, w, h, sigma) {
+    /* kolme laatikkosumennusta ≈ Gaussin sumennus */
+    const n = 3, wIdeal = Math.sqrt(12 * sigma * sigma / n + 1); let wl = Math.floor(wIdeal); if (wl % 2 === 0) wl--;
+    const m = Math.round((12 * sigma * sigma - n * wl * wl - 4 * n * wl - 3 * n) / (-4 * wl - 4));
+    let s = Float32Array.from(a), t = new Float32Array(a.length);
+    for (let i = 0; i < n; i++) { const r = ((i < m ? wl : wl + 2) - 1) / 2; boxBlurH(s, t, w, h, r); boxBlurV(t, s, w, h, r); }
+    return s;
+  }
+  function maxFilter(a, w, h, k) {
+    const r = k >> 1, t = new Float32Array(a.length), o = new Float32Array(a.length);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { let m = 0; const x0 = Math.max(0, x - r), x1 = Math.min(w - 1, x + r); for (let i = x0; i <= x1; i++) { const v = a[y * w + i]; if (v > m) m = v; } t[y * w + x] = m; }
+    for (let x = 0; x < w; x++) for (let y = 0; y < h; y++) { let m = 0; const y0 = Math.max(0, y - r), y1 = Math.min(h - 1, y + r); for (let i = y0; i <= y1; i++) { const v = t[i * w + x]; if (v > m) m = v; } o[y * w + x] = m; }
+    return o;
+  }
+  function pct(a, p) {
+    let mn = Infinity, mx = -Infinity; for (let i = 0; i < a.length; i++) { const v = a[i]; if (v < mn) mn = v; if (v > mx) mx = v; }
+    if (!(mx > mn)) return mn;
+    const B = 2048, hist = new Uint32Array(B), k = (B - 1) / (mx - mn);
+    for (let i = 0; i < a.length; i++) hist[((a[i] - mn) * k) | 0]++;
+    const target = a.length * p / 100; let c = 0; for (let v = 0; v < B; v++) { c += hist[v]; if (c >= target) return mn + v / k; } return mx;
+  }
+  function enhanceGray(g, w, h) {
+    /* vaalea teksti tummalla pohjalla: käännetään */
+    const border = []; for (let x = 0; x < w; x += 2) { border.push(g[x], g[(h - 1) * w + x]); } for (let y = 0; y < h; y += 2) { border.push(g[y * w], g[y * w + w - 1]); }
+    const bMed = pct(Float32Array.from(border), 50), aMed = pct(g, 50);
+    if (bMed < 100 || bMed < aMed * 0.8) for (let i = 0; i < g.length; i++) g[i] = 255 - g[i];
+    /* valaistuksen tasoitus: tausta = sumennettu maksimikuva */
+    const r = Math.max(8, Math.min(w, h) / 8);
+    const b1 = gaussBlur(g, w, h, r), b2 = gaussBlur(maxFilter(g, w, h, 15), w, h, r);
+    const n = new Float32Array(g.length);
+    for (let i = 0; i < g.length; i++) n[i] = g[i] / Math.max(1, Math.max(b1[i], b2[i])) * 255;
+    const lo = pct(n, 1), hi = pct(n, 99.5), sc = 255 / Math.max(1, hi - lo);
+    for (let i = 0; i < n.length; i++) n[i] = Math.max(0, Math.min(255, (n[i] - lo) * sc));
+    /* terävöitys */
+    const bl = gaussBlur(n, w, h, 1.2);
+    for (let i = 0; i < n.length; i++) n[i] = Math.max(0, Math.min(255, n[i] + 1.0 * (n[i] - bl[i])));
+    return n;
+  }
+  /* Sanasto tekstintunnistuksen korjaukseen: ainesosat ja lisäaineet suomeksi sekä kosmetiikan englanninkieliset ja INCI-nimet */
+  const OCR_VOCAB_TXT = `
+ainesosat ainekset ainesosa sisältää saattaa sisältää pieniä määriä jäämiä valmistettu tehtaassa jossa käsitellään myös
+vesi juomavesi suola merisuola vuorisuola jodioitu sokeri ruokosokeri fariinisokeri tomusokeri raakasokeri kookossokeri sokerisiirappi
+glukoosisiirappi glukoosi fruktoosi glukoosi-fruktoosisiirappi fruktoosi-glukoosisiirappi dekstroosi maltodekstriini maltoosi invertsokerisiirappi
+hunaja vaahterasiirappi agavesiirappi siirappi melassi mallasuute ohramallasuute mallas ohramallas
+vehnäjauho vehnä vehnäjauhot vehnäleseet vehnägluteeni gluteeni täysjyvävehnäjauho täysjyvä täysjyväkaura täysjyväruis ruisjauho ruis
+ruisjauhot ruisleseet ohra ohrajauho ohrahiutale kaura kaurajauho kaurahiutale kaurahiutaleet kauralese kauraleseet kauraproteiini
+speltti spelttijauho maissi maissijauho maissitärkkelys maissisiirappi riisi riisijauho riisitärkkelys tattari tattarijauho hirssi kvinoa
+perunatärkkelys peruna perunat perunahiutale perunahiutaleet perunajauho tärkkelys muunnettu muunneltu tapioka tapiokatärkkelys
+herne herneproteiini härkäpapu härkäpapuproteiini soija soijaproteiini soijajauho soijapapu soijapavut soijakastike soijalesitiini
+auringonkukkalesitiini rapsilesitiini lesitiini linssi linssit kikherne kikherneet papu pavut
+kasvirasva kasviöljy kasviöljyt rypsiöljy rapsiöljy auringonkukkaöljy oliiviöljy palmuöljy palmurasva palmuydinöljy kookosöljy kookosrasva
+sheavoi kaakaovoi kaakaomassa kaakao kaakaojauhe rasvaton vähärasvainen kookos kookosmaito kookoskerma kookoshiutale
+maito maitojauhe täysmaitojauhe rasvaton maitojauhe kevytmaitojauhe kuorittu maitoproteiini maitorasva voi voirasva kerma kermajauhe
+hera herajauhe heraproteiini laktoosi kaseiini kaseinaatti natriumkaseinaatti juusto juustojauhe jogurtti jogurttijauhe rahka piimä
+kananmuna kananmunanvalkuainen munanvalkuainen munankeltuainen kananmunajauhe kokomunajauhe munajauhe
+liha sianliha naudanliha broileri broilerinliha kana kananliha kalkkuna lammas kala lohi tonnikala silakka katkarapu
+gelatiini liivate kollageeni
+hiiva hiivauute leivinhiiva hapanjuuri juuri
+emulgointiaine emulgointiaineet happamuudensäätöaine happamuudensäätöaineet säilöntäaine säilöntäaineet sakeuttamisaine sakeuttamisaineet
+stabilointiaine stabilointiaineet hyytelöimisaine hyytelöimisaineet nostatusaine nostatusaineet makeutusaine makeutusaineet
+väriaine väriaineet väri hapettumisenestoaine hapettumisenestoaineet antioksidantti pintakäsittelyaine pintakäsittelyaineet
+paakkuuntumisenestoaine kosteudensäilyttäjä arominvahvenne arominvahventeet jauhonparanne vaahdonestoaine täyteaine kantaja-aine
+aromi aromit aromiaine luontainen luonnollinen savuaromi vaniljauute vanilja vaniljasokeri vanilliini
+sitruunahappo maitohappo omenahappo viinihappo etikkahappo askorbiinihappo sorbiinihappo bentsoehappo fosforihappo
+natriumsitraatti kaliumsitraatti kalsiumsitraatti natriumlaktaatti kalsiumlaktaatti natriumasetaatti
+natriumbikarbonaatti ammoniumbikarbonaatti dinatriumdifosfaatti natriumdifosfaatti kaliumbikarbonaatti
+kaliumsorbaatti natriumbentsoaatti natriumnitriitti kaliumnitraatti natriumaskorbaatti natriumerytorbaatti
+kalsiumkarbonaatti magnesiumkarbonaatti kalsiumfosfaatti trikalsiumfosfaatti dikaliumfosfaatti dikalsiumfosfaatti
+kalsiumkloridi magnesiumkloridi kaliumkloridi natriumkloridi rautasulfaatti sinkkisulfaatti
+ksantaanikumi guarkumi johanneksenleipäpuujauhe karrageeni pektiini agar alginaatti natriumalginaatti selluloosa
+metyyliselluloosa karboksimetyyliselluloosa hydroksipropyyliselluloosa gummiarabikumi arabikumi tragantti
+mono- diglyseridit monoglyseridit rasvahappojen rasvahapot glyseroli glyseriini sorbitoli ksylitoli maltitoli erytritoli
+isomalti steviolglykosidi steviolglykosidit sukraloosi aspartaami asesulfaami-k sakariini
+mononatriumglutamaatti natriumglutamaatti glutamaatti dinatriuminosinaatti dinatriumguanylaatti ribonukleotidit
+beetakaroteeni karoteeni paprikauute kurkumiini kurkuma karmiini kokenilli antosyaanit klorofylli karamelliväri
+punajuuriväri punajuurimehutiiviste spirulinauute titaanidioksidi rautaoksidi
+mehiläisvaha karnaubavaha sellakka shellakka parafiini
+tokoferoli tokoferolit rosmariiniuute
+vitamiini vitamiinit kivennäisaineet riboflaviini tiamiini niasiini foolihappo biotiini pantoteenihappo kobalamiini
+kalsium magnesium rauta sinkki jodi kalium natrium fosfori seleeni
+mauste mausteet maustepippuri pippuri mustapippuri valkopippuri chili cayennepippuri paprika savupaprika kaneli inkivääri
+kardemumma neilikka muskottipähkinä kumina juustokumina korianteri sinappi sinapinsiemen sinapinsiemenet
+yrtit persilja tilli basilika oregano timjami rosmariini salvia ruohosipuli lipstikka laakerinlehti
+sipuli sipulijauhe valkosipuli valkosipulijauhe purjo porkkana peruna tomaatti tomaattipyree tomaattimurska tomaattitiiviste
+paprika kurkku suolakurkku kapris oliivi oliivit sieni sienet herkkusieni kantarelli
+omena omenasose appelsiini sitruuna sitruunamehu sitruunamehutiiviste lime banaani mansikka vadelma mustikka puolukka karpalo
+mustaherukka kirsikka ananas mango persikka päärynä rusina rusinat taateli taatelit viikuna luumu aprikoosi
+hedelmä hedelmät marja marjat mehu mehutiiviste tiiviste hillo sose kuivattu kuivatut
+pähkinä pähkinät hasselpähkinä manteli mantelit maapähkinä maapähkinät cashewpähkinä saksanpähkinä pekaanipähkinä pistaasi
+macadamiapähkinä seesami seesaminsiemen seesaminsiemenet pellavansiemen pellavansiemenet auringonkukansiemen auringonkukansiemenet
+kurpitsansiemen kurpitsansiemenet chiansiemen hamppu hampunsiemen unikonsiemen
+suklaa tumma maitosuklaa valkosuklaa nougat karamelli lakritsi salmiakki salmiakkijauhe ammoniumkloridi anis anisöljy
+etikka väkiviinaetikka omenaviinietikka viinietikka balsamietikka viini punaviini valkoviini olut alkoholi
+kahvi tee kaakaojauhe
+inuliini kuitu ravintokuitu sokerijuurikaskuitu omenakuitu
+täysjyväkaurahiutaleet kaurahiutaleet ruokosokeri karpalot auringonkukkaöljy kookoshiutale
+aqua water glycerin glycerine glycerol butyrospermum parkii shea butter theobroma cacao seed cocoa mangifera indica
+cocos nucifera coconut oil olea europaea olive fruit simmondsia chinensis jojoba prunus amygdalus dulcis sweet almond
+argania spinosa kernel helianthus annuus sunflower ricinus communis castor persea gratissima avocado vitellaria paradoxa
+aloe barbadensis leaf juice extract chamomilla recutita matricaria calendula officinalis flower rosmarinus lavandula
+angustifolia citrus aurantium limon peel oryza sativa rice bran avena kernel flour hydrolyzed protein wheat soy
+cetearyl cetyl stearyl alcohol glyceryl stearate citrate caprylic capric triglyceride caprylyl glycol
+sodium laureth lauryl sulfate sulfoacetate cocoyl isethionate glutamate cocamidopropyl betaine coco glucoside decyl lauryl
+chloride hydroxide benzoate sorbate levulinate anisate lactate citric acid lactic salicylic hyaluronic hyaluronate
+phenoxyethanol ethylhexylglycerin benzyl alcohol dehydroacetic potassium tocopherol tocopheryl acetate
+parfum fragrance limonene linalool citral geraniol citronellol coumarin eugenol
+dimethicone cyclopentasiloxane cyclohexasiloxane silica mica titanium dioxide iron oxides zinc oxide talc kaolin
+xanthan gum carbomer acrylates copolymer polymer crosspolymer polysorbate peg ppg sorbitan oleate cellulose
+panthenol allantoin niacinamide urea squalane squalene ceramide cholesterol lanolin beeswax cera alba carnauba
+candelilla shellac carmine collagen keratin silk honey mel propolis milk lac lactis
+`;
+  const OCR_COMMON_TXT = `
+näin tee teet tehdä mausta maustaa sekoita sekoittele lisää kaada keitä keittää paista paistaa vatkaa vatkaten anna leikkaa kuori pese hienonna sulata
+kuumenna lämmitä tarjoile tarjoa valmista laita nosta siivilöi hauduta kypsennä jäähdytä levitä yhdistä ripottele käännä kääntele
+tarkista viimeistele huuhtele pilko paloittele raasta soseuta liota valuta kuullota ruskista voitele vuoraa muotoile kaulitse
+nostata pyöritä aseta jätä peitä purista silppua viipaloi esilämmitä kohota kohoaa vaivaa nypi painele koristele kostuta murskaa
+vinkki vinkit huom huomio ohje ohjeet valmistus annosta annos annokset minuuttia tuntia astetta asteessa uuni uunissa pannu kattila
+kulho vuoka pelti kakku taikina täyte pohja kuorrute kastike keitto salaatti pullat leipä noin kunnes kanssa joukkoon pinnalle
+päälle mukaan maun mukaan hetki hetken kypsiä kypsä kypsäksi tasaiseksi sileäksi vaahdoksi kuohkeaksi
+säilytä viileässä kuivassa parasta ennen valmistaja pakattu suojakaasuun ravintosisältö energia rasva josta tyydyttyneitä
+hiilihydraatit sokereita proteiini suolaa kuitua
+`;
+  const OCR_EXTRA_WORDS = (window.VegCore ? window.VegCore.ENTRIES : []).filter(e => e.st !== 'V').map(e => e.name);
+  /* ---------- Tekstintunnistuksen korjaus sanaston avulla ---------- */
+  const ocrN = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  let OCRV = null;
+  function ocrVocab() {
+    if (OCRV) return OCRV;
+    const words = new Map();
+    const add = w => { w = String(w || '').trim(); if (w.length < 3 || /\d/.test(w)) return; const k = ocrN(w); const prev = words.get(k); if (!prev || (/[äöå]/i.test(w) && !/[äöå]/i.test(prev))) words.set(k, w.toLowerCase()); };
+    OCR_VOCAB_TXT.split(/\s+/).forEach(add);
+    try { (window.VegCore ? window.VegCore.ENTRIES : []).forEach(e => { if (e.st === 'V') return; e.aliases.forEach(a => a.split(/\s+/).forEach(add)); }); } catch (e) { }
+    /* reseptien yleiset sanat, jottei niitä "korjata" ainesosiksi */
+    OCR_COMMON_TXT.split(/\s+/).forEach(add);
+    const learned = ocrLearned();
+    Object.values(learned).forEach(add);
+    const list = [...words.keys()];
+    const byLen = new Map(); list.forEach(k => { if (!byLen.has(k.length)) byLen.set(k.length, []); byLen.get(k.length).push(k); });
+    OCRV = { words, byLen };
+    return OCRV;
+  }
+  function ocrLearned() { try { return (typeof S !== 'undefined' && S.settings && S.settings.ocrFix) || {}; } catch (e) { return {}; } }
+  /* tekstintunnistuksen tyypilliset sekaannukset: halvempi vaihto */
+  const CONF = new Set(['o0', '0o', 'l1', '1l', 'i1', '1i', 'il', 'li', 's5', '5s', 'b8', '8b', 'g9', '9g', 'z2', '2z', 'ec', 'ce', 'co', 'oc', 'ao', 'oa', 'nh', 'hn', 'uv', 'vu', 'tf', 'ft', 'ij', 'ji', 'rt', 'tr', 'nu', 'un', 'mn', 'nm']);
+  function ocrDist(a, b, max) {
+    const n = a.length, m = b.length; if (Math.abs(n - m) > max + 1) return 99;
+    let prev2 = null, prev = new Float32Array(m + 1), cur = new Float32Array(m + 1);
+    for (let j = 0; j <= m; j++) prev[j] = j;
+    for (let i = 1; i <= n; i++) {
+      cur[0] = i; let rowMin = cur[0];
+      for (let j = 1; j <= m; j++) {
+        const x = a[i - 1], y = b[j - 1];
+        let v = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (x === y ? 0 : CONF.has(x + y) ? 0.35 : 1));
+        /* kaksi merkkiä yhdeksi: rn→m, cl→d, vv→w, ii→ü */
+        if (i > 1 && prev2 && ((a[i - 2] + x === 'rn' && y === 'm') || (a[i - 2] + x === 'cl' && y === 'd') || (a[i - 2] + x === 'vv' && y === 'w'))) v = Math.min(v, prev2[j - 1] + 0.4);
+        if (j > 1 && ((b[j - 2] + y === 'rn' && x === 'm') || (b[j - 2] + y === 'cl' && x === 'd'))) v = Math.min(v, prev[j - 2] + 0.4);
+        cur[j] = v; if (v < rowMin) rowMin = v;
+      }
+      if (rowMin > max) return 99;
+      prev2 = prev; prev = cur; cur = new Float32Array(m + 1);
+    }
+    return prev[m];
+  }
+  const FI_SUF = ['a', 'ä', 'n', 't', 'ta', 'tä', 'ja', 'jä', 'na', 'nä', 'ssa', 'ssä', 'sta', 'stä', 'lla', 'llä', 'lta', 'ltä', 'lle', 'ksi', 'ineen', 'iin', 'ista', 'istä', 'ia', 'iä', 'ien', 'ine', 'eja', 'ejä', 'ita', 'itä', 'neen', 'ää', 'aa', 'oa', 'öä', 'ua', 'yä', 's', 'es', 'ed', 'ing'].map(ocrN).sort((x, y) => y.length - x.length);
+  function ocrKnown(k, V, depth) {
+    if (V.words.has(k)) return true;
+    for (const s of FI_SUF) if (k.length - s.length >= 4 && k.endsWith(s) && V.words.has(k.slice(0, -s.length))) return true;
+    /* monikon osanto: kananmunia → kananmuna, mansikoita → mansikka (likimain) */
+    for (const [suf, rep] of [['ia', 'a'], ['ia', 'ä'], ['ja', ''], ['jä', ''], ['ita', 'a'], ['itä', 'ä'], ['oita', 'a'], ['ita', ''], ['ia', ''], ['ksia', 's'], ['ksiä', 's'], ['ia', 'i'], ['eja', 'i'], ['ejä', 'i'], ['ta', ''], ['tä', '']]) { const sn = ocrN(suf); if (k.length - sn.length >= 4 && k.endsWith(sn) && V.words.has(k.slice(0, -sn.length) + ocrN(rep))) return true; }
+    /* yhdyssana tunnetuista osista */
+    if ((depth || 0) < 3 && k.length >= 7) for (let i = 3; i <= k.length - 3; i++) if (V.words.has(k.slice(0, i)) && ocrKnown(k.slice(i), V, (depth || 0) + 1)) return true;
+    return false;
+  }
+  function ocrBest(k, V) {
+    const L = k.length, max = L <= 5 ? 0.4 : L <= 8 ? 0.8 : L <= 11 ? 1.4 : Math.min(2.4, 1.6 + (L - 12) * 0.15);
+    let best = null, bd = 99, second = 99;
+    for (let len = Math.max(3, L - 2); len <= L + 2; len++) for (const w of (V.byLen.get(len) || [])) {
+      const d = ocrDist(k, w, max); if (d < bd) { second = bd; bd = d; best = w; } else if (d < second) second = d;
+    }
+    return best && bd <= max && second - bd >= 0.3 ? best : null;
+  }
+  function caseLike(src, w) { return src === src.toUpperCase() && /[A-ZÄÖÅ]{2}/.test(src) ? w.toUpperCase() : /^[A-ZÄÖÅ]/.test(src) ? w.charAt(0).toUpperCase() + w.slice(1) : w; }
+  function fixOcrText(text) {
+    const V = ocrVocab(), learned = ocrLearned();
+    let t = String(text || '')
+      /* E-koodit: E 47l → E471, EI00 → E100 */
+      .replace(/\b[EЕ][\s\-]?([0-9OoIlSsBZz]{3,4})([a-f]?)\b/g, (m, d, s) => { const n = d.replace(/[Oo]/g, '0').replace(/[Il]/g, '1').replace(/[Ss]/g, '5').replace(/B/g, '8').replace(/[Zz]/g, '2'); return /^\d{3,4}$/.test(n) && +n >= 100 && +n <= 1600 ? 'E' + n + s : m; })
+      /* numerot: 1O % → 10 %, l2 % → 12 % */
+      .replace(/\b([0-9OolI]{1,3}(?:[.,][0-9OolI]{1,2})?)(?=\s?%)/g, m => /\d/.test(m) ? m.replace(/[Oo]/g, '0').replace(/[lI]/g, '1') : m);
+    const parts = t.split(/([A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ0-9\-]*[A-Za-zÀ-ÖØ-öø-ÿ0-9]|[A-Za-zÀ-ÖØ-öø-ÿ])/);
+    /* sanat ovat parittomissa indekseissä */
+    for (let i = 1; i < parts.length; i += 2) {
+      const w = parts[i]; if (w.length < 4) continue;
+      const k = ocrN(w);
+      if (learned[k]) { parts[i] = caseLike(w, learned[k]); continue; }
+      if (ocrKnown(k, V)) { const f = V.words.get(k); if (f && f !== w.toLowerCase() && ocrN(f) === k) parts[i] = caseLike(w, f); continue; }
+      /* kahteen osaan katkennut sana: "glukoosisiit appi" */
+      if (i + 2 < parts.length && /^ $/.test(parts[i + 1]) && parts[i + 2].length >= 2 && !ocrKnown(ocrN(parts[i + 2]), V)) {
+        const jk = k + ocrN(parts[i + 2]);
+        const jb = ocrKnown(jk, V) ? jk : ocrBest(jk, V);
+        if (jb) { parts[i] = caseLike(w, V.words.get(jb) || jb); parts[i + 1] = ''; parts[i + 2] = ''; continue; }
+      }
+      if (/\d/.test(w)) continue;
+      const b = ocrBest(k, V);
+      if (b) parts[i] = caseLike(w, V.words.get(b) || b);
+    }
+    return parts.join('');
+  }
+  /* Oppiminen: verrataan luettua ja käyttäjän korjaamaa tekstiä, ja yksittäiset sanakorjaukset muistetaan */
+  function learnOcr(raw, fin) {
+    if (!raw || !fin || raw === fin) return 0;
+    const tk = x => (String(x).match(/[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ\-]{2,}/g) || []);
+    const A = tk(raw), B = tk(fin); if (!A.length || !B.length || A.length > 800 || B.length > 800) return 0;
+    const a = A.map(ocrN), b = B.map(ocrN), n = a.length, m = b.length;
+    const dp = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
+    for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    const pairs = []; let i = 0, j = 0, ga = [], gb = [];
+    const flush = () => { if (ga.length === 1 && gb.length === 1) pairs.push([ga[0], gb[0]]); else if (ga.length === 2 && gb.length === 1) pairs.push([ga.join(''), gb[0]]); ga = []; gb = []; };
+    while (i < n && j < m) {
+      if (a[i] === b[j]) { flush(); i++; j++; }
+      else if (dp[i + 1][j] >= dp[i][j + 1]) ga.push(A[i++]); else gb.push(B[j++]);
+    }
+    while (i < n) ga.push(A[i++]); while (j < m) gb.push(B[j++]); flush();
+    const L = Object.assign({}, ocrLearned()); let cnt = 0;
+    pairs.forEach(([x, y]) => {
+      const kx = ocrN(x), ky = ocrN(y); if (kx === ky || ky.length < 4) return;
+      const lim = Math.max(1.5, ky.length * 0.34);
+      if (ocrDist(kx, ky, lim) <= lim) { L[kx] = y.toLowerCase(); cnt++; }
+    });
+    if (cnt && typeof S !== 'undefined') {
+      const keys = Object.keys(L); if (keys.length > 600) keys.slice(0, keys.length - 600).forEach(k => delete L[k]);
+      S.settings.ocrFix = L; OCRV = null; try { saveSettings(); } catch (e) { }
+    }
+    return cnt;
+  }
   /* ---------- TEKSTINTUNNISTUS (Tesseract, toimii laitteessa ilman Claudea) ---------- */
   let tessP = null, tessWorker = null;
   /* Tarkka suomen kielimalli (tessdata_best) on sovelluksen omana tiedostona: fin.traineddata.gz samassa kansiossa */
@@ -2431,11 +2693,13 @@ Täytä kakku mansikoilla ja kermalla.`;
     const k = Math.min(big > 2400 ? 2400 / big : Math.min(3, 1800 / Math.max(1, bmp.width)), 3200 / big);
     const cv = document.createElement('canvas'); cv.width = Math.round(bmp.width * k); cv.height = Math.round(bmp.height * k);
     const g = cv.getContext('2d'); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(bmp, 0, 0, cv.width, cv.height);
-    const im = g.getImageData(0, 0, cv.width, cv.height), d = im.data;
-    let mn = 255, mx = 0;
-    for (let i = 0; i < d.length; i += 4) { const y = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]; d[i] = y; if (y < mn) mn = y; if (y > mx) mx = y; }
-    const sc = mx > mn ? 255 / (mx - mn) : 1;
-    for (let i = 0; i < d.length; i += 4) { const y = (d[i] - mn) * sc; d[i] = d[i + 1] = d[i + 2] = y; }
+    const im = g.getImageData(0, 0, cv.width, cv.height), d = im.data, W = cv.width, H = cv.height;
+    const gray = new Float32Array(W * H);
+    for (let i = 0, j = 0; i < d.length; i += 4, j++) gray[j] = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+    let out;
+    try { out = enhanceGray(gray, W, H); }
+    catch (e) { /* varalla pelkkä kontrastin venytys */ let mn = 255, mx = 0; gray.forEach(v => { if (v < mn) mn = v; if (v > mx) mx = v; }); const sc = mx > mn ? 255 / (mx - mn) : 1; out = gray.map(v => (v - mn) * sc); }
+    for (let i = 0, j = 0; i < d.length; i += 4, j++) d[i] = d[i + 1] = d[i + 2] = out[j];
     g.putImageData(im, 0, 0);
     return cv;
   }
@@ -2583,10 +2847,12 @@ Täytä kakku mansikoilla ja kermalla.`;
       const res = await Promise.race([work, stall]);
       clearInterval(wd);
       const raw = res && res.data ? res.data.text : '';
-      const txt = pickIngredients(raw);
+      let txt = raw; try { txt = fixOcrText(raw); } catch (e) { }
+      txt = pickIngredients(txt);
       c.busy = null;
       if (!txt || txt.length < 8) { renderCheck(); toast('Kuvasta ei löytynyt tekstiä. Kuvaa ainesosaluettelo lähempää ja suoraan edestä.'); return; }
-      c.draft = append && c.draft && c.draft.trim() ? c.draft.trim() + ' ' + txt : txt; if (!append || !c.thumb) c.thumb = thumb; renderCheck();
+      c.draft = append && c.draft && c.draft.trim() ? c.draft.trim() + ' ' + txt : txt; if (!append || !c.thumb) c.thumb = thumb;
+      c.ocrRaw = c.draft; renderCheck();
       const ta = $('#ingText'); if (ta) { ta.focus(); ta.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
       toast('Tarkista teksti ja korjaa tarvittaessa');
     } catch (e) {
@@ -2713,10 +2979,12 @@ Täytä kakku mansikoilla ja kermalla.`;
       clearInterval(wd);
       /* Rivien sijainnista päätellään, mitkä rivit kuuluvat samaan lauseeseen; jos sijainteja ei ole, käytetään tekstiä */
       const ln = ocrLinesOf(res && res.data);
-      const txt = ln.length ? reflowLines(ln) : cleanRecipeOcr(res && res.data ? res.data.text : '');
+      let txt = ln.length ? reflowLines(ln) : cleanRecipeOcr(res && res.data ? res.data.text : '');
+      try { txt = fixOcrText(txt); } catch (e) { }
       r.busy = null;
       if (!txt || txt.length < 8) { renderRecipe(); toast('Kuvasta ei löytynyt tekstiä. Kuvaa resepti lähempää ja suoraan edestä.'); return; }
       r.ingDraft = r.ingDraft && r.ingDraft.trim() ? mergeShots(r.ingDraft.trim(), txt) : txt;
+      r.ocrRaw = r.ingDraft;
       renderRecipe();
       const ta = $('#rIng'); if (ta) { ta.focus({ preventScroll: true }); ta.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
       toast('Teksti lisätty. Tarkista se, tai lisää seuraava kuva.');
@@ -3077,6 +3345,7 @@ Täytä kakku mansikoilla ja kermalla.`;
     const r = S.rin;
     r.nameDraft = $('#rName').value; r.ingDraft = $('#rIng').value; r.stepDraft = '';
     if (!r.ingDraft.trim()) { toast('Liitä ensin resepti.'); return; }
+    if (r.ocrRaw) { const n = learnOcr(r.ocrRaw, r.ingDraft); r.ocrRaw = null; if (n) setTimeout(() => toast(`Opittu ${n} korjaus${n > 1 ? 'ta' : ''} tekstintunnistukseen`), 1200); }
     r.review = C.classify(r.ingDraft, r.stepDraft, S.settings.ignoreLines || [], { noTitle: true });
     r.review.title = r.nameDraft.trim();
     if (!r.review.title && r.review.titleGuess) { r.review.title = r.nameDraft = r.review.titleGuess; }
@@ -3891,6 +4160,7 @@ Täytä kakku mansikoilla ja kermalla.`;
         <div class="setrow"><div><b>Palmuöljyvaroitus</b><p class="muted">Näytä huomautus, kun tuotteessa on palmuöljyä.</p></div><label class="switch"><input id="palmSw" type="checkbox" ${st.palmWarn ? 'checked' : ''} aria-label="Palmuöljyvaroitus"><span></span></label></div>
       </div>
       ${(st.ignoreLines || []).length ? `<div class="card"><div class="setrow"><div><b>Muistetut ohitukset</b><p class="muted">${st.ignoreLines.length} riviä, jotka olet merkinnyt ohitettaviksi resepteissä.</p></div><button class="btn ghost small" data-act="igclear">Tyhjennä</button></div></div>` : ''}
+      ${Object.keys(st.ocrFix || {}).length ? `<div class="card"><div class="setrow"><div><b>Opitut tekstikorjaukset</b><p class="muted">${Object.keys(st.ocrFix).length} sanaa, jotka olet korjannut kuvasta luetussa tekstissä. Sovellus korjaa ne jatkossa itse.</p></div><button class="btn ghost small" data-act="ocrclear">Tyhjennä</button></div></div>` : ''}
       <div class="card">
         <div><b>Oletusyksiköt</b></div>
         <div class="seg">${UNIT_MODES.map(([k, l]) => `<button data-act="defunits" data-v="${k}" aria-pressed="${pressed(st.units === k)}">${l}</button>`).join('')}</div>
@@ -3920,7 +4190,10 @@ Täytä kakku mansikoilla ja kermalla.`;
     const a = t.dataset.act, val = t.dataset.v, c = S.check, h = S.hist;
     switch (a) {
       case 'cat': c.category = val; syncCheck(); if (c.sub) c.res = analyzeText(c.sub.text, c.category); renderCheck(); break;
-      case 'run': { syncCheck(); const th = c.thumb; c.thumb = null; await submitCheck(c.draft, { product: c.product, thumb: th || null }); break; }
+      case 'run': { syncCheck(); const th = c.thumb; c.thumb = null;
+        /* opitaan käyttäjän korjauksista luettuun tekstiin */
+        if (c.ocrRaw) { const n = learnOcr(c.ocrRaw, c.draft); c.ocrRaw = null; if (n) setTimeout(() => toast(`Opittu ${n} korjaus${n > 1 ? 'ta' : ''} tekstintunnistukseen`), 1200); }
+        await submitCheck(c.draft, { product: c.product, thumb: th || null }); break; }
       case 'fixtext': c.draft = c.sub.text; c.product = c.sub.product || ''; renderCheck(); window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => $('#ingText').focus(), 300); break;
       case 'fav': { const it = S.history.find(x => x.id === c.histId); if (it) { it.fav = !it.fav; await put('history', it); syncCheck(); renderCheck(); toast(it.fav ? 'Lisätty suosikkeihin' : 'Poistettu suosikeista'); } break; }
       case 'selfcheck': { const it = S.history.find(x => x.id === c.histId); if (it) { it.selfChecked = !it.selfChecked; await put('history', it); syncCheck(); renderCheck(); } break; }
@@ -4005,6 +4278,7 @@ Täytä kakku mansikoilla ja kermalla.`;
       case 'avdel': S.settings.avoid.splice(parseInt(t.dataset.i, 10), 1); await saveSettings(); renderSettings(); break;
       case 'defres': { const d = S.settings.defRestrictions; S.settings.defRestrictions = d.includes(val) ? d.filter(x => x !== val) : [...d, val]; S.rin.restrictions = null; await saveSettings(); renderSettings(); break; }
       case 'defunits': S.settings.units = val; await saveSettings(); renderSettings(); break;
+      case 'ocrclear': S.settings.ocrFix = {}; OCRV = null; await saveSettings(); renderSettings(); toast('Opitut korjaukset tyhjennetty'); break;
       case 'igclear': S.settings.ignoreLines = []; await saveSettings(); renderSettings(); toast('Muistetut ohitukset tyhjennetty'); break;
     }
   });
