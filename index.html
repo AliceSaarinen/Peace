@@ -1454,9 +1454,14 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
       const known = SECTION_WORD.test(t), colon = /:$/.test(l), caps = l === l.toUpperCase() && /[A-ZÄÖÅ]{3}/.test(l);
       return (known || colon || caps) && !!nx && isQtyL(nx);
     };
+    let titleGuess = '';
+    const TIP_RE = /^(vinkki|vinkit|huom|huomio|huomioi|tip|tips|note|notes|pro tip|sailytys|tarjoiluehdotus|tarjoiluvinkki)\b\s*[:!.\-–]/;
+    const META_RE = /(^https?:|www\.|\.(fi|com|net|org|se|blog|blogspot)\b|julkaistu|published|kommentti|comments?|\d{1,2}\.\d{1,2}\.\d{2,4}|^by |kirjoittaja)/i;
     lines.forEach((l, li) => {
       const nx = lines[li + 1];
       if (ign.has(prepText(l).trim())) { push(l, 'skip'); return; }
+      /* Vinkit ja huomiot menevät muistiinpanoihin */
+      if (TIP_RE.test(prepText(l))) { out.push({ t: l, k: 'skip', k0: 'skip', note: true }); return; }
       if (TOOL_HEAD.test(l) && l.length < 40) { section = 'tools'; return; }
       if (JUNK.test(l) || PAGE_JUNK.test(l)) { const s2 = l.match(/(servings|serves|yield|annokset|annoksia|makes)\s*:?\s*(\d+)/i); if (s2 && servings == null) servings = parseInt(s2[2], 10); push(l, 'skip'); return; }
       const sv = l.match(/(\d+)\s*(annosta|annos|hengelle|henkilölle|henkiloa|henkeä|kpl|kappaletta|sämpylää|sampylaa|pullaa|palaa|muffinssia|keksiä|servings?|serves|portions?|pieces?)/i) || l.match(/(?:serves|makes|yields|riittää|tekee|annoksia|määrä)\s*:?\s*(\d+)/i);
@@ -1492,6 +1497,11 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
         if (NOT_FOOD.test(prepText(pi.name)) || NOT_FOOD.test(prepText(l))) { if (/(people|persons?|servings?|henke|hengelle|annos)/i.test(l) && servings == null && pi.qty) servings = Math.round(pi.qty); push(l, 'skip'); return; }
         push(l, 'ing'); section = section || 'ings'; return;
       }
+      const noIngYet = !out.some(x => x.k === 'ing' || x.k === 'head');
+      /* Ensimmäinen otsikon näköinen rivi ennen aineksia on todennäköisesti reseptin nimi */
+      if (noIngYet && !titleGuess && l.length >= 6 && l.length < 80 && !/[.!?:]$/.test(l) && !/^\d/.test(l) && !META_RE.test(l) && !STEP_VERB.test(l)) { titleGuess = l; push(l, 'skip'); return; }
+      /* Johdantoteksti ennen aineksia (blogit): ohitetaan */
+      if (noIngYet && section !== 'steps' && !STEP_VERB.test(l)) { push(l, 'skip'); return; }
       push(l.replace(/^\d+[.)]\s*/, ''), l.length < 40 && !/[.!?]$/.test(l) ? 'skip' : 'step');
     });
     if (stepsText && stepsText.trim()) {
@@ -1502,18 +1512,19 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
         push(l.replace(/^\d+[.)]\s*/, ''), 'step');
       });
     }
-    return { title: title || '', servings: servings || 4, servingsLabel, lines: out };
+    return { title: title || '', titleGuess: titleGuess.replace(/^#+\s*/, ''), servings: servings || 4, servingsLabel, lines: out };
   }
   /* Luokittelusta reseptiksi */
   function buildParsed(cls) {
-    const ings = [], steps = [], tools = [];
+    const ings = [], steps = [], tools = [], tips = [];
     cls.lines.forEach(x => {
       if (x.k === 'tool') { if (x.t.trim()) tools.push(x.t.trim()); }
       else if (x.k === 'ing') { const pi = parseIngredient(x.t); if (pi.name) ings.push(pi); }
       else if (x.k === 'head') ings.push({ head: x.t.replace(/:$/, '') });
       else if (x.k === 'step') steps.push(x.t);
+      else if (x.k === 'skip' && x.note) tips.push(x.t);
     });
-    return { title: cls.title || 'Resepti', servings: cls.servings || 4, servingsLabel: cls.servingsLabel || 'annosta', ingredients: ings, steps, tools };
+    return { title: cls.title || 'Resepti', servings: cls.servings || 4, servingsLabel: cls.servingsLabel || 'annosta', ingredients: ings, steps, tools, tips };
   }
   function parseRecipe(text) { return buildParsed(classify(text, '', [])); }
   function normLabel(s) {
@@ -1711,7 +1722,7 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
       return t;
     });
     steps = preSteps.concat(steps);
-    const notes = [];
+    const notes = (p.tips || []).slice();
     if (en) notes.push('Ainekset on suomennettu. Valmistusohjeen suomentaminen ja lämpötilojen säätö onnistuvat älykkäällä muunnoksella.');
     if (ctx.bake && swaps.some(s => s[2] === 'muna')) notes.push('Kananmunattomat leivonnaiset kypsyvät usein hieman hitaammin: tarkista kypsyys tikulla 5 minuuttia ohjeaikaa myöhemmin.');
     if (swaps.some(s => s[2] === 'gelatiini')) notes.push('Agar täytyy kiehauttaa nesteessä 1–2 minuuttia, jotta se hyytyy.');
@@ -2581,6 +2592,91 @@ Täytä kakku mansikoilla ja kermalla.`;
       renderCheck();
     }
   }
+  /* ---------- Kuvasta luetun tekstin rivitys: rivien sijainnista päätellään, jatkuuko lause ---------- */
+  const OCR_BULLET_RE = /^(?:[oOeEcC0°º©®¢•·«»*+~>¬=]|[-–—_]{1,2}|\(\s?\)|\[\s?\])\s+(?=[\dA-Za-zÄÖÅäöå½¼¾⅓])/;
+  function fixOcrLine(t) {
+    return String(t || '').replace(/[ \t]+/g, ' ').trim()
+      .replace(OCR_BULLET_RE, '- ')
+      .replace(/(\d\s?)(dl|tl|rkl|ml|cl|kg|kpl)(?=[a-zäöå]{3})/gi, '$1$2 ')      // 1 tlleivin → 1 tl leivin
+      .replace(/(\d)(dl|tl|rkl|ml|cl|kg|g|l|kpl)\b/gi, '$1 $2')                 // 2dl → 2 dl
+      .replace(/(\d)\s?([½¼¾⅓])/g, '$1 $2');
+  }
+  const LIST_START = /^(?:- |\d+[.)]\s|\d+(?:[.,]\d+)?\s*(?:[½¼¾⅓])?\s*(?:g|kg|dl|ml|l|cl|tl|rkl|mm|kpl|tlk|pkt|prk|rs|ps)\b|[½¼¾⅓]\s|(?:vaihe|step)\s*\d)/i;
+  /* lines: [{t, x0, x1, y0, y1, p}] lukujärjestyksessä (p = kappaleen tunniste) */
+  function reflowLines(lines) {
+    lines = lines.map(l => Object.assign({}, l, { t: fixOcrLine(l.t) })).filter(l => l.t);
+    if (!lines.length) return '';
+    const q = (arr, f) => { const a = arr.slice().sort((x, y) => x - y); return a[Math.min(a.length - 1, Math.max(0, Math.floor(a.length * f)))]; };
+    const R = q(lines.map(l => l.x1), 0.9), L = q(lines.map(l => l.x0), 0.1), W = Math.max(1, R - L);
+    const H = q(lines.map(l => l.y1 - l.y0), 0.5) || 20;
+    /* tyypillinen riviväli kappaleen sisällä: pienin yleinen väli peräkkäisten rivien välillä */
+    const gaps = lines.slice(1).map((l, i) => l.y0 - lines[i].y1).filter(g => g > -H && g < H * 3);
+    const G = gaps.length ? q(gaps, 0.25) : H * 0.5;
+    const maxGap = Math.max(H * 0.5, G * 1.45 + H * 0.15);
+    const out = [];
+    let cur = null;
+    lines.forEach((l, i) => {
+      const prev = lines[i - 1];
+      let join = false;
+      if (cur && prev) {
+        const gap = l.y0 - prev.y1;
+        const nearRight = prev.x1 >= L + W * 0.78;
+        const sameIndent = Math.abs(l.x0 - prev.x0) < W * 0.08 || (/^- |^\d+[.)]\s/.test(cur) && l.x0 > prev.x0);
+        const ended = /[.!?:]$/.test(prev.t) && !/\b(n|esim|mm|ym|ns|klo|tl|rkl|dl|noin)\.$/i.test(prev.t);
+        const lower = /^[a-zäöå(,]/.test(l.t);
+        join = !LIST_START.test(l.t) && gap < maxGap && (
+          (nearRight && !ended) ||                 // rivi jatkui oikeaan reunaan asti
+          (lower && !ended) ||    // jatkuu pienellä kirjaimella
+          (/-$/.test(prev.t) && lower)             // tavutus
+        ) && (sameIndent || nearRight);
+      }
+      if (join) cur = /-$/.test(cur) && /^[a-zäöå]/.test(l.t) ? cur.slice(0, -1) + l.t : cur + ' ' + l.t;
+      else { if (cur != null) out.push(cur); cur = l.t; }
+    });
+    if (cur != null) out.push(cur);
+    return out.join('\n');
+  }
+  /* tesseract.js:n tuloksesta riviluettelo */
+  function ocrLinesOf(data) {
+    const lines = []; let pid = 0;
+    ((data && data.blocks) || []).forEach(b => (b.paragraphs || []).forEach(p => { pid++; (p.lines || []).forEach(ln => { if (ln && ln.bbox) lines.push({ t: ln.text || '', x0: ln.bbox.x0, x1: ln.bbox.x1, y0: ln.bbox.y0, y1: ln.bbox.y1, p: pid }); }); }));
+    return lines;
+  }
+  /* Peräkkäisten kuvakaappausten päällekkäiset rivit poistetaan */
+  const simKey = t => String(t || '').toLowerCase().replace(/[^a-zäöå0-9]+/g, '');
+  function similar(a, b) {
+    a = simKey(a); b = simKey(b);
+    if (!a || !b) return false;
+    if (a === b) return true;
+    if (Math.min(a.length, b.length) < 6) return false;
+    const bg = s => { const m = new Map(); for (let i = 0; i < s.length - 1; i++) { const k = s.slice(i, i + 2); m.set(k, (m.get(k) || 0) + 1); } return m; };
+    const A = bg(a), B = bg(b); let n = 0;
+    A.forEach((v, k) => { n += Math.min(v, B.get(k) || 0); });
+    return 2 * n / (a.length + b.length - 2) > 0.86;
+  }
+  function mergeShots(prevText, nextText) {
+    const A = String(prevText || '').split('\n').filter(x => x.trim()), B = String(nextText || '').split('\n').filter(x => x.trim());
+    if (!A.length) return B.join('\n');
+    if (!B.length) return A.join('\n');
+    /* etsitään pisin päällekkäinen jakso: A:n loppu = B:n alku (reunojen rivit voivat olla puolikkaita) */
+    let best = 0, bestCut = 0;
+    for (let k = Math.min(A.length, B.length, 40); k >= 1; k--) {
+      let hits = 0;
+      for (let j = 0; j < k; j++) if (similar(A[A.length - k + j], B[j])) hits++;
+      const need = k <= 2 ? k : k - 1;     // yksi puolikas rivi saa erota
+      if (hits >= need && hits > best) { best = hits; bestCut = k; break; }
+    }
+    if (!bestCut) {
+      /* pelkkä yksi reunarivi: viimeinen A-rivi alkaa B:n ensimmäisen alusta tai päinvastoin */
+      const a = simKey(A[A.length - 1]), b = simKey(B[0]);
+      if (a.length > 8 && b.length > 8 && (a.endsWith(b.slice(0, 12)) || b.startsWith(a.slice(-12)))) bestCut = 1;
+    }
+    let rest = B.slice(bestCut);
+    if (bestCut) { /* pidetään pidempi versio reunariveistä */ const lastB = B[bestCut - 1]; if (simKey(lastB).length > simKey(A[A.length - 1]).length) A[A.length - 1] = lastB; }
+    /* kesken jäänyt lause jatkuu seuraavassa kuvassa */
+    if (rest.length && !/[.!?:]$/.test(A[A.length - 1]) && /^[a-zäöå]/.test(rest[0]) && !LIST_START.test(rest[0])) { A[A.length - 1] += ' ' + rest[0]; rest = rest.slice(1); }
+    return A.concat(rest).join('\n');
+  }
   /* Reseptin kuva tekstiksi: rivit säilytetään, katkenneet lauseet yhdistetään. Useampi kuva lisätään peräkkäin. */
   function cleanRecipeOcr(t) {
     /* Tunnistus lukee luettelomerkin usein kirjaimeksi tai merkiksi (o, e, c, °, «, ~ …): muutetaan viivaksi */
@@ -2604,13 +2700,15 @@ Täytä kakku mansikoilla ja kermalla.`;
       const why = await ocrPreflight();
       if (why) throw { why };
       const stall = new Promise((_, rej) => { wd = setInterval(() => { if (Date.now() - last > 45000) rej({ why: 'stall' }); }, 2000); });
-      const work = (async () => { const w = await getWorker(prog); last = Date.now(); const cv = await prepOcr(cropped || file); return w.recognize(cv); })();
+      const work = (async () => { const w = await getWorker(prog); last = Date.now(); const cv = await prepOcr(cropped || file); return w.recognize(cv, {}, { text: true, blocks: true }); })();
       const res = await Promise.race([work, stall]);
       clearInterval(wd);
-      const txt = cleanRecipeOcr(res && res.data ? res.data.text : '');
+      /* Rivien sijainnista päätellään, mitkä rivit kuuluvat samaan lauseeseen; jos sijainteja ei ole, käytetään tekstiä */
+      const ln = ocrLinesOf(res && res.data);
+      const txt = ln.length ? reflowLines(ln) : cleanRecipeOcr(res && res.data ? res.data.text : '');
       r.busy = null;
       if (!txt || txt.length < 8) { renderRecipe(); toast('Kuvasta ei löytynyt tekstiä. Kuvaa resepti lähempää ja suoraan edestä.'); return; }
-      r.ingDraft = (r.ingDraft && r.ingDraft.trim() ? r.ingDraft.trim() + '\n\n' : '') + txt;
+      r.ingDraft = r.ingDraft && r.ingDraft.trim() ? mergeShots(r.ingDraft.trim(), txt) : txt;
       renderRecipe();
       const ta = $('#rIng'); if (ta) { ta.focus({ preventScroll: true }); ta.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
       toast('Teksti lisätty. Tarkista se, tai lisää seuraava kuva.');
@@ -2973,6 +3071,7 @@ Täytä kakku mansikoilla ja kermalla.`;
     if (!r.ingDraft.trim()) { toast('Liitä ensin resepti.'); return; }
     r.review = C.classify(r.ingDraft, r.stepDraft, S.settings.ignoreLines || [], { noTitle: true });
     r.review.title = r.nameDraft.trim();
+    if (!r.review.title && r.review.titleGuess) { r.review.title = r.nameDraft = r.review.titleGuess; }
     renderRecipe(); scrollToEl('#reviewBox');
   }
   async function convertRecipe() {
