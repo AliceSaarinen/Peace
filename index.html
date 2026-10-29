@@ -1718,8 +1718,11 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
   /* ---------- tunnistus ---------- */
   const MAY_RE = /(saattaa sisaltaa|voi sisaltaa|saattaa sisaltaa pienia maaria|voi sisaltaa pienia maaria|sisaltaa mahdollisesti|jaamia|jaamina|may contain|may also contain|traces? of|produced in a factory|made in a factory|factory that (also )?handles|facility that|kasitellaan myos|tehtaassa,? jossa|tuotantolaitoksessa,? jossa|samoilla (tuotanto)?linjoilla|kan innehalla|kann spuren|spuren von|peut contenir|puo contenere)/;
 
+  /* "Saattaa sisältää" -lauseen alku. Lause katkaistaan tästä myös ilman pistettä: tekstintunnistus pudottaa pisteen usein,
+     jolloin koko ainesosaluettelo olisi muuten tulkittu "saattaa sisältää" -osaksi ja eläinperäiset aineet jääneet huomaamatta. */
+  const MAY_LEAD = /(?:^|[\s,])(?=(?:saattaa sisaltaa|voi sisaltaa|sisaltaa mahdollisesti|may (?:also )?contain|valmistettu (?:tehtaassa|tuotantolaitoksessa|samoilla)|pakattu (?:tehtaassa|tuotantolaitoksessa)|kan innehalla|kann spuren|peut contenir|puo contenere|produced in a factory|made in a factory)\b)/g;
   function splitMay(text) {
-    const t = prepText(text);
+    const t = prepText(text).replace(MAY_LEAD, m => m.replace(/[\s,]$/, '') + '\n');
     // Lauseet: piste, puolipiste tai rivinvaihto. Desimaalipisteitä ei katkaista.
     const parts = t.split(/(?<!\d)\.(?!\d)|;|\n/);
     const main = [], may = [];
@@ -1819,7 +1822,7 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
       }
     });
     if (may.trim()) {
-      const mm = findMatches(may, cat, []);
+      const mm = findMatches(may.replace(/\b(?:saattaa|voi) sisaltaa\b/g, 'sisaltaa'), cat, []);
       groupFound(mm.found).forEach(g => { if (g.e.st === 'A' || g.e.st === 'P') res.may.push(g); });
       if (!res.may.length) res.mayText = true;
     }
@@ -2908,7 +2911,10 @@ Täytä kakku mansikoilla ja kermalla.`;
         ${c.ocrErr ? `<p class="note warm" style="font-size:.88rem"><b>Tekstintunnistus ei käynnistynyt:</b> ${esc(c.ocrErr)}. Voit kopioida tekstin kuvasta puhelimen omalla toiminnolla (iPhone: paina tekstiä kuvassa pitkään · Android: Google Lens → Kopioi teksti) ja liittää sen kenttään.</p>` : ''}
         <label class="flabel" for="ingText"><span class="label">Ainesosat</span></label>
         <textarea id="ingText">${esc(c.draft)}</textarea>
-        ${c.draft && c.draft.trim() && !c.busy ? `<div class="row"><label class="btn soft small" style="position:relative">${icon('i-plus')}Lisää kuva jatkoksi<input id="addIn" type="file" accept="image/*" multiple class="hidein"></label></div>` : ''}
+        ${c.unsure && c.unsure.length && !c.busy ? `<div class="note warm" style="font-size:.88rem"><b>Tarkista nämä kohdat kuvasta.</b> Tunnistus luki ne epävarmasti, eikä sovellus tunne niitä: <span class="chips" style="margin-top:6px">${c.unsure.map(u => `<button class="chip" data-act="unsure" data-v="${esc(u)}">${esc(u)}</button>`).join('')}</span></div>` : ''}
+        ${c.ocrGroups > 1 && !c.busy ? `<p class="note warm" style="font-size:.88rem">Kaikkia kuvia ei saatu yhdistettyä toisiinsa, joten niiden tekstit ovat eri riveillä. Ota kuva niiden väliltä niin, että peräkkäisissä kuvissa näkyy samoja sanoja.</p>` : ''}
+        ${c.draft && c.draft.trim() && !c.busy ? `<div class="row"><label class="btn soft small" style="position:relative">${icon('i-plus')}Lisää kuva jatkoksi<input id="addIn" type="file" accept="image/*" multiple class="hidein"></label></div>
+        ${c.ocrOut ? `<p class="muted" style="font-size:.8rem;margin-top:-4px">Kaareva pakkaus tai pitkä luettelo: kierrä tuotetta tai siirrä kameraa ja ota useampi kuva niin, että noin kolmasosa osuu edellisen kuvan päälle. Kuvat yhdistetään, ja kustakin käytetään sen suorin kohta.</p>` : ''}` : ''}
         <label class="flabel" for="prodName"><span class="label">Tuotteen nimi</span></label>
         <div class="cfrow"><input id="prodName" type="search" enterkeyhint="search" value="${esc(c.product)}"><button class="iconbtn" style="flex:0 0 auto" data-act="offfind" aria-label="Hae tuotetta nimellä" title="Hae tuotetta nimellä">${icon('i-check')}</button></div>
         ${c.off ? offHTML(c.off) : ''}
@@ -3042,6 +3048,7 @@ Täytä kakku mansikoilla ja kermalla.`;
           <p class="muted" style="font-size:.8rem">${esc(CAT_LABEL[r.category])}</p></div>
         </div>
         ${certVegan.length ? `<div class="cert">${icon('i-leaf')}Merkintä: ${esc(certVegan.join(', '))}</div>` : ''}
+        ${s.unsure && s.unsure.length && r.verdict !== 'animal' ? `<p class="note warm">Kuvasta luetussa tekstissä on epävarmasti tunnistettuja sanoja: <b>${esc(s.unsure.join(', '))}</b>. Jos jokin niistä on eläinperäinen ainesosa, tulos muuttuu. Tarkista ne pakkauksesta tai korjaa teksti.</p>` : ''}
         ${certVegan.length && (r.verdict === 'animal' || r.verdict === 'aid') ? `<p class="note warm">Pakkauksessa on vegaanimerkintä, mutta luettelossa on eläinperäiseksi tunnistettu aine. Tarkista ainesosa tai kysy valmistajalta.</p>` : ''}
         ${sec('Eläinperäiset ainesosat', r.animal, 'animal')}
         ${sec('Valmistuksen apuaineet', r.aid, 'animal')}
@@ -3078,6 +3085,7 @@ Täytä kakku mansikoilla ja kermalla.`;
     c.sub = Object.assign({ text, product: '', thumb: null, certs: [], example: false }, meta || {});
     c.res = analyzeText(text, (meta && meta.category) || c.category);
     c.ai = null; c.histId = null; c.draft = ''; c.product = '';
+    c.shots = null; c.ocrOut = null; c.unsure = []; c.ocrGroups = 1;
     if (!c.sub.example && c.res.verdict !== 'empty') {
       const item = { id: uid(), ts: Date.now(), product: c.sub.product || '', text: text.slice(0, 6000), category: c.res.category, verdict: c.res.verdict, certs: c.sub.certs || [], fav: false, selfChecked: false };
       c.histId = item.id;
@@ -3091,6 +3099,261 @@ Täytä kakku mansikoilla ja kermalla.`;
     const rest = S.history.filter(h => !h.fav && !h.selfChecked);
     if (rest.length > 300) rest.slice(300).forEach(h => del('history', h.id));
   }
+  /* ---------- Kaarevan pinnan suoristus, kuvien yhdistäminen ja tekstialueen rajaus ----------
+     Toimii harmaasävykuvilla {w, h, d: Float32Array}, laitteessa ilman verkkoa.
+     1) Kirjainten tunnistus (yhtenäiset tummat alueet) → kirjainkorkeus ja tekstialue.
+     2) Tekstirivien kaarevuus mitataan ja rivit suoristetaan (purkin kaari, kallistus).
+     3) Rajaus tekstialueeseen ja mittakaava, jossa kirjaimet ovat tunnistukselle sopivan kokoisia.
+     Usean kuvan yhdistäminen tehdään tunnistettujen sanojen sijainneista (ocrMergeShots). */
+  const OG = (() => {
+    const mk = (w, h, fill) => { const d = new Float32Array(w * h); if (fill) d.fill(fill); return { w, h, d }; };
+    const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+    const median = a => { if (!a.length) return 0; const s = Float64Array.from(a).sort(); return s[s.length >> 1]; };
+    function resize(im, W, H) {
+      W = Math.max(1, Math.round(W)); H = Math.max(1, Math.round(H));
+      const { w, h, d } = im, o = new Float32Array(W * H), sx = w / W, sy = h / H;
+      if (sx >= 1 && sy >= 1) {
+        /* pienennys: pinta-alakeskiarvo */
+        for (let y = 0; y < H; y++) {
+          const y0 = y * sy, y1 = y0 + sy, ya = Math.floor(y0), yb = Math.min(h, Math.ceil(y1));
+          for (let x = 0; x < W; x++) {
+            const x0 = x * sx, x1 = x0 + sx, xa = Math.floor(x0), xb = Math.min(w, Math.ceil(x1)); let s = 0, a = 0;
+            for (let yy = ya; yy < yb; yy++) { const wy = Math.min(y1, yy + 1) - Math.max(y0, yy); for (let xx = xa; xx < xb; xx++) { const wx = Math.min(x1, xx + 1) - Math.max(x0, xx), k = wx * wy; s += d[yy * w + xx] * k; a += k; } }
+            o[y * W + x] = s / a;
+          }
+        }
+        return { w: W, h: H, d: o };
+      }
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) o[y * W + x] = sample(im, (x + .5) * sx - .5, (y + .5) * sy - .5, 255);
+      return { w: W, h: H, d: o };
+    }
+    function sample(im, x, y, bg) {
+      if (!(x >= -0.5 && y >= -0.5 && x <= im.w - 0.5 && y <= im.h - 0.5)) return bg;
+      x = clamp(x, 0, im.w - 1); y = clamp(y, 0, im.h - 1);
+      const w = im.w, d = im.d, x0 = x | 0, y0 = y | 0, x1 = Math.min(x0 + 1, w - 1), y1 = Math.min(y0 + 1, im.h - 1), tx = x - x0, ty = y - y0;
+      return (d[y0 * w + x0] * (1 - tx) + d[y0 * w + x1] * tx) * (1 - ty) + (d[y1 * w + x0] * (1 - tx) + d[y1 * w + x1] * tx) * ty;
+    }
+    function crop(im, x0, y0, x1, y1) {
+      x0 = clamp(Math.floor(x0), 0, im.w - 1); y0 = clamp(Math.floor(y0), 0, im.h - 1); x1 = clamp(Math.ceil(x1), x0 + 1, im.w); y1 = clamp(Math.ceil(y1), y0 + 1, im.h);
+      const o = mk(x1 - x0, y1 - y0);
+      for (let y = y0; y < y1; y++) o.d.set(im.d.subarray(y * im.w + x0, y * im.w + x1), (y - y0) * o.w);
+      return o;
+    }
+    /* Otsun kynnys tumman tekstin erottamiseen vaaleasta pohjasta */
+    function otsu(d) {
+      const hist = new Float64Array(256); for (let i = 0; i < d.length; i++) hist[clamp(d[i] | 0, 0, 255)]++;
+      let sum = 0; for (let i = 0; i < 256; i++) sum += i * hist[i];
+      let wB = 0, sB = 0, best = 0, t = 128;
+      for (let i = 0; i < 256; i++) { wB += hist[i]; if (!wB) continue; const wF = d.length - wB; if (!wF) break; sB += i * hist[i]; const mB = sB / wB, mF = (sum - sB) / wF, v = wB * wF * (mB - mF) * (mB - mF); if (v > best) { best = v; t = i; } }
+      return t;
+    }
+    /* Yhtenäiset alueet (8-naapurusto). Palauttaa laatikot ja leimakartan. */
+    function comps(m, w, h) {
+      const lab = new Int32Array(w * h), out = [], st = new Int32Array(w * h); let n = 0;
+      for (let i = 0; i < w * h; i++) {
+        if (!m[i] || lab[i]) continue;
+        n++; let sp = 0; st[sp++] = i; lab[i] = n;
+        let x0 = w, y0 = h, x1 = 0, y1 = 0, cnt = 0;
+        while (sp) {
+          const p = st[--sp], y = (p / w) | 0, x = p - y * w; cnt++;
+          if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+          for (let dy = -1; dy <= 1; dy++) { const yy = y + dy; if (yy < 0 || yy >= h) continue; for (let dx = -1; dx <= 1; dx++) { const xx = x + dx; if (xx < 0 || xx >= w) continue; const q = yy * w + xx; if (m[q] && !lab[q]) { lab[q] = n; st[sp++] = q; } } }
+        }
+        out.push({ id: n, x0, y0, x1: x1 + 1, y1: y1 + 1, n: cnt });
+      }
+      return { list: out, lab };
+    }
+    /* Kirjaimet: kirjainkorkeus (hc), kirjainmaski ja tekstialue */
+    function letters(im) {
+      const { w, h, d } = im, thr = Math.min(200, otsu(d) + 8), m = new Uint8Array(w * h);
+      for (let i = 0; i < m.length; i++) m[i] = d[i] < thr ? 1 : 0;
+      const C = comps(m, w, h);
+      let cand = C.list.filter(c => { const ch = c.y1 - c.y0, cw = c.x1 - c.x0; return c.n >= 6 && ch >= 5 && ch < h / 3 && cw < ch * 4 && cw < w / 4 && c.n < cw * ch * 0.95; });
+      if (cand.length < 8) return null;
+      /* sanoissa kirjaimet ovat jonossa: lähin naapuri vieressä, samalla korkeudella ja samankokoinen.
+         Taustan kohinatäplät ja kuviot jäävät pois, jolloin kirjainkorkeus ei mene harhaan. */
+      {
+        const s = cand.slice().sort((a, b) => a.x0 - b.x0), deg = new Map();
+        for (let i = 0; i < s.length; i++) {
+          const a = s[i], ah = a.y1 - a.y0, ay = (a.y0 + a.y1) / 2;
+          for (let j = i + 1; j < s.length; j++) {
+            const b = s[j], bh = b.y1 - b.y0, mh = Math.max(ah, bh); if (b.x0 - a.x1 > mh * 0.9) break;
+            if (Math.abs((b.y0 + b.y1) / 2 - ay) < mh * 0.35 && mh / Math.min(ah, bh) < 1.7) { deg.set(a, (deg.get(a) || 0) + 1); deg.set(b, (deg.get(b) || 0) + 1); }
+          }
+        }
+        const good = cand.filter(c => (deg.get(c) || 0) >= 2);
+        if (good.length >= 12) cand = good.concat(cand.filter(c => deg.get(c) === 1 && good.length > 0));
+      }
+      /* kirjainkorkeus: korkeuksien yleisin arvo (kirjaimet ilman i-pisteitä ja välimerkkejä) */
+      const hs = cand.map(c => c.y1 - c.y0), hist = new Map(); hs.forEach(v => { for (let k = -1; k <= 1; k++) hist.set(v + k, (hist.get(v + k) || 0) + (k ? 1 : 2)); });
+      let mode = median(hs), mv = 0; hist.forEach((v, k) => { if (v > mv || (v === mv && k > mode)) { mv = v; mode = k; } });
+      const hc = median(hs.filter(v => v >= mode * 0.7 && v <= mode * 1.5)) || mode;
+      let L = cand.filter(c => { const ch = c.y1 - c.y0; return ch >= hc * 0.45 && ch <= hc * 1.9 && (c.x1 - c.x0) <= hc * 3.2; });
+      /* kirjaimella on naapuri samalla rivillä; yksittäiset täplät (tausta, kuviot) pois */
+      const byX = L.slice().sort((a, b) => a.x0 - b.x0);
+      const nb = new Set();
+      for (let i = 0; i < byX.length; i++) {
+        const a = byX[i], ay = (a.y0 + a.y1) / 2;
+        for (let j = i + 1; j < byX.length && byX[j].x0 - a.x1 < hc * 1.3; j++) { const b = byX[j], by = (b.y0 + b.y1) / 2; if (Math.abs(ay - by) < hc * 0.6) { nb.add(a); nb.add(b); } }
+      }
+      if (nb.size >= 8) L = L.filter(c => nb.has(c));
+      const keep = new Uint8Array(C.list.length + 2); L.forEach(c => keep[c.id] = 1);
+      const lm = new Uint8Array(w * h); for (let i = 0; i < lm.length; i++) if (C.lab[i] && keep[C.lab[i]]) lm[i] = 1;
+      /* tekstialue: kirjainten laatikoista, harvat irralliset pois */
+      const xs = [], ys = []; L.forEach(c => { xs.push((c.x0 + c.x1) / 2); ys.push((c.y0 + c.y1) / 2); });
+      const q = (a, f) => { const s = Float64Array.from(a).sort(); return s[clamp(Math.floor(s.length * f), 0, s.length - 1)]; };
+      const box = { x0: Math.max(0, q(xs, .005) - hc * 2), x1: Math.min(w, q(xs, .995) + hc * 2), y0: Math.max(0, q(ys, .005) - hc * 1.6), y1: Math.min(h, q(ys, .995) + hc * 1.6) };
+      /* Kuvan reunoilla (purkin kaarteessa) kirjaimet puristuvat yhteen ja sulautuvat sanan mittaisiksi möykyiksi.
+         Ne kuuluvat silti samoille riveille: tekstialuetta jatketaan sivuille niin kauan kuin rivien korkeudelta löytyy tekstiä. */
+      const blobs = C.list.filter(c => { const ch = c.y1 - c.y0; return c.n >= 6 && ch >= hc * 0.4 && ch <= hc * 2.2 && (c.x1 - c.x0) < w / 2 && (c.y0 + c.y1) / 2 > box.y0 && (c.y0 + c.y1) / 2 < box.y1; });
+      for (let grew = true; grew;) {
+        grew = false;
+        for (const c of blobs) {
+          if (c.x1 <= box.x0 && box.x0 - c.x1 < hc * 2.5 && c.x0 - hc < box.x0) { box.x0 = Math.max(0, c.x0 - hc); grew = true; }
+          if (c.x0 >= box.x1 && c.x0 - box.x1 < hc * 2.5 && c.x1 + hc > box.x1) { box.x1 = Math.min(w, c.x1 + hc); grew = true; }
+        }
+      }
+      return { hc, L, lm, box, thr };
+    }
+    /* Tekstirivien keskikohdat kapeissa pystykaistoissa ja niiden ketjutus riveiksi */
+    function traceLines(lt, w, h) {
+      const { hc, lm, box } = lt;
+      const sw = Math.max(4, Math.round(hc * 2.5)), xs0 = Math.floor(box.x0), xs1 = Math.ceil(box.x1);
+      const strips = [];
+      const sig = Math.max(1, hc * 0.35), kr = Math.ceil(sig * 2.5), ker = []; for (let k = -kr; k <= kr; k++) ker.push(Math.exp(-k * k / (2 * sig * sig)));
+      for (let sx = xs0; sx + sw <= xs1; sx += Math.max(2, sw >> 1)) {
+        const p = new Float32Array(h); let tot = 0;
+        for (let y = 0; y < h; y++) { let s = 0; const r = y * w; for (let x = sx; x < sx + sw; x++) s += lm[r + x]; p[y] = s; tot += s; }
+        if (tot < hc * 2) { strips.push({ x: sx + sw / 2, pk: [] }); continue; }
+        const g = new Float32Array(h); for (let y = 0; y < h; y++) { let s = 0, a = 0; for (let k = -kr; k <= kr; k++) { const yy = y + k; if (yy < 0 || yy >= h) continue; s += p[yy] * ker[k + kr]; a += ker[k + kr]; } g[y] = s / a; }
+        let mx = 0; for (let y = 0; y < h; y++) if (g[y] > mx) mx = g[y];
+        const pk = [];
+        for (let y = 1; y < h - 1; y++) if (g[y] >= g[y - 1] && g[y] > g[y + 1] && g[y] > mx * 0.22) {
+          /* huippu: ei toista korkeampaa huippua puolen kirjaimen sisällä */
+          let ok = true; for (let k = Math.max(0, y - Math.round(hc * 0.6)); k <= Math.min(h - 1, y + Math.round(hc * 0.6)); k++) if (g[k] > g[y]) { ok = false; break; }
+          if (!ok) continue;
+          const a = g[y - 1], b = g[y], c = g[y + 1], den = a - 2 * b + c, off = den ? clamp(0.5 * (a - c) / den, -0.5, 0.5) : 0;
+          pk.push({ y: y + off, v: b });
+        }
+        strips.push({ x: sx + sw / 2, pk });
+      }
+      /* ketjutus vasemmalta oikealle */
+      const chains = [];
+      strips.forEach((s, si) => {
+        const used = new Set();
+        const live = chains.filter(c => si - c.last <= 4);
+        /* lähimmät parit ensin */
+        const pairs = [];
+        live.forEach(c => { const n = c.pts.length, a = c.pts[n - 1], b = c.pts[Math.max(0, n - 4)]; const sl = n > 1 && a.x !== b.x ? clamp((a.y - b.y) / (a.x - b.x), -0.35, 0.35) : 0; const pred = a.y + sl * (s.x - a.x); s.pk.forEach((p, pi) => { const dd = Math.abs(p.y - pred); if (dd < hc * 0.55) pairs.push({ c, pi, dd }); }); });
+        pairs.sort((a, b) => a.dd - b.dd);
+        const taken = new Set();
+        pairs.forEach(({ c, pi }) => { if (taken.has(c) || used.has(pi)) return; taken.add(c); used.add(pi); c.pts.push({ x: s.x, y: s.pk[pi].y, v: s.pk[pi].v }); c.last = si; });
+        s.pk.forEach((p, pi) => { if (!used.has(pi)) chains.push({ pts: [{ x: s.x, y: p.y, v: p.v }], last: si }); });
+      });
+      const tw = Math.max(1, box.x1 - box.x0);
+      return chains.filter(c => c.pts.length >= 5 && (c.pts[c.pts.length - 1].x - c.pts[0].x) >= tw * 0.28).map(c => c.pts);
+    }
+    /* painotettu pienimmän neliösumman sovitus: y = Σ c_k u^k */
+    function polyfit(us, ys, ws, deg) {
+      const n = deg + 1, A = Array.from({ length: n }, () => new Float64Array(n + 1));
+      for (let i = 0; i < us.length; i++) { const pw = [1]; for (let k = 1; k < 2 * n; k++) pw.push(pw[k - 1] * us[i]); for (let r = 0; r < n; r++) { for (let c = 0; c < n; c++) A[r][c] += ws[i] * pw[r + c]; A[r][n] += ws[i] * pw[r] * ys[i]; } }
+      for (let r = 0; r < n; r++) A[r][r] += 1e-9;
+      for (let c = 0; c < n; c++) { let p = c; for (let r = c + 1; r < n; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;[A[c], A[p]] = [A[p], A[c]]; const v = A[c][c]; if (Math.abs(v) < 1e-12) return null; for (let k = c; k <= n; k++) A[c][k] /= v; for (let r = 0; r < n; r++) if (r !== c) { const f = A[r][c]; for (let k = c; k <= n; k++) A[r][k] -= f * A[c][k]; } }
+      return A.map(r => r[n]);
+    }
+    /* Rivien kaarevuusmalli: jokaisen rivin muoto y(u) = c0 + c1 u + c2 u² + c3 u³; kertoimet muuttuvat lineaarisesti rivin korkeuden c0 mukaan */
+    function curveModel(chains, cx, hw, hc) {
+      const fits = [];
+      chains.forEach(pts => {
+        const us = pts.map(p => (p.x - cx) / hw), ys = pts.map(p => p.y), ws = pts.map(() => 1);
+        const span = us[us.length - 1] - us[0], deg = span > 1.1 ? 3 : 2;
+        let c = polyfit(us, ys, ws, deg); if (!c) return;
+        /* poikkeavat pisteet pois ja uusi sovitus */
+        const res = us.map((u, i) => Math.abs(ys[i] - c.reduce((s, ck, k) => s + ck * Math.pow(u, k), 0)));
+        const lim = Math.max(hc * 0.25, median(res) * 3);
+        const keep = res.map(r => r <= lim);
+        if (keep.filter(Boolean).length >= 5) c = polyfit(us.filter((_, i) => keep[i]), ys.filter((_, i) => keep[i]), ws.filter((_, i) => keep[i]), deg) || c;
+        while (c.length < 4) c.push(0);
+        /* rivin ketju, joka hyppii rivien välillä, ei kelpaa malliin */
+        const rms = Math.sqrt(us.reduce((s, u, i) => s + (keep[i] ? (ys[i] - c.reduce((t, ck, k) => t + ck * Math.pow(u, k), 0)) ** 2 : 0), 0) / Math.max(1, keep.filter(Boolean).length));
+        if (rms > hc * 0.3) return;
+        fits.push({ c, w: pts.length * Math.min(1, span), u0: us[0], u1: us[us.length - 1] });
+      });
+      if (!fits.length) return null;
+      /* kerroin k rivin korkeuden funktiona */
+      const coef = [];
+      for (let k = 1; k <= 3; k++) {
+        if (fits.length === 1) { coef.push([fits[0].c[k], 0]); continue; }
+        const xs = fits.map(f => f.c[0]), ys = fits.map(f => f.c[k]), ws = fits.map(f => f.w);
+        const yr = Math.max(...xs) - Math.min(...xs);
+        const p = yr > hc * 2 ? polyfit(xs.map(x => (x - xs[0]) / 100), ys, ws, 1) : null;
+        if (p) coef.push([p[0] - p[1] * xs[0] / 100, p[1] / 100]); else { const W = ws.reduce((a, b) => a + b, 0); coef.push([ys.reduce((s, v, i) => s + v * ws[i], 0) / W, 0]); }
+      }
+      /* kuvaus ei saa taittua: lähdekuvan rivin on edettävä alaspäin kaikkialla. Muuten kertoimet vakioiksi. */
+      const fold = [-1.25, -0.6, 0, 0.6, 1.25].some(u => 1 + coef[0][1] * u + coef[1][1] * u * u + coef[2][1] * u * u * u < 0.6);
+      if (fold) coef.forEach((c, k) => { const W = fits.reduce((a, f) => a + f.w, 0); c[0] = fits.reduce((a, f) => a + f.c[k + 1] * f.w, 0) / W; c[1] = 0; });
+      return { fits, coef, cx, hw, at: (y0, u) => y0 + (coef[0][0] + coef[0][1] * y0) * u + (coef[1][0] + coef[1][1] * y0) * u * u + (coef[2][0] + coef[2][1] * y0) * u * u * u };
+    }
+    /* Rivien suoristus pystysuunnassa */
+    function straighten(im, lt) {
+      const chains = traceLines(lt, im.w, im.h);
+      if (!chains.length) return { im, did: false, lines: 0 };
+      const cx = (lt.box.x0 + lt.box.x1) / 2, hw = Math.max(1, (lt.box.x1 - lt.box.x0) / 2);
+      const M = curveModel(chains, cx, hw, lt.hc);
+      if (!M) return { im, did: false, lines: chains.length };
+      /* tarvitaanko: suurin poikkeama suorasta vaakarivistä tekstialueella */
+      let dev = 0; const ys = M.fits.map(f => f.c[0]);
+      [Math.min(...ys), median(ys), Math.max(...ys)].forEach(y0 => { for (let u = -1; u <= 1; u += 0.1) dev = Math.max(dev, Math.abs(M.at(y0, u) - y0)); });
+      if (dev < lt.hc * 0.22) return { im, did: false, lines: chains.length, dev };
+      const o = mk(im.w, im.h, 255);
+      for (let y = 0; y < im.h; y++) for (let x = 0; x < im.w; x++) { const u = clamp((x - cx) / hw, -1.25, 1.25); o.d[y * im.w + x] = sample(im, x, M.at(y, u), 255); }
+      /* tarkistus: rivien pitää olla suoristuksen jälkeen suorempia, muuten alkuperäinen kuva */
+      const spread = ch => ch.length ? ch.reduce((s, c) => { let a = Infinity, b = -Infinity; c.forEach(p => { if (p.y < a) a = p.y; if (p.y > b) b = p.y; }); return s + b - a; }, 0) / ch.length : Infinity;
+      const lt2 = letters(o), after = lt2 ? spread(traceLines(lt2, o.w, o.h)) : Infinity, before = spread(chains);
+      if (!(after < before * 0.75)) return { im, did: false, lines: chains.length, dev, rejected: true };
+      return { im: o, did: true, lines: chains.length, dev, lt: lt2 };
+    }
+    /* Yksi kuva: suoristus, rajaus tekstialueeseen ja mittakaava niin, että kirjaimet ovat noin 30 px korkeita */
+    const TARGET_HC = 30;
+    function prepShot(im) {
+      const info = {};
+      let lt = letters(im);
+      if (!lt) return { im, hc: 0, info: { noText: true } };
+      const st = straighten(im, lt); info.curve = st.did; info.lines = st.lines; info.dev = st.dev;
+      if (st.did) { im = st.im; lt = st.lt || lt; }
+      const k = clamp(TARGET_HC / lt.hc, 0.35, 3.2);
+      /* rajataan tekstialueeseen (marginaalia jätetään), jottei pakkauksen reunat ja tausta tuota roskamerkkejä */
+      const b = lt.box; im = crop(im, b.x0, b.y0, b.x1, b.y1);
+      im = resize(im, im.w * k, im.h * k);
+      if (im.w > 3600) im = resize(im, 3600, im.h * 3600 / im.w);
+      info.hc = lt.hc * k;
+      info.cleared = clearNonText(im, info.hc);
+      return { im, hc: info.hc, info };
+    }
+    /* Kirjaimia selvästi korkeammat tummat alueet (tausta, pakkauksen reuna, varjo) valkaistaan: tunnistuksen asettelu
+       sekoaa niistä helposti (esim. musta kaistale kuvan reunassa sotki rivit). */
+    function clearNonText(im, hc) {
+      const { w, h, d } = im, thr = Math.min(200, otsu(d) + 8), m = new Uint8Array(w * h);
+      for (let i = 0; i < m.length; i++) m[i] = d[i] < thr ? 1 : 0;
+      const C = comps(m, w, h), kill = new Uint8Array(C.list.length + 2); let n = 0;
+      C.list.forEach(c => { const ch = c.y1 - c.y0, cw = c.x1 - c.x0, edge = c.x0 === 0 || c.y0 === 0 || c.x1 === w || c.y1 === h;
+        if (ch > hc * 2.6 || (edge && ch > hc * 1.7 && c.n > ch * cw * 0.5) || (cw > hc * 14 && ch > hc * 1.2)) { kill[c.id] = 1; n++; } });
+      if (!n) return 0;
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const l = C.lab[y * w + x]; if (l && kill[l]) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const yy = y + dy, xx = x + dx; if (yy >= 0 && xx >= 0 && yy < h && xx < w) d[yy * w + xx] = 255; } }
+      return n;
+    }
+    /* Onko teksti vaaleaa tummalla pohjalla? Lasketaan kirjaimen kokoiset yhtenäiset alueet kummallakin polariteetilla:
+       tekstin puolella niitä on paljon. (Pelkkä reunojen tummuus johtaa harhaan, kun kuvassa näkyy pakkauksen ympäristöä.) */
+    function lightText(g, w, h) {
+      const k = Math.min(1, 900 / Math.max(w, h)), s = k < 1 ? resize({ w, h, d: g }, w * k, h * k) : { w, h, d: g };
+      const t = otsu(s.d), n = s.w * s.h, dk = new Uint8Array(n), lt = new Uint8Array(n);
+      for (let i = 0; i < n; i++) { dk[i] = s.d[i] < t ? 1 : 0; lt[i] = 1 - dk[i]; }
+      const cnt = m => comps(m, s.w, s.h).list.filter(c => { const ch = c.y1 - c.y0, cw = c.x1 - c.x0; return c.n >= 5 && ch >= 4 && ch < s.h / 4 && cw < ch * 3.5 && cw < s.w / 6; }).length;
+      const a = cnt(dk), b = cnt(lt);
+      return b > a * 1.6 && b >= 12;
+    }
+    return { lightText, resize, crop, letters, traceLines, straighten, prepShot, TARGET_HC };
+  })();
   /* ---------- Kuvan esikäsittely tekstintunnistukseen ----------
      Valaistuksen tasoitus (jakaminen taustan kirkkaudella), vaalean tekstin kääntö tummalla pohjalla ja terävöitys.
      Testikuvilla oikein tunnistettujen sanojen osuus nousi 49 %:sta 76 %:iin. */
@@ -3138,10 +3401,12 @@ Täytä kakku mansikoilla ja kermalla.`;
     const target = a.length * p / 100; let c = 0; for (let v = 0; v < B; v++) { c += hist[v]; if (c >= target) return mn + v / k; } return mx;
   }
   function enhanceGray(g, w, h) {
-    /* vaalea teksti tummalla pohjalla: käännetään */
-    const border = []; for (let x = 0; x < w; x += 2) { border.push(g[x], g[(h - 1) * w + x]); } for (let y = 0; y < h; y += 2) { border.push(g[y * w], g[y * w + w - 1]); }
-    const bMed = pct(Float32Array.from(border), 50), aMed = pct(g, 50);
-    if (bMed < 100 || bMed < aMed * 0.8) for (let i = 0; i < g.length; i++) g[i] = 255 - g[i];
+    /* vaalea teksti tummalla pohjalla: käännetään. Päätös kirjainten muodoista, ei reunojen tummuudesta
+       (pakkauksen ympäristö kuvan reunoilla käänsi ennen kuvan turhaan negatiiviksi). */
+    let light = false;
+    try { light = OG.lightText(g, w, h); }
+    catch (e) { const border = []; for (let x = 0; x < w; x += 2) { border.push(g[x], g[(h - 1) * w + x]); } for (let y = 0; y < h; y += 2) { border.push(g[y * w], g[y * w + w - 1]); } light = pct(Float32Array.from(border), 50) < 100; }
+    if (light) for (let i = 0; i < g.length; i++) g[i] = 255 - g[i];
     /* valaistuksen tasoitus: tausta = sumennettu maksimikuva */
     const r = Math.max(8, Math.min(w, h) / 8);
     const b1 = gaussBlur(g, w, h, r), b2 = gaussBlur(maxFilter(g, w, h, 15), w, h, r);
@@ -3157,6 +3422,7 @@ Täytä kakku mansikoilla ja kermalla.`;
   /* Sanasto tekstintunnistuksen korjaukseen: ainesosat ja lisäaineet suomeksi sekä kosmetiikan englanninkieliset ja INCI-nimet */
   const OCR_VOCAB_TXT = `
 ainesosat ainekset ainesosa sisältää saattaa sisältää pieniä määriä jäämiä valmistettu tehtaassa jossa käsitellään myös
+rypsi palmu raps rapsi auringonkukka kookos shea kasvi maitoa kananmunaa munaa pähkinää pähkinöitä seesaminsiementä selleriä sinappia vehnää ohraa kauraa soijaa lupiinia äyriäisiä nilviäisiä kalaa
 vesi juomavesi suola merisuola vuorisuola jodioitu sokeri ruokosokeri fariinisokeri tomusokeri raakasokeri kookossokeri sokerisiirappi
 glukoosisiirappi glukoosi fruktoosi glukoosi-fruktoosisiirappi fruktoosi-glukoosisiirappi dekstroosi maltodekstriini maltoosi invertsokerisiirappi
 hunaja vaahterasiirappi agavesiirappi siirappi melassi mallasuute ohramallasuute mallas ohramallas
@@ -3351,6 +3617,192 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     }
     return cnt;
   }
+  /* ---------- Ainesosaosion valinta riveistä ----------
+     Tekstintunnistuksen rivit (sanat ja niiden varmuus) → ainesosaluettelo ilman muuta pakkaustekstiä.
+     Palauttaa { text, unsure } — unsure: sanat, joita ei tunneta ja jotka tunnistus luki epävarmasti. */
+  const ING_START = ['ainesosat', 'ainekset', 'aineosat', 'ainesosa', 'raaka-aineet', 'ingredients', 'ingredient'].map(w => ocrN(w));
+  const OCR_SHORT_OK = /^(ja|ei|tai|on|ml|g|kg|dl|l|e|%|[a-zäöå]\)|\d+([.,]\d+)?%?)$/i;
+  function ocrTokOk(w) {
+    const core = w.t.replace(/^[^\p{L}\p{N}%(]+|[^\p{L}\p{N}%).,:;]+$/gu, '');
+    if (!core || /^[\d%().,:;]+$/.test(core)) return /[\d%()]/.test(w.t);
+    const letters = (core.match(/[\p{L}\p{N}]/gu) || []).length;
+    if (letters / core.length < 0.5) return false;
+    if (letters <= 2 && !OCR_SHORT_OK.test(core.replace(/[.,:;]$/, '')) && w.conf < 60) return false;
+    return true;
+  }
+  function ocrIsKnown(word) {
+    const k = ocrN(word.replace(/[^\p{L}\-]/gu, '')); if (k.length < 3) return true;
+    const V = ocrVocab(); if (ocrKnown(k, V)) return true;
+    return k.split('-').every(p => p.length < 3 || ocrKnown(p, V));
+  }
+  /* rivin "ainesosamaisuus": tunnetut sanat, pilkut, prosentit ja E-koodit */
+  function ingScore(t) {
+    const ws = (t.match(/[\p{L}][\p{L}\-]{2,}/gu) || []); if (!ws.length) return /\d/.test(t) ? 0.2 : 0;
+    const known = ws.filter(ocrIsKnown).length;
+    return known / ws.length + Math.min(0.3, (t.match(/,/g) || []).length * 0.1) + (/\bE\s?\d{3}/.test(t) ? 0.2 : 0);
+  }
+  function ocrSelect(lines) {
+    /* 1) roskamerkit pois, rivit tekstiksi */
+    const L = lines.map(l => { const ws = (l.words || [{ t: l.t, conf: 90 }]).filter(ocrTokOk); return { t: ws.map(w => w.t).join(' '), words: ws }; }).filter(l => l.t.trim());
+    const conf = new Map(); L.forEach(l => l.words.forEach(w => { const k = ocrN(w.t.replace(/[^\p{L}\p{N}]/gu, '')); if (k) conf.set(k, Math.min(conf.get(k) ?? 100, w.conf)); }));
+    let lines2 = L.map(l => { let t = l.t; try { t = fixOcrText(t); } catch (e) { } return t; });
+    /* 2) alkusana sumealla haulla ("Aimesosat", "Ainesosal" …) */
+    let start = -1;
+    for (let i = 0; i < lines2.length && start < 0; i++) {
+      const toks = lines2[i].split(/(\s+)/);
+      for (let j = 0; j < toks.length; j += 2) {
+        const k = ocrN(toks[j].replace(/[^\p{L}\-]/gu, '')); if (k.length < 6) continue;
+        if (ING_START.some(s => ocrDist(k, s, 1.6) <= 1.6)) { toks[j] = 'Ainesosat' + (/[:]$/.test(toks[j]) ? ':' : ':'); lines2[i] = toks.slice(j).join('').replace(/^Ainesosat::/, 'Ainesosat:'); start = i; break; }
+      }
+    }
+    if (start >= 0) lines2 = lines2.slice(start);
+    else {
+      /* ei otsikkoa: reunoilta pois rivit, jotka eivät näytä ainesosilta (tuotenimi, mainoslause, osoite) */
+      /* mainoslause tms.: kokonainen lause ilman pilkkuja, kun alempana on pilkuin eroteltu luettelo */
+      const listBelow = i => lines2.slice(i + 1).some(t => (t.match(/,/g) || []).length >= 2);
+      while (lines2.length > 1 && (ingScore(lines2[0]) < 0.45 || (!/,/.test(lines2[0]) && /[.!]\s*$/.test(lines2[0]) && listBelow(0)))) lines2.shift();
+      while (lines2.length > 1 && ingScore(lines2[lines2.length - 1]) < 0.45) lines2.pop();
+    }
+    let text = pickIngredients(lines2.join('\n'));
+    /* 3) epävarmat sanat: tuntematon sana, jonka tunnistus luki heikolla varmuudella */
+    const unsure = [];
+    (text.match(/[\p{L}][\p{L}\-]{3,}/gu) || []).forEach(w => {
+      if (ocrIsKnown(w)) return;
+      const c = conf.get(ocrN(w.replace(/[^\p{L}\p{N}]/gu, '')));
+      if ((c == null || c < 85) && !unsure.includes(w)) unsure.push(w);
+    });
+    return { text, unsure: unsure.slice(0, 12) };
+  }
+  /* Kahden kuvan teksti yhteen: päällekkäinen jakso (edellisen loppu = seuraavan alku) poistetaan sanatasolla */
+  function ocrJoin(a, b) {
+    a = String(a || '').trim(); b = String(b || '').trim(); if (!a) return b; if (!b) return a;
+    b = b.replace(/^Ainesosat:\s*/i, '');
+    const A = a.split(/\s+/), B = b.split(/\s+/), K = x => ocrN(x.replace(/[^\p{L}\p{N}]/gu, ''));
+    let best = 0;
+    for (let n = Math.min(A.length, B.length, 60); n >= 2; n--) {
+      let hit = 0; for (let i = 0; i < n; i++) { const x = K(A[A.length - n + i]), y = K(B[i]); if (x && y && (x === y || (x.length > 4 && ocrDist(x, y, 1.5) <= 1.5))) hit++; }
+      if (hit >= Math.max(2, n * 0.7)) { best = n; break; }
+    }
+    /* eri kuvaryhmät erotetaan rivinvaihdolla: "saattaa sisältää" -lause ei jatku seuraavan ryhmän ainesosiin */
+    return A.join(' ') + (best ? ' ' : '\n') + B.slice(best).join(' ');
+  }
+  /* Yhden kuvan rivit siistiksi: roskamerkit ja hyvin epävarmat tuntemattomat sanat pois, pilkulla yhteen liimautuneet sanat
+     erilleen ("kaurahiutale,sipuli") ja saman rivin palat yhdeksi riviksi (tunnistus pilkkoo rivin joskus kahtia). */
+  function ocrCleanLines(lines) {
+    let L = (lines || []).map(l => {
+      const ws = [];
+      (l.words || []).forEach(w => {
+        if (!ocrTokOk(w)) return;
+        /* sanastokorjaus jo tässä: korjautuva sana säilyy ja auttaa kuvien kohdistuksessa */
+        let t = w.t; try { t = fixOcrText(t); } catch (e) { }
+        if (t !== w.t) w = Object.assign({}, w, { t, fixed: true });
+        if ((w.conf || 0) < 25 && !w.fixed && !ocrIsKnown(w.t)) return;
+        const parts = String(w.t).split(/(?<=,)(?=\p{L})/u);
+        if (parts.length > 1 && w.x1 > w.x0) { const n = w.t.length; let x = w.x0; parts.forEach(p => { const wd = (w.x1 - w.x0) * p.length / n; ws.push(Object.assign({}, w, { t: p, x0: x, x1: x + wd })); x += wd; }); }
+        else ws.push(w);
+      });
+      return { words: ws };
+    }).filter(l => l.words.length && (l.words.reduce((s, w) => s + (w.conf || 0), 0) / l.words.length >= 35 || l.words.some(w => w.t.length >= 4 && ocrIsKnown(w.t))));
+    L.forEach(l => { l.y0 = Math.min(...l.words.map(w => w.y0)); l.y1 = Math.max(...l.words.map(w => w.y1)); });
+    L.sort((a, b) => a.y0 - b.y0);
+    const out = [];
+    L.forEach(l => {
+      const p = out.find(o => { const iy = Math.min(o.y1, l.y1) - Math.max(o.y0, l.y0); const xo = l.words.some(w => o.words.some(v => Math.min(w.x1, v.x1) - Math.max(w.x0, v.x0) > 0.5 * Math.min(w.x1 - w.x0, v.x1 - v.x0))); return iy > 0.6 * Math.min(o.y1 - o.y0, l.y1 - l.y0) && !xo; });
+      if (p) { p.words = p.words.concat(l.words); p.y0 = Math.min(p.y0, l.y0); p.y1 = Math.max(p.y1, l.y1); } else out.push(l);
+    });
+    out.forEach(l => { l.words.sort((a, b) => a.x0 - b.x0); l.t = l.words.map(w => w.t).join(' '); });
+    return out;
+  }
+  /* Usean kuvan yhdistäminen sanojen sijainneista.
+     shots: [{ lines: [{ words: [{t, conf, x0, y0, x1, y1}] }] }] (kunkin kuvan omat koordinaatit, kirjaimet samassa mittakaavassa).
+     Samat sanat kahdessa peräkkäisessä kuvassa kertovat kuvien keskinäisen siirtymän (vaaka: purkin ympäri, pysty: pitkä luettelo).
+     Päällekkäiseltä alueelta otetaan kukin sana siitä kuvasta, jossa se on lähempänä kuvan keskustaa: vääristyneet reunat jäävät pois.
+     Rivit jatkuvat kuvasta toiseen yhteisten sanojen kautta (ei pelkän korkeuden mukaan), joten pieni kallistusero ei sekoita rivejä.
+     Palauttaa ryhmät riveinä; kuva, jota ei saatu kohdistettua, aloittaa uuden ryhmän (teksti liitetään perään). */
+  function ocrMergeShots(shots) {
+    const key = t => ocrN(String(t).replace(/[^\p{L}\p{N}]/gu, ''));
+    const cx = w => (w.x0 + w.x1) / 2, cy = w => (w.y0 + w.y1) / 2;
+    const bounds = ws => ws.length ? { x0: Math.min(...ws.map(w => w.x0)), y0: Math.min(...ws.map(w => w.y0)), x1: Math.max(...ws.map(w => w.x1)), y1: Math.max(...ws.map(w => w.y1)) } : null;
+    const med = a => { const s = a.slice().sort((x, y) => x - y); return s.length ? s[s.length >> 1] : 0; };
+    let lid = 0;
+    const W = shots.map((s, i) => ocrCleanLines(s.lines).flatMap(l => { const L = ++lid; return (l.words || []).map(w => Object.assign({}, w, { k: key(w.t), src: i, L })); })).filter(ws => ws.length);
+    const ctr = R => ({ x: (R.x0 + R.x1) / 2, y: (R.y0 + R.y1) / 2 });
+    /* B liitetään A:han; last = viimeksi lisätyn kuvan alue A:ssa (sauma sen ja B:n väliin). Palauttaa null, jos kohdistus ei onnistu. */
+    function mergePair(acc, last, B) {
+      const hc = med(B.map(w => w.y1 - w.y0)) || 30;
+      /* ehdokasparit: sama sana (tai lähes sama pitkä sana) molemmissa */
+      const votes = [];
+      B.forEach(b => { if (b.k.length < 4) return; acc.forEach(a => { if (a.k.length < 4) return; if (a.k === b.k || (Math.min(a.k.length, b.k.length) >= 6 && ocrDist(a.k, b.k, 1.2) <= 1.2)) votes.push({ dx: cx(a) - cx(b), dy: cy(a) - cy(b), wt: Math.min(a.k.length, b.k.length), a, b }); }); });
+      let best = null;
+      votes.forEach(v => {
+        const sup = votes.filter(u => Math.abs(u.dx - v.dx) < hc * 1.6 && Math.abs(u.dy - v.dy) < hc * 0.7);
+        const words = new Set(sup.map(u => u.b)).size, score = sup.reduce((s, u) => s + u.wt, 0);
+        if (!best || score > best.score) best = { score, words, sup };
+      });
+      if (!best || !(best.words >= 2 || best.sup.some(u => u.wt >= 8))) return null;
+      const T = best.sup.reduce((s, u) => s + u.wt, 0), dx = best.sup.reduce((s, u) => s + u.dx * u.wt, 0) / T, dy = best.sup.reduce((s, u) => s + u.dy * u.wt, 0) / T;
+      const Bt = B.map(w => Object.assign({}, w, { x0: w.x0 + dx, x1: w.x1 + dx, y0: w.y0 + dy, y1: w.y1 + dy }));
+      const Q = bounds(Bt), QC = ctr(Q), lastC = ctr(last);
+      const horiz = Math.abs(QC.x - lastC.x) >= Math.abs(QC.y - lastC.y);
+      /* sauma päällekkäisen alueen keskelle */
+      const seam = horiz ? (Math.max(last.x0, Q.x0) + Math.min(last.x1, Q.x1)) / 2 : (Math.max(last.y0, Q.y0) + Math.min(last.y1, Q.y1)) / 2;
+      const bAfter = horiz ? QC.x > lastC.x : QC.y > lastC.y;
+      const pos = w => horiz ? cx(w) : cy(w);
+      const inside = (w, R) => horiz ? (cy(w) >= R.y0 - hc * 0.5 && cy(w) <= R.y1 + hc * 0.5) : (cx(w) >= R.x0 - hc && cx(w) <= R.x1 + hc);
+      const keepA = acc.filter(a => !(inside(a, Q) && (bAfter ? pos(a) > seam : pos(a) < seam)));
+      const keepB = Bt.filter(b => !(inside(b, last) && (bAfter ? pos(b) < seam : pos(b) > seam)));
+      /* päällekkäiset laatikot sauman tuntumassa: säilytetään se, joka on omalla puolellaan */
+      const ov = (p, q) => { const ix = Math.min(p.x1, q.x1) - Math.max(p.x0, q.x0), iy = Math.min(p.y1, q.y1) - Math.max(p.y0, q.y0); return ix > 0 && iy > 0 ? ix * iy / Math.min((p.x1 - p.x0) * (p.y1 - p.y0), (q.x1 - q.x0) * (q.y1 - q.y0)) : 0; };
+      const dropA = new Set(), dropB = new Set();
+      const ownA = a => bAfter ? pos(a) <= seam : pos(a) >= seam, ownB = b => bAfter ? pos(b) >= seam : pos(b) <= seam;
+      keepA.forEach(a => keepB.forEach(b => {
+        if (dropA.has(a) || dropB.has(b) || ov(a, b) <= 0.35) return;
+        if (ownA(a) && !ownB(b)) dropB.add(b);
+        else if (ownB(b) && !ownA(a)) dropA.add(a);
+        else if ((a.conf || 0) >= (b.conf || 0)) dropB.add(b); else dropA.add(a);
+      }));
+      const outA = keepA.filter(a => !dropA.has(a)), outB = keepB.filter(b => !dropB.has(b));
+      /* B:n rivit A:n riveihin: ensisijaisesti yhteisten sanojen kautta, muuten sauman vieressä olevien sanojen korkeudesta */
+      const lmap = new Map(), score = new Map();
+      best.sup.forEach(u => { const k = u.b.L + ':' + u.a.L; score.set(k, (score.get(k) || 0) + u.wt); });
+      [...score.entries()].sort((p, q) => q[1] - p[1]).forEach(([k]) => { const [bl, al] = k.split(':').map(Number); if (!lmap.has(bl) && ![...lmap.values()].includes(al)) lmap.set(bl, al); });
+      if (horiz) {
+        const near = (ws, w) => ws.filter(x => Math.abs(pos(x) - seam) < hc * 6);
+        const aLines = new Map(); near(outA).forEach(a => { if (!aLines.has(a.L)) aLines.set(a.L, []); aLines.get(a.L).push(cy(a)); });
+        const bLines = new Map(); near(outB).forEach(b => { if (!bLines.has(b.L)) bLines.set(b.L, []); bLines.get(b.L).push(cy(b)); });
+        bLines.forEach((ys, bl) => {
+          if (lmap.has(bl)) return; const y = med(ys); let bestL = null, bd = hc * 0.6;
+          aLines.forEach((ays, al) => { const d = Math.abs(med(ays) - y); if (d < bd && ![...lmap.values()].includes(al)) { bd = d; bestL = al; } });
+          if (bestL != null) lmap.set(bl, bestL);
+        });
+      }
+      outB.forEach(b => { if (lmap.has(b.L)) b.L = lmap.get(b.L); });
+      return { words: outA.concat(outB), last: Q };
+    }
+    /* peräkkäiset kuvat; kohdistumaton aloittaa uuden ryhmän */
+    let groups = [];
+    W.forEach(B => {
+      const g = groups[groups.length - 1], m = g ? mergePair(g.words, g.last, B) : null;
+      if (m) groups[groups.length - 1] = m; else groups.push({ words: B, last: bounds(B) });
+    });
+    /* ryhmät vielä keskenään (esim. yksi välikuva oli epäselvä, mutta seuraava osuu aiempaan) */
+    for (let again = true; again && groups.length > 1;) {
+      again = false;
+      outer: for (let i = 0; i < groups.length; i++) for (let j = i + 1; j < groups.length; j++) {
+        const m = mergePair(groups[i].words, bounds(groups[i].words), groups[j].words);
+        if (m) { groups[i] = { words: m.words, last: m.last }; groups.splice(j, 1); again = true; break outer; }
+      }
+    }
+    /* sanat riveiksi rivitunnisteen mukaan; rivit ylhäältä alas */
+    return groups.map(g => {
+      const by = new Map(); g.words.forEach(w => { if (!by.has(w.L)) by.set(w.L, []); by.get(w.L).push(w); });
+      const lines = [...by.values()].map(ws => { ws.sort((a, b) => a.x0 - b.x0); return { words: ws, t: ws.map(w => w.t).join(' '), cy: med(ws.map(cy)), x0: ws[0].x0 }; });
+      const h = med(g.words.map(w => w.y1 - w.y0)) || 30;
+      lines.sort((a, b) => a.cy - b.cy);
+      return lines;
+    });
+  }
+  /* ---------- loppu: ainesosaosion valinta */
   /* ---------- TEKSTINTUNNISTUS (Tesseract, toimii laitteessa ilman Claudea) ---------- */
   let tessP = null, tessWorker = null;
   /* Tarkka suomen kielimalli (tessdata_best) on sovelluksen omana tiedostona: fin.traineddata.gz samassa kansiossa */
@@ -3411,28 +3863,48 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     const opts = { logger: m => { if (m && typeof m.progress === 'number') onProg(m.status, m.progress); } };
     if (!(await seedLang(onProg))) throw { why: 'fetch' };
     const w = await T.createWorker('fin', 1, Object.assign({ langPath: LANG_PATH, cachePath: LANG_CACHE }, opts));
-    /* Rajattu ainesosaluettelo luetaan yhtenä tekstilohkona: tarkempi kuin automaattinen asettelu */
-    try { await w.setParameters({ tessedit_pageseg_mode: '6', preserve_interword_spaces: '1' }); } catch (e) { }
+    /* Asettelutila 4 (yksi palsta, vaihtelevan kokoista tekstiä). Tila 6 (yksi lohko) sekosi kuvan reunaan osuneesta
+       puolikkaasta rivistä; testikuvilla tila 4 luki sanoista 89 % (tila 6: 88 %) ja pitkät luettelot lähes virheettä. */
+    try { await w.setParameters({ tessedit_pageseg_mode: '4', preserve_interword_spaces: '1' }); } catch (e) { }
     tessWorker = w;
     return tessWorker;
   }
-  /* Kuva harmaasävyksi ja sopivan kokoiseksi: parantaa tunnistusta ja nopeuttaa */
+  /* Kuva tunnistusta varten: harmaasävy, valaistuksen tasoitus, kaarevien rivien suoristus, rajaus tekstialueeseen
+     ja mittakaava, jossa kirjaimet ovat noin 30 px korkeita (OG.prepShot). Jos tekstiä ei löydy, käytetään entistä mitoitusta. */
   async function prepOcr(src) {
     const bmp = src instanceof HTMLCanvasElement ? src : await createImageBitmap(src);
-    /* Pieni rajaus suurennetaan (enintään 3×), iso pienennetään: kirjaimet sopivan kokoisiksi tunnistukselle */
+    const gray = (k) => {
+      const cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(bmp.width * k)); cv.height = Math.max(1, Math.round(bmp.height * k));
+      const g = cv.getContext('2d'); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(bmp, 0, 0, cv.width, cv.height);
+      const d = g.getImageData(0, 0, cv.width, cv.height).data, W = cv.width, H = cv.height, a = new Float32Array(W * H);
+      for (let i = 0, j = 0; i < d.length; i += 4, j++) a[j] = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+      let out;
+      try { out = enhanceGray(a, W, H); }
+      catch (e) { /* varalla pelkkä kontrastin venytys */ let mn = 255, mx = 0; a.forEach(v => { if (v < mn) mn = v; if (v > mx) mx = v; }); const sc = mx > mn ? 255 / (mx - mn) : 1; out = a.map(v => (v - mn) * sc); }
+      return { w: W, h: H, d: out };
+    };
     const big = Math.max(bmp.width, bmp.height);
-    const k = Math.min(big > 2400 ? 2400 / big : Math.min(3, 1800 / Math.max(1, bmp.width)), 3200 / big);
-    const cv = document.createElement('canvas'); cv.width = Math.round(bmp.width * k); cv.height = Math.round(bmp.height * k);
-    const g = cv.getContext('2d'); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(bmp, 0, 0, cv.width, cv.height);
-    const im = g.getImageData(0, 0, cv.width, cv.height), d = im.data, W = cv.width, H = cv.height;
-    const gray = new Float32Array(W * H);
-    for (let i = 0, j = 0; i < d.length; i += 4, j++) gray[j] = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
-    let out;
-    try { out = enhanceGray(gray, W, H); }
-    catch (e) { /* varalla pelkkä kontrastin venytys */ let mn = 255, mx = 0; gray.forEach(v => { if (v < mn) mn = v; if (v > mx) mx = v; }); const sc = mx > mn ? 255 / (mx - mn) : 1; out = gray.map(v => (v - mn) * sc); }
-    for (let i = 0, j = 0; i < d.length; i += 4, j++) d[i] = d[i + 1] = d[i + 2] = out[j];
+    let p = gray(big > 2400 ? 2400 / big : 1), ok = false;
+    try { const r = OG.prepShot(p); if (r && r.hc) { p = r.im; ok = true; } } catch (e) { }
+    if (!ok) {
+      /* tekstiä ei löytynyt: pieni rajaus suurennetaan (enintään 3×) kuten ennen */
+      const k = Math.min(big > 2400 ? 2400 / big : Math.min(3, 1800 / Math.max(1, bmp.width)), 3200 / big);
+      if (Math.abs(k * bmp.width - p.w) > 2) p = gray(k);
+    }
+    const cv = document.createElement('canvas'); cv.width = p.w; cv.height = p.h;
+    const g = cv.getContext('2d'), im = g.createImageData(p.w, p.h), d = im.data;
+    for (let i = 0, j = 0; i < d.length; i += 4, j++) { const v = p.d[j]; d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255; }
     g.putImageData(im, 0, 0);
     return cv;
+  }
+  /* tesseract.js:n tuloksesta rivit ja sanat sijainteineen ja varmuuksineen */
+  function ocrWordsOf(data) {
+    const out = [];
+    ((data && data.blocks) || []).forEach(b => (b.paragraphs || []).forEach(p => (p.lines || []).forEach(ln => {
+      const ws = (ln.words || []).filter(w => w && w.bbox && String(w.text || '').trim()).map(w => ({ t: String(w.text).trim(), conf: w.confidence, x0: w.bbox.x0, y0: w.bbox.y0, x1: w.bbox.x1, y1: w.bbox.y1 }));
+      if (ws.length) out.push({ t: ws.map(w => w.t).join(' '), words: ws, x0: Math.min(...ws.map(w => w.x0)), x1: Math.max(...ws.map(w => w.x1)), y0: Math.min(...ws.map(w => w.y0)), y1: Math.max(...ws.map(w => w.y1)) });
+    })));
+    return out;
   }
   /* Poimitaan ainesosaluettelo: alkaen "Ainesosat", loppuen esim. ruotsinkieliseen osaan tai ravintosisältöön */
   function pickIngredients(t) {
@@ -3460,7 +3932,8 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       return n;
     };
     const root = $('#cropRoot');
-    let box = { x: .06, y: .06, w: .88, h: .88 };
+    /* oletuksena koko kuva: sovellus rajaa tekstialueen itse, eikä reunaan asti ulottuva teksti katkea */
+    let box = { x: 0, y: 0, w: 1, h: 1 };
     root.innerHTML = `<div class="crop" role="dialog" aria-modal="true" aria-label="Rajaa ja käännä kuva">
       <div class="stagewrap"><div class="stage"><canvas></canvas><div class="cbox"><span class="hd nw" data-h="nw"></span><span class="hd ne" data-h="ne"></span><span class="hd sw" data-h="sw"></span><span class="hd se" data-h="se"></span></div></div></div>
       <div class="tilt"><button class="tstep" data-k="tminus" aria-label="Käännä 0,5° vastapäivään">−</button><input type="range" min="-45" max="45" step="0.5" value="0" aria-label="Suorista kuvaa"><button class="tstep" data-k="tplus" aria-label="Käännä 0,5° myötäpäivään">+</button><button class="tval" data-k="tzero" aria-label="Nollaa suoristus">0°</button></div>
@@ -3563,6 +4036,8 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     };
     next();
   }
+  /* Tarkista-välilehti: jokainen kuva luetaan erikseen. Saman tuotteen kuvat (purkin ympäri tai pitkän luettelon osat)
+     yhdistetään sanojen sijainneista, ja muu pakkausteksti karsitaan. Epävarmasti luetut tuntemattomat sanat näytetään käyttäjälle. */
   async function ocrPhoto(file, cropped, append) {
     const c = S.check;
     const thumb = URL.createObjectURL(file);
@@ -3574,18 +4049,37 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       const why = await ocrPreflight();
       if (why) throw { why };
       const stall = new Promise((_, rej) => { wd = setInterval(() => { if (Date.now() - last > 45000) rej({ why: 'stall' }); }, 2000); });
-      const work = (async () => { const w = await getWorker(prog); last = Date.now(); const cv = await prepOcr(cropped || file); return w.recognize(cv); })();
+      const work = (async () => { const w = await getWorker(prog); last = Date.now(); const cv = await prepOcr(cropped || file); return w.recognize(cv, {}, { text: true, blocks: true }); })();
       const res = await Promise.race([work, stall]);
       clearInterval(wd);
-      const raw = res && res.data ? res.data.text : '';
-      let txt = raw; try { txt = fixOcrText(raw); } catch (e) { }
-      txt = pickIngredients(txt);
+      const data = res && res.data;
+      let lines = ocrWordsOf(data);
+      /* varalla pelkkä teksti (ilman sijainteja kuvia ei voi yhdistää, mutta teksti saadaan) */
+      if (!lines.length && data && data.text) lines = data.text.split('\n').filter(t => t.trim()).map((t, i) => ({ t, words: t.trim().split(/\s+/).map((x, k) => ({ t: x, conf: 70, x0: k * 100, x1: k * 100 + 90, y0: i * 40, y1: i * 40 + 30 })) }));
+      const shot = { lines };
+      const edited = append && c.draft && c.draft.trim() && c.ocrOut != null && c.draft.trim() !== c.ocrOut.trim();
+      if (!append || !c.shots || (append && !c.ocrOut)) c.shots = [];
+      c.shots.push(shot);
+      let txt = '', unsure = [], groups = 1;
+      const add = s1 => { txt = ocrJoin(txt, s1.text); s1.unsure.forEach(u => { if (!unsure.includes(u)) unsure.push(u); }); };
+      if (edited) {
+        /* käyttäjä on jo korjannut tekstiä: uuden kuvan teksti liitetään korjatun perään */
+        txt = c.draft.trim(); (c.unsure || []).forEach(u => unsure.push(u));
+        ocrMergeShots([shot]).forEach(g => add(ocrSelect(g)));
+      } else {
+        const gs = ocrMergeShots(c.shots); groups = gs.length;
+        gs.forEach(g => add(ocrSelect(g)));
+        if (append && c.draft && c.draft.trim() && c.shots.length === 1) txt = ocrJoin(c.draft.trim(), txt);
+      }
       c.busy = null;
-      if (!txt || txt.length < 8) { renderCheck(); toast('Kuvasta ei löytynyt tekstiä. Kuvaa ainesosaluettelo lähempää ja suoraan edestä.'); return; }
-      c.draft = append && c.draft && c.draft.trim() ? c.draft.trim() + ' ' + txt : txt; if (!append || !c.thumb) c.thumb = thumb;
-      c.ocrRaw = c.draft; renderCheck();
+      if (!txt || txt.replace(/^Ainesosat:\s*/i, '').length < 8) { c.shots.pop(); renderCheck(); toast('Kuvasta ei löytynyt tekstiä. Kuvaa ainesosaluettelo lähempää ja suoraan edestä.'); return; }
+      c.draft = txt; c.ocrOut = txt; c.ocrRaw = txt;
+      c.unsure = unsure.filter(u => txt.includes(u));
+      c.ocrGroups = c.shots.length > 1 ? groups : 1;
+      if (!append || !c.thumb) c.thumb = thumb;
+      renderCheck();
       const ta = $('#ingText'); if (ta) { ta.focus(); ta.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
-      toast('Tarkista teksti ja korjaa tarvittaessa');
+      toast(c.shots.length > 1 ? (c.ocrGroups > 1 ? 'Kaikkia kuvia ei saatu yhdistettyä. Tarkista teksti.' : `${c.shots.length} kuvaa yhdistetty. Tarkista teksti.`) : 'Tarkista teksti ja korjaa tarvittaessa');
     } catch (e) {
       clearInterval(wd);
       c.busy = null;
@@ -4947,7 +5441,10 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       case 'run': { syncCheck(); const th = c.thumb; c.thumb = null;
         /* opitaan käyttäjän korjauksista luettuun tekstiin */
         if (c.ocrRaw) { const n = learnOcr(c.ocrRaw, c.draft); c.ocrRaw = null; if (n) setTimeout(() => toast(`Opittu ${n} korjaus${n > 1 ? 'ta' : ''} tekstintunnistukseen`), 1200); }
-        await submitCheck(c.draft, { product: c.product, thumb: th || null }); break; }
+        /* epävarmat sanat, joita käyttäjä ei korjannut, näytetään tuloksen yhteydessä */
+        const uns = (c.unsure || []).filter(u => c.draft.includes(u));
+        await submitCheck(c.draft, { product: c.product, thumb: th || null, unsure: uns }); break; }
+      case 'unsure': { const ta = $('#ingText'); if (ta && val) { const i = ta.value.indexOf(val); if (i >= 0) { ta.focus(); ta.setSelectionRange(i, i + val.length); } } break; }
       case 'fixtext': c.draft = c.sub.text; c.product = c.sub.product || ''; renderCheck(); window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => $('#ingText').focus(), 300); break;
       case 'fav': { const it = S.history.find(x => x.id === c.histId); if (it) { it.fav = !it.fav; await put('history', it); syncCheck(); renderCheck(); toast(it.fav ? 'Lisätty suosikkeihin' : 'Poistettu suosikeista'); } break; }
       case 'selfcheck': { const it = S.history.find(x => x.id === c.histId); if (it) { it.selfChecked = !it.selfChecked; await put('history', it); syncCheck(); renderCheck(); } break; }
