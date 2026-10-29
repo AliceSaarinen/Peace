@@ -35,7 +35,8 @@ Vertailu vanhaan versioon: tallenna vanha `index.html` esim. nimellä `vanha.htm
 | Tasainen etiketti | 94 % / 89 % | 100 % / 100 % |
 | Paljon muuta tekstiä | 100 % / 97 % | 99 % / 98 % |
 | Ei "Ainesosat:"-otsikkoa | 98 % / 73 % | 97 % / 98 % |
-| Pitkä luettelo, useita kuvia | 100 % / 50 % | 98 % / 96 % |
+| Pitkä luettelo, useita kuvia | 100 % / 50 % | 99 % / 97 % |
+| Purkin ympäri, tiheä sarja (~30° välein, 9 kuvaa) | – | 96 % / 94 % |
 | **Kaikki** | **81 % / 60 %** | **90 % / 92 %** |
 
 Huomaamatta jääneet eläinperäiset ainesosat: 22 → 9. Oikea vegaanisuustulos: 52/56 → 55/56.

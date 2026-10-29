@@ -3732,7 +3732,8 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       const hc = med(B.map(w => w.y1 - w.y0)) || 30;
       /* ehdokasparit: sama sana (tai lähes sama pitkä sana) molemmissa */
       const votes = [];
-      B.forEach(b => { if (b.k.length < 4) return; acc.forEach(a => { if (a.k.length < 4) return; if (a.k === b.k || (Math.min(a.k.length, b.k.length) >= 6 && ocrDist(a.k, b.k, 1.2) <= 1.2)) votes.push({ dx: cx(a) - cx(b), dy: cy(a) - cy(b), wt: Math.min(a.k.length, b.k.length), a, b }); }); });
+      B.forEach(b => { if (b.k.length < 4) return; acc.forEach(a => { if (a.k.length < 4) return; const n = Math.min(a.k.length, b.k.length), tol = n >= 9 ? 2.2 : n >= 6 ? 1.2 : 0;
+        if (a.k === b.k || (tol && ocrDist(a.k, b.k, tol) <= tol)) votes.push({ dx: cx(a) - cx(b), dy: cy(a) - cy(b), wt: a.k === b.k ? n : n * 0.7, a, b }); }); });
       let best = null;
       votes.forEach(v => {
         const sup = votes.filter(u => Math.abs(u.dx - v.dx) < hc * 1.6 && Math.abs(u.dy - v.dy) < hc * 0.7);
@@ -3749,18 +3750,29 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       const bAfter = horiz ? QC.x > lastC.x : QC.y > lastC.y;
       const pos = w => horiz ? cx(w) : cy(w);
       const inside = (w, R) => horiz ? (cy(w) >= R.y0 - hc * 0.5 && cy(w) <= R.y1 + hc * 0.5) : (cx(w) >= R.x0 - hc && cx(w) <= R.x1 + hc);
-      const keepA = acc.filter(a => !(inside(a, Q) && (bAfter ? pos(a) > seam : pos(a) < seam)));
-      const keepB = Bt.filter(b => !(inside(b, last) && (bAfter ? pos(b) < seam : pos(b) > seam)));
-      /* päällekkäiset laatikot sauman tuntumassa: säilytetään se, joka on omalla puolellaan */
-      const ov = (p, q) => { const ix = Math.min(p.x1, q.x1) - Math.max(p.x0, q.x0), iy = Math.min(p.y1, q.y1) - Math.max(p.y0, q.y0); return ix > 0 && iy > 0 ? ix * iy / Math.min((p.x1 - p.x0) * (p.y1 - p.y0), (q.x1 - q.x0) * (q.y1 - q.y0)) : 0; };
-      const dropA = new Set(), dropB = new Set();
+      /* Päällekkäisellä alueella sama sana on luettu kahdesti: valitaan parempi lukema (tunnettu sana ennen tuntematonta,
+         sitten varmempi lukema, sitten kuvan suorempi kohta). Sana, jolle toisessa kuvassa ei ole vastinetta, otetaan sauman omalta puolelta. */
       const ownA = a => bAfter ? pos(a) <= seam : pos(a) >= seam, ownB = b => bAfter ? pos(b) >= seam : pos(b) <= seam;
-      keepA.forEach(a => keepB.forEach(b => {
-        if (dropA.has(a) || dropB.has(b) || ov(a, b) <= 0.35) return;
-        if (ownA(a) && !ownB(b)) dropB.add(b);
-        else if (ownB(b) && !ownA(a)) dropA.add(a);
-        else if ((a.conf || 0) >= (b.conf || 0)) dropB.add(b); else dropA.add(a);
-      }));
+      const inOv = w => inside(w, Q) && inside(w, last) && (horiz ? (cx(w) > Math.max(last.x0, Q.x0) - hc && cx(w) < Math.min(last.x1, Q.x1) + hc) : (cy(w) > Math.max(last.y0, Q.y0) - hc && cy(w) < Math.min(last.y1, Q.y1) + hc));
+      const same = (p, q) => Math.abs(cx(p) - cx(q)) < 0.45 * Math.max(p.x1 - p.x0, q.x1 - q.x0, hc) && Math.abs(cy(p) - cy(q)) < hc * 0.6;
+      const good = w => (w.k.length >= 3 && ocrIsKnown(w.t) ? 2 : 0) + (w.conf || 0) / 100;
+      const dropA = new Set(), dropB = new Set();
+      const ovA = acc.filter(inOv), ovB = Bt.filter(inOv);
+      const pairs = [];
+      ovA.forEach(a => ovB.forEach(b => { if (same(a, b)) pairs.push({ a, b, d: Math.abs(cx(a) - cx(b)) + Math.abs(cy(a) - cy(b)) }); }));
+      pairs.sort((p, q) => p.d - q.d);
+      const usedA = new Set(), usedB = new Set();
+      pairs.forEach(({ a, b }) => {
+        if (usedA.has(a) || usedB.has(b)) return; usedA.add(a); usedB.add(b);
+        const ga = good(a) + (ownA(a) ? 0.15 : 0), gb = good(b) + (ownB(b) ? 0.15 : 0);
+        if (ga >= gb) dropB.add(b); else dropA.add(a);
+      });
+      /* vastineettomat sanat sauman väärällä puolella pois (toinen kuva näyttää kohdan suorempana) */
+      ovA.forEach(a => { if (!usedA.has(a) && !ownA(a)) dropA.add(a); });
+      ovB.forEach(b => { if (!usedB.has(b) && !ownB(b)) dropB.add(b); });
+      /* päällekkäisen alueen ulkopuolella vanha sääntö: sauman väärällä puolella oleva sana pois */
+      const keepA = acc.filter(a => inOv(a) || !(inside(a, Q) && (bAfter ? pos(a) > seam : pos(a) < seam)));
+      const keepB = Bt.filter(b => inOv(b) || !(inside(b, last) && (bAfter ? pos(b) < seam : pos(b) > seam)));
       const outA = keepA.filter(a => !dropA.has(a)), outB = keepB.filter(b => !dropB.has(b));
       /* B:n rivit A:n riveihin: ensisijaisesti yhteisten sanojen kautta, muuten sauman vieressä olevien sanojen korkeudesta */
       const lmap = new Map(), score = new Map();
@@ -3793,10 +3805,27 @@ hiilihydraatit sokereita proteiini suolaa kuitua
         if (m) { groups[i] = { words: m.words, last: m.last }; groups.splice(j, 1); again = true; break outer; }
       }
     }
+    /* Kohdistumaton ryhmä, jonka sanat on jo luettu muista kuvista, on turha (tiheässä kuvasarjassa yksi epäselvä kuva):
+       se jätetään pois, ettei sama teksti toistu. Uutta tekstiä sisältävä ryhmä säilyy. */
+    if (groups.length > 1) {
+      const sz = g => g.words.length;
+      const main = groups.reduce((a, b) => sz(b) > sz(a) ? b : a);
+      const keys = main.words.map(w => w.k).filter(k => k.length >= 4);
+      groups = groups.filter(g => {
+        if (g === main) return true;
+        const ks = g.words.map(w => w.k).filter(k => k.length >= 4); if (!ks.length) return false;
+        const cov = ks.filter(k => keys.some(m => m === k || m.includes(k) || (k.length >= 6 && ocrDist(k, m, 1.6) <= 1.6))).length / ks.length;
+        return cov < 0.6;
+      });
+    }
     /* sanat riveiksi rivitunnisteen mukaan; rivit ylhäältä alas */
     return groups.map(g => {
       const by = new Map(); g.words.forEach(w => { if (!by.has(w.L)) by.set(w.L, []); by.get(w.L).push(w); });
-      const lines = [...by.values()].map(ws => { ws.sort((a, b) => a.x0 - b.x0); return { words: ws, t: ws.map(w => w.t).join(' '), cy: med(ws.map(cy)), x0: ws[0].x0 }; });
+      const lines = [...by.values()].map(ws => {
+        ws.sort((a, b) => a.x0 - b.x0);
+        /* kahden kuvan rajalle jäänyt sama sana kahteen kertaan ("aromi. aromi.") tai sanan loppuosa ("kananmunaa munaa") */
+        ws = ws.filter((w, i) => { const p = ws[i - 1]; return !(p && w.k.length >= 3 && (p.k === w.k || (p.k.length > w.k.length + 2 && p.k.endsWith(w.k)) || (w.k.length >= 5 && ocrDist(p.k, w.k, 1.2) <= 1.2))); });
+        return { words: ws, t: ws.map(w => w.t).join(' '), cy: med(ws.map(cy)), x0: ws[0].x0 }; });
       const h = med(g.words.map(w => w.y1 - w.y0)) || 30;
       lines.sort((a, b) => a.cy - b.cy);
       return lines;
