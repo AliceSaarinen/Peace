@@ -1748,7 +1748,9 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
 
   function prevWord(t, i) {
     let j = i - 1;
-    while (j >= 0 && !isW(t[j])) j--;
+    /* edellinen sana vain samasta ainesosasta: pilkku, piste, sulku tms. erottaa eri ainesosat
+       ("vesi, kaura, maito" ei ole kauramaitoa; ennen tätä maito, juusto, kerma ja hunaja jäivät huomaamatta) */
+    while (j >= 0 && !isW(t[j])) { if (/[,.;:()\[\]\/\n*•·]/.test(t[j])) return ''; j--; }
     if (j < 0) return '';
     // ohitetaan pelkkä yhdysmerkki-sanaliitos ("kaura- ja soijajuoma") vain tämän sanan osalta
     let k = j;
