@@ -36,9 +36,21 @@ Vertailu vanhaan versioon: tallenna vanha `index.html` esim. nimellä `vanha.htm
 | Paljon muuta tekstiä | 100 % / 97 % | 99 % / 98 % |
 | Ei "Ainesosat:"-otsikkoa | 98 % / 73 % | 97 % / 98 % |
 | Pitkä luettelo, useita kuvia | 100 % / 50 % | 99 % / 97 % |
-| Purkin ympäri, tiheä sarja (~30° välein, 9 kuvaa) | – | 96 % / 94 % |
-| **Kaikki** | **81 % / 60 %** | **90 % / 92 %** |
+| Purkin ympäri, tiheä sarja (~30° välein, 9 kuvaa) | – | 95 % / 94 % |
+| Purkin ympäri, skannaustilan tiheys (~14° välein, 17 kuvaa) | – | 98 % / 99 % |
+| **Kaikki** | **81 % / 60 %** | **92 % / 94 %** |
 
 Huomaamatta jääneet eläinperäiset ainesosat: 22 → 9. Oikea vegaanisuustulos: 52/56 → 55/56.
 Jäljelle jääneet virheet ovat lähes kaikki yksittäisen purkkikuvan jyrkissä reunoissa, joista puuttuu tietoa.
 Useampi kuva korjaa nämä, ja sovellus merkitsee epävarmat sanat käyttäjälle tarkistettaviksi.
+
+## Skannaustila
+
+Selaintesti (Chromium, kamerana video pyörivästä tölkistä): kaksi eri tuotetta, 15–16 automaattisesti otettua kuvaa,
+100 % sanoista oikein, ei ylimääräistä tekstiä.
+
+## PaddleOCR-kokeilu 29.10.2026
+
+PP-OCRv5:n monikielinen ONNX-malli (tunnistus + luku) samalla testisarjalla: 78,5 % (Tesseract 90,7 %), noin 3× hitaampi
+ja +21 Mt ladattavaa. Malli kadottaa ä/ö-pisteitä ja sanavälejä. Ei otettu käyttöön. Suomelle tarkoitettua latin-mallia ei
+voitu tässä ympäristössä ladata kokeiltavaksi.

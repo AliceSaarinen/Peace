@@ -415,6 +415,21 @@ textarea.let:focus{background:#FFFDF9;border-color:#E3B7C4;box-shadow:none}
 .iconpick label:active{background:var(--rose-soft)}
 .iconpick svg{width:30px;height:30px}
 .iconpick input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.iconpick button{height:62px;display:grid;place-items:center;border-radius:14px;border:1.5px dashed #E3B7C4;background:var(--rose-wash);color:var(--rose-ink);cursor:pointer;padding:0}
+.iconpick button:active{background:var(--rose-soft)}
+.offdone{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;align-self:center}
+.offdone svg{width:16px;height:16px}
+/* Skannaustila */
+.scan .sview{position:relative;width:100%;max-width:720px;max-height:100%;aspect-ratio:3/4;overflow:hidden;border-radius:14px;background:#000}
+.scan video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.scan .sframe{position:absolute;inset:12% 6%;border:2px solid rgba(255,255,255,.85);border-radius:12px;box-shadow:0 0 0 9999px rgba(20,14,12,.35)}
+.scan .sflash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.scan .sflash.on{animation:sflash .35s ease-out}
+@keyframes sflash{from{opacity:.55}to{opacity:0}}
+.scan .shint{color:#FFF8EE;text-align:center;font-size:.92rem;margin:12px auto 0;max-width:520px}
+.scan .sprog{height:6px;border-radius:99px;background:rgba(255,255,255,.18);margin:10px auto 0;max-width:520px;width:100%;overflow:hidden}
+.scan .sprog i{display:block;height:100%;width:0;background:#F3B6C6;transition:width .25s}
+.scan .scount{color:#FFF8EE;font-weight:800;align-self:center;min-width:72px;text-align:center;font-variant-numeric:tabular-nums}
 .bcchip{display:inline-flex;align-self:flex-start;align-items:center;gap:8px;background:var(--blue-soft);color:#3F5A78;border-radius:99px;padding:5px 6px 5px 12px;font-weight:800;font-variant-numeric:tabular-nums;font-size:.9rem}
 .bcchip svg{width:18px;height:18px}
 .bcchip button{border:0;background:rgba(255,255,255,.6);border-radius:99px;width:26px;height:26px;color:inherit;font-weight:800}
@@ -470,6 +485,7 @@ textarea.let:focus{background:#FFFDF9;border-color:#E3B7C4;box-shadow:none}
     <symbol id="i-barcode" viewBox="0 0 24 24"><path d="M4 6v12M7 6v12M9.5 6v12M13 6v12M15 6v12M18 6v12M20 6v12" stroke="currentColor" stroke-width="1.6"/><path d="M7 6v12M13 6v12M18 6v12" stroke="currentColor" stroke-width="2.4"/></symbol>
     <symbol id="i-cook" viewBox="0 0 24 24"><path d="M4 11h16v2.5a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6V11Z M2.5 11h2M19.5 11h2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/><path d="M9 4.5c-.8 1 .8 2 0 3M12.5 3.5c-.8 1 .8 2 0 3M16 4.5c-.8 1 .8 2 0 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
     <symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 13.5V9.5M10 3.5h4M18 7l1.4-1.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24"><path d="M3.5 8V5.5a2 2 0 0 1 2-2H8M16 3.5h2.5a2 2 0 0 1 2 2V8M20.5 16v2.5a2 2 0 0 1-2 2H16M8 20.5H5.5a2 2 0 0 1-2-2V16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M8.5 8.5h7v7h-7z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5 12h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
     <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M5 12a7 7 0 1 0 2.1-5M5 4v4h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-left" viewBox="0 0 24 24"><path d="m14.5 6-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-right" viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
@@ -2903,10 +2919,12 @@ Täytä kakku mansikoilla ja kermalla.`;
       <div class="card">
         <div class="iconpick">
           <label aria-label="Kuvaa ainesosat" title="Kuvaa ainesosat">${icon('i-cam')}<input id="camIn" type="file" accept="image/*" capture="environment"></label>
+          <button data-act="scan" aria-label="Skannaa kiertämällä (kaareva pakkaus tai pitkä luettelo)" title="Skannaa kiertämällä">${icon('i-scan')}</button>
           <label aria-label="Valitse kuva" title="Valitse kuva">${icon('i-img')}<input id="galIn" type="file" accept="image/*" multiple></label>
           <label aria-label="Lue viivakoodi" title="Lue viivakoodi">${icon('i-barcode')}<input id="bcIn" type="file" accept="image/*" capture="environment"></label>
         </div>
         ${c.code ? `<div class="bcchip">${icon('i-barcode')}<span>${esc(c.code)}</span><button data-act="bcclear" aria-label="Poista viivakoodi">×</button></div>` : ''}
+        ${c.code && c.codeMiss === c.code && !c.busy ? `<div class="note warm" style="font-size:.88rem"><b>Tuotetta ei vielä ole avoimessa tietokannassa.</b> Kaupan verkkosivulla on yleensä ainesosaluettelo: haku viivakoodilla löytää juuri tämän tuotteen. Kopioi ainesosat kenttään tai kuvaa ne pakkauksesta. Tarkistuksen jälkeen voit lisätä tuotteen Open Food Factsiin, jolloin se löytyy jatkossa kaikille.</div>${shopLinks(c.code)}` : ''}
         ${c.busy ? `<div class="busy"><div class="spinner"></div><span id="ocrMsg">${esc(c.busy)}</span></div>` : ''}
         ${c.ocrErr ? `<p class="note warm" style="font-size:.88rem"><b>Tekstintunnistus ei käynnistynyt:</b> ${esc(c.ocrErr)}. Voit kopioida tekstin kuvasta puhelimen omalla toiminnolla (iPhone: paina tekstiä kuvassa pitkään · Android: Google Lens → Kopioi teksti) ja liittää sen kenttään.</p>` : ''}
         <label class="flabel" for="ingText"><span class="label">Ainesosat</span></label>
@@ -2914,7 +2932,7 @@ Täytä kakku mansikoilla ja kermalla.`;
         ${c.unsure && c.unsure.length && !c.busy ? `<div class="note warm" style="font-size:.88rem"><b>Tarkista nämä kohdat kuvasta.</b> Tunnistus luki ne epävarmasti, eikä sovellus tunne niitä: <span class="chips" style="margin-top:6px">${c.unsure.map(u => `<button class="chip" data-act="unsure" data-v="${esc(u)}">${esc(u)}</button>`).join('')}</span></div>` : ''}
         ${c.ocrGroups > 1 && !c.busy ? `<p class="note warm" style="font-size:.88rem">Kaikkia kuvia ei saatu yhdistettyä toisiinsa, joten niiden tekstit ovat eri riveillä. Ota kuva niiden väliltä niin, että peräkkäisissä kuvissa näkyy samoja sanoja.</p>` : ''}
         ${c.draft && c.draft.trim() && !c.busy ? `<div class="row"><label class="btn soft small" style="position:relative">${icon('i-plus')}Lisää kuva jatkoksi<input id="addIn" type="file" accept="image/*" multiple class="hidein"></label></div>
-        ${c.ocrOut ? `<p class="muted" style="font-size:.8rem;margin-top:-4px">Kaareva pakkaus tai pitkä luettelo: kierrä tuotetta tai siirrä kameraa ja ota useampi kuva niin, että noin kolmasosa osuu edellisen kuvan päälle. Kuvat yhdistetään, ja kustakin käytetään sen suorin kohta.</p>` : ''}` : ''}
+        ${c.ocrOut ? `<p class="muted" style="font-size:.8rem;margin-top:-4px">Kaareva pakkaus tai pitkä luettelo: paras tulos tulee skannaustilasta (kehyskuvake ylhäällä), jossa kierrät tuotetta ja kuvat otetaan automaattisesti. Voit myös ottaa useamman kuvan niin, että noin kolmasosa osuu edellisen kuvan päälle.</p>` : ''}` : ''}
         <label class="flabel" for="prodName"><span class="label">Tuotteen nimi</span></label>
         <div class="cfrow"><input id="prodName" type="search" enterkeyhint="search" value="${esc(c.product)}"><button class="iconbtn" style="flex:0 0 auto" data-act="offfind" aria-label="Hae tuotetta nimellä" title="Hae tuotetta nimellä">${icon('i-check')}</button></div>
         ${c.off ? offHTML(c.off) : ''}
@@ -3000,6 +3018,46 @@ Täytä kakku mansikoilla ja kermalla.`;
     if (p.code && /^\d{6,}$/.test(p.code) && !c.code) c.code = p.code;
     await submitCheck(p.ing, { product: [p.brand, p.name].filter(Boolean).join(' '), certs: p.labelVegan ? ['vegan'] : [], source: 'off', category: OFF_CAT[p.db] === 'food' ? null : OFF_CAT[p.db] });
   }
+  /* Tuotteen lisäys Open Food Factsiin: tieto hyödyttää jatkossa kaikkia (myös suomalaiset tuotteet, joita tietokannasta
+     vielä puuttuu). Omalla ilmaisella tunnuksella lähetys suoraan sovelluksesta; ilman tunnusta ainesosat kopioidaan
+     leikepöydälle ja tuotteen lisäyssivu avataan. Tunnus tallentuu vain tälle laitteelle (ei asetuksiin eikä varmuuskopioon). */
+  const OFF_WRITE = 'https://world.openfoodfacts.org';
+  function offAuth() { try { const a = JSON.parse(localStorage.getItem('peace-off-auth') || 'null'); return a && a.user && a.pass ? a : null; } catch (e) { return null; } }
+  async function offShare() {
+    const c = S.check, s = c.sub, it = c.histId ? S.history.find(x => x.id === c.histId) : null;
+    if (!s || !it || !it.barcode) return;
+    const code = it.barcode, text = String(s.text || '').replace(/^\s*(ainesosat|ainekset)\s*:\s*/i, '').trim(), auth = offAuth();
+    if (!window.confirm(`Lisätäänkö tuotteen ${code} ainesosat avoimeen Open Food Facts -tietokantaan? Tiedot ovat julkisia. Varmista, että teksti vastaa pakkausta.`)) return;
+    if (auth) {
+      toast('Lähetetään Open Food Factsiin…');
+      try {
+        const fd = new FormData();
+        const f = { code, user_id: auth.user, password: auth.pass, lc: 'fi', cc: 'fi', ingredients_text_fi: text, comment: 'Peace-sovellus' };
+        if (s.product) f.product_name_fi = s.product;
+        Object.entries(f).forEach(([k, v]) => fd.append(k, v));
+        const r = await fetch(OFF_WRITE + '/cgi/product_jqm2.pl', { method: 'POST', body: fd });
+        const d = await r.json();
+        if (d && d.status === 1) {
+          if (s.thumb) {
+            try {
+              const b = await (await fetch(s.thumb)).blob(), g = new FormData();
+              [['code', code], ['user_id', auth.user], ['password', auth.pass], ['imagefield', 'ingredients_fi']].forEach(([k, v]) => g.append(k, v));
+              g.append('imgupload_ingredients_fi', b, 'ainesosat.jpg');
+              await fetch(OFF_WRITE + '/cgi/product_image_upload.pl', { method: 'POST', body: g });
+            } catch (e) { }
+          }
+          it.offSent = 'api'; await put('history', it); renderCheck();
+          toast('Kiitos! Tuote löytyy nyt Open Food Factsista kaikille.'); return;
+        }
+        toast(d && d.status_verbose ? 'Open Food Facts: ' + d.status_verbose : 'Lähetys ei onnistunut. Avataan Open Food Facts.');
+      } catch (e) { toast('Suora lähetys ei onnistunut. Avataan Open Food Facts.'); }
+    }
+    let copied = false; try { await navigator.clipboard.writeText(text); copied = true; } catch (e) { }
+    const w = window.open(`https://fi.openfoodfacts.org/cgi/product.pl?type=add&code=${encodeURIComponent(code)}`, '_blank');
+    if (w) { try { w.opener = null; } catch (e) { } }
+    it.offSent = 'page'; await put('history', it); renderCheck();
+    toast(copied ? 'Ainesosat kopioitu. Liitä ne Open Food Factsin ainesosakenttään ja tallenna.' : 'Kopioi ainesosat ja liitä ne Open Food Factsin ainesosakenttään.');
+  }
   function sentHTML() {
     const s = S.check.sub; if (!s) return '';
     return `<div class="card" style="margin-bottom:18px">
@@ -3061,6 +3119,7 @@ Täytä kakku mansikoilla ja kermalla.`;
         <div class="row">
           ${hist ? `<button class="btn soft small" data-act="fav" aria-pressed="${pressed(hist.fav)}">${icon(hist.fav ? 'i-star' : 'i-staro')}${hist.fav ? 'Suosikki' : 'Lisää suosikkeihin'}</button>
           <button class="btn soft small" data-act="selfcheck">${icon('i-ok')}${hist.selfChecked ? 'Poista oma merkintä' : 'Merkitse tarkistetuksi'}</button>` : ''}
+          ${hist && hist.barcode && s.source !== 'off' ? (hist.offSent === 'api' ? `<span class="muted offdone">${icon('i-ok')}Lisätty Open Food Factsiin</span>` : `<button class="btn soft small" data-act="offshare">${icon('i-up')}${hist.offSent ? 'Avaa Open Food Facts uudelleen' : 'Lisää Open Food Factsiin'}</button>`) : ''}
           ${c.code && hist && !hist.barcode ? `<button class="btn soft small" data-act="bcattach">${icon('i-barcode')}Liitä viivakoodi tähän</button>` : ''}
           ${S.sample && !c.ai && (r.maybe.length || r.likely.length) ? `<button class="btn soft small" data-act="askai">${icon('i-spark')}Kysy Claudelta tarkempi arvio</button>` : ''}
         </div>
@@ -4117,6 +4176,146 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       renderCheck();
     }
   }
+  /* ---------- SKANNAUSTILA: kamera auki, käyttäjä kiertää tuotetta, kuvat otetaan automaattisesti ----------
+     Liike mitataan pienistä esikatselukuvista (peräkkäisten kuvien siirtymä). Kun teksti on siirtynyt noin kuudesosan
+     kuvan leveydestä (tai korkeudesta) ja kuva on terävä, otetaan täysikokoinen kuva. Näin jokainen sana näkyy useassa
+     kuvassa, ja yhdistämisessä käytetään kunkin sanan parasta lukemaa. Testikuvilla purkin ympäri: 98 % sanoista oikein. */
+  const SCAN_MAX = 24, SCAN_STEP = 0.13, SCAN_W = 192;
+  function scanGray(video, g, w, h) {
+    g.drawImage(video, 0, 0, w, h);
+    const d = g.getImageData(0, 0, w, h).data, a = new Float32Array(w * h);
+    for (let i = 0, j = 0; j < a.length; i += 4, j++) a[j] = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+    /* reunakuva (gradientti): valaistuksen muutos ja heijastus eivät sotke liikkeen mittausta */
+    const e = new Float32Array(w * h); let s = 0;
+    for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) { const i = y * w + x, gx = a[i + 1] - a[i - 1], gy = a[i + w] - a[i - w], v = Math.abs(gx) + Math.abs(gy); e[i] = v; s += v * v; }
+    return { e, sharp: s / (w * h) };
+  }
+  /* Siirtymä edellisestä esikatselukuvasta alipikselin tarkkuudella. Vertailussa vain muuttuneet kohdat (mask):
+     purkin pyöriessä vain teksti liikkuu, kun taas purkin reunat, heijastus ja etiketin reunat pysyvät paikallaan
+     ja vetäisivät tuloksen muuten nollaan. */
+  function scanShift(A, B, w, h, r, mask) {
+    const V = new Float64Array((2 * r + 1) * (2 * r + 1)).fill(Infinity);
+    let bi = -1;
+    for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+      let s = 0, n = 0;
+      for (let y = Math.max(1, dy + 1); y < Math.min(h - 1, h - 1 + dy); y++) { const ra = y * w, rb = (y - dy) * w - dx; for (let x = Math.max(1, dx + 1); x < Math.min(w - 1, w - 1 + dx); x++) { if (mask && !mask[ra + x]) continue; const t = A[ra + x] - B[rb + x]; s += t * t; n++; } }
+      const k = (dy + r) * (2 * r + 1) + dx + r; V[k] = n > 20 ? s / n : Infinity; if (bi < 0 || V[k] < V[bi]) bi = k;
+    }
+    const W = 2 * r + 1, iy = Math.floor(bi / W), ix = bi % W;
+    const sub = (a, b, c) => { const d = a - 2 * b + c; return isFinite(d) && d > 0 ? Math.max(-0.5, Math.min(0.5, 0.5 * (a - c) / d)) : 0; };
+    const fx = ix > 0 && ix < W - 1 ? sub(V[bi - 1], V[bi], V[bi + 1]) : 0, fy = iy > 0 && iy < W - 1 ? sub(V[bi - W], V[bi], V[bi + W]) : 0;
+    return { dx: ix - r + fx, dy: iy - r + fy, v: V[bi] };
+  }
+  async function openScan() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('Kamera ei ole käytettävissä tässä selaimessa. Ota kuvat tavallisesti.'); return; }
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false }); }
+    catch (e) { toast('Kameraa ei saatu auki. Salli kameran käyttö selaimen asetuksista.'); return; }
+    const root = $('#cropRoot');
+    root.innerHTML = `<div class="crop scan" role="dialog" aria-modal="true" aria-label="Skannaa ainesosat">
+      <div class="stagewrap"><div class="sview"><video playsinline muted autoplay></video><div class="sframe"></div><div class="sflash"></div></div></div>
+      <p class="shint" aria-live="polite">Kierrä tuotetta hitaasti niin, että koko ainesosaluettelo kulkee kehyksen läpi. Pitkässä luettelossa siirrä kameraa hitaasti alaspäin.</p>
+      <div class="sprog" aria-hidden="true"><i></i></div>
+      <div class="cbar"><button class="btn ghost" data-k="no" aria-label="Peruuta">${icon('i-x')}</button><span class="scount" aria-live="polite">0 kuvaa</span><button class="btn primary" data-k="ok" disabled>${icon('i-ok')}Valmis</button></div></div>`;
+    document.body.style.overflow = 'hidden';
+    const video = root.querySelector('video'), cnt = root.querySelector('.scount'), ok = root.querySelector('[data-k="ok"]'), bar = root.querySelector('.sprog i'), hint = root.querySelector('.shint'), flash = root.querySelector('.sflash');
+    video.srcObject = stream;
+    try { await video.play(); } catch (e) { }
+    const frames = [];
+    let prev = null, acc = { x: 0, y: 0 }, maxSharp = 0, timer = 0, done = false, busyGrab = false, still = 0;
+    const small = document.createElement('canvas'), sg = small.getContext('2d', { willReadFrequently: true });
+    const stop = () => { done = true; clearInterval(timer); stream.getTracks().forEach(t => t.stop()); root.innerHTML = ''; document.body.style.overflow = ''; };
+    const grab = async () => {
+      /* täysikokoinen kuva JPEG-muodossa (muistia säästäen) */
+      const vw = video.videoWidth, vh = video.videoHeight, k = Math.min(1, 1920 / Math.max(vw, vh));
+      const cv = document.createElement('canvas'); cv.width = Math.round(vw * k); cv.height = Math.round(vh * k);
+      cv.getContext('2d').drawImage(video, 0, 0, cv.width, cv.height);
+      const blob = await new Promise(res => cv.toBlob(res, 'image/jpeg', 0.92));
+      if (!blob || done) return;
+      frames.push(blob);
+      cnt.textContent = `${frames.length} kuva${frames.length === 1 ? '' : 'a'}`;
+      bar.style.width = Math.min(100, frames.length / SCAN_MAX * 100) + '%';
+      ok.disabled = false;
+      flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on');
+      if (frames.length === 3) hint.textContent = 'Hyvä! Jatka kiertämistä, kunnes luettelo on lopussa, ja paina Valmis.';
+      if (frames.length >= SCAN_MAX) finish();
+    };
+    const tick = async () => {
+      if (done || busyGrab || !video.videoWidth) return;
+      const w = SCAN_W, h = Math.max(8, Math.round(SCAN_W * video.videoHeight / video.videoWidth));
+      if (small.width !== w) { small.width = w; small.height = h; }
+      const cur = scanGray(video, sg, w, h);
+      maxSharp = Math.max(maxSharp * 0.995, cur.sharp);
+      if (prev) {
+        let mean = 0; for (let i = 0; i < cur.e.length; i++) mean += cur.e[i]; mean /= cur.e.length;
+        const mask = new Uint8Array(w * h); let nm = 0;
+        for (let i = 0; i < mask.length; i++) if (Math.abs(cur.e[i] - prev.e[i]) > mean * 0.5) { mask[i] = 1; nm++; }
+        let m = { dx: 0, dy: 0 };
+        if (nm > w * h * 0.01) { const r = scanShift(cur.e, prev.e, w, h, 7, mask); if (r.v < Infinity) m = r; }
+        acc.x += m.dx; acc.y += m.dy;
+        still = Math.abs(m.dx) + Math.abs(m.dy) < 0.5 ? still + 1 : 0;
+      }
+      prev = cur;
+      const moved = Math.max(Math.abs(acc.x) / w, Math.abs(acc.y) / h);
+      const sharpOk = cur.sharp >= maxSharp * 0.6;
+      if (window.__scanLog) window.__scanLog.push([Date.now(), acc.x, acc.y, +cur.sharp.toFixed(1), +maxSharp.toFixed(1), frames.length]);
+      /* ensimmäinen kuva heti kun kuva on tarkka ja paikallaan, sitten aina kun tekstiä on siirtynyt tarpeeksi */
+      if ((!frames.length && still >= 3 && sharpOk) || (frames.length && ((moved >= SCAN_STEP && sharpOk) || moved >= SCAN_STEP * 1.8))) {
+        busyGrab = true; acc = { x: 0, y: 0 };
+        try { await grab(); } finally { busyGrab = false; }
+      }
+    };
+    const finish = () => { if (done) return; const fs = frames.slice(); stop(); if (fs.length) ocrFrames(fs); };
+    timer = setInterval(tick, 110);
+    root.querySelector('.scan').addEventListener('click', e => {
+      const k = (e.target.closest('[data-k]') || {}).dataset; if (!k || !k.k) return;
+      if (k.k === 'no') stop();
+      if (k.k === 'ok') finish();
+    });
+  }
+  /* Usean kuvan tunnistus ja yhdistäminen (skannaustila) */
+  async function ocrFrames(blobs) {
+    const c = S.check;
+    let last = Date.now(), wd = null, i = 0;
+    const msg = t => { const el = $('#ocrMsg'); if (el) el.textContent = t; };
+    const prog = (st, p) => { last = Date.now(); msg(/load|initial/i.test(st) ? 'Ladataan tekstintunnistusta… ' + Math.round(p * 100) + ' %' : `Luetaan kuvaa ${i + 1} / ${blobs.length}…`); };
+    c.busy = 'Ladataan tekstintunnistusta…'; c.ocrErr = null; renderCheck();
+    try {
+      const why = await ocrPreflight();
+      if (why) throw { why };
+      const stall = new Promise((_, rej) => { wd = setInterval(() => { if (Date.now() - last > 45000) rej({ why: 'stall' }); }, 2000); });
+      const work = (async () => {
+        const w = await getWorker(prog), shots = [];
+        for (i = 0; i < blobs.length; i++) {
+          last = Date.now(); msg(`Luetaan kuvaa ${i + 1} / ${blobs.length}…`);
+          const cv = await prepOcr(blobs[i]);
+          const r = await w.recognize(cv, {}, { text: true, blocks: true });
+          const lines = ocrWordsOf(r && r.data);
+          if (lines.length) shots.push({ lines });
+        }
+        return shots;
+      })();
+      const shots = await Promise.race([work, stall]);
+      clearInterval(wd);
+      let txt = '', unsure = [];
+      const gs = ocrMergeShots(shots);
+      gs.forEach(g => { const s1 = ocrSelect(g); txt = ocrJoin(txt, s1.text); s1.unsure.forEach(u => { if (!unsure.includes(u)) unsure.push(u); }); });
+      c.busy = null;
+      if (!txt || txt.replace(/^Ainesosat:\s*/i, '').length < 8) { renderCheck(); toast('Kuvista ei löytynyt tekstiä. Kokeile uudelleen lähempää ja paremmassa valossa.'); return; }
+      c.shots = shots; c.draft = txt; c.ocrOut = txt; c.ocrRaw = txt;
+      c.unsure = unsure.filter(u => txt.includes(u)); c.ocrGroups = gs.length;
+      c.thumb = URL.createObjectURL(blobs[Math.floor(blobs.length / 2)]);
+      renderCheck();
+      const ta = $('#ingText'); if (ta) { ta.focus(); ta.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+      toast(gs.length > 1 ? 'Kaikkia kuvia ei saatu yhdistettyä. Tarkista teksti.' : `${blobs.length} kuvaa yhdistetty. Tarkista teksti.`);
+    } catch (e) {
+      clearInterval(wd);
+      c.busy = null;
+      if (e && e.why === 'stall') { try { if (tessWorker) tessWorker.terminate(); } catch (x) { } tessWorker = null; }
+      c.ocrErr = OCR_WHY[(e && e.why) || ''] || 'tunnistus ei käynnistynyt (' + String((e && e.message) || e || '').slice(0, 80) + ')';
+      renderCheck();
+    }
+  }
   /* ---------- Kuvasta luetun tekstin rivitys: rivien sijainnista päätellään, jatkuuko lause ---------- */
   const OCR_BULLET_RE = /^(?:[oOeEcC0°º©®¢•·«»*+~>¬=]|[-–—_]{1,2}|\(\s?\)|\[\s?\])\s+(?=[\dA-Za-zÄÖÅäöå½¼¾⅓])/;
   function fixOcrLine(t) {
@@ -5002,6 +5201,7 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     c.busy = null;
     if (p && p.ing) { await offUse(p); toast('Tuote löytyi Open Food Factsista'); return; }
     if (p && p.name) c.product = [p.brand, p.name].filter(Boolean).join(' ');
+    c.codeMiss = code;
     renderCheck();
     toast(c.histId ? 'Uusi viivakoodi' : 'Uusi tuote: kuvaa ainesosat, niin se muistetaan');
   }
@@ -5439,6 +5639,10 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       ${(st.ignoreLines || []).length ? `<div class="card"><div class="setrow"><div><b>Muistetut ohitukset</b><p class="muted">${st.ignoreLines.length} riviä, jotka olet merkinnyt ohitettaviksi resepteissä.</p></div><button class="btn ghost small" data-act="igclear">Tyhjennä</button></div></div>` : ''}
       ${Object.keys(st.ocrFix || {}).length ? `<div class="card"><div class="setrow"><div><b>Opitut tekstikorjaukset</b><p class="muted">${Object.keys(st.ocrFix).length} sanaa, jotka olet korjannut kuvasta luetussa tekstissä. Sovellus korjaa ne jatkossa itse.</p></div><button class="btn ghost small" data-act="ocrclear">Tyhjennä</button></div></div>` : ''}
       <div class="card">
+        <div><b>Open Food Facts -tunnus</b><p class="muted">Jos viivakoodilla ei löydy tuotetta, voit tarkistuksen jälkeen lisätä sen ainesosat avoimeen Open Food Facts -tietokantaan. Silloin tuote löytyy jatkossa sinulta ja kaikilta muilta. Ilman tunnusta sovellus kopioi ainesosat ja avaa lisäyssivun; tunnuksella lähetys onnistuu suoraan sovelluksesta. Tunnus tallentuu vain tälle laitteelle. Ilmaisen tunnuksen saa osoitteesta <a href="https://world.openfoodfacts.org/cgi/user.pl" target="_blank" rel="noopener">openfoodfacts.org</a>.</p></div>
+        ${offAuth() ? `<div class="setrow"><div><b>${esc(offAuth().user)}</b><p class="muted">Tunnus tallennettu</p></div><button class="btn ghost small" data-act="offforget">Poista</button></div>` : `<input id="offUser" type="text" autocomplete="username" placeholder="Käyttäjätunnus" aria-label="Open Food Facts -käyttäjätunnus"><input id="offPass" type="password" autocomplete="current-password" placeholder="Salasana" aria-label="Open Food Facts -salasana"><div class="row"><button class="btn soft small" data-act="offsave">Tallenna tunnus</button></div>`}
+      </div>
+      <div class="card">
         <div><b>Oletusyksiköt</b></div>
         <div class="seg">${UNIT_MODES.map(([k, l]) => `<button data-act="defunits" data-v="${k}" aria-pressed="${pressed(st.units === k)}">${l}</button>`).join('')}</div>
       </div>
@@ -5473,6 +5677,7 @@ hiilihydraatit sokereita proteiini suolaa kuitua
         /* epävarmat sanat, joita käyttäjä ei korjannut, näytetään tuloksen yhteydessä */
         const uns = (c.unsure || []).filter(u => c.draft.includes(u));
         await submitCheck(c.draft, { product: c.product, thumb: th || null, unsure: uns }); break; }
+      case 'scan': syncCheck(); await openScan(); break;
       case 'unsure': { const ta = $('#ingText'); if (ta && val) { const i = ta.value.indexOf(val); if (i >= 0) { ta.focus(); ta.setSelectionRange(i, i + val.length); } } break; }
       case 'fixtext': c.draft = c.sub.text; c.product = c.sub.product || ''; renderCheck(); window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => $('#ingText').focus(), 300); break;
       case 'fav': { const it = S.history.find(x => x.id === c.histId); if (it) { it.fav = !it.fav; await put('history', it); syncCheck(); renderCheck(); toast(it.fav ? 'Lisätty suosikkeihin' : 'Poistettu suosikeista'); } break; }
@@ -5481,6 +5686,9 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       case 'cfrun': openCF(); break;
       case 'offfind': await offFind(); break;
       case 'offclose': c.off = null; renderCheck(); break;
+      case 'offshare': await offShare(); break;
+      case 'offsave': { const u = ($('#offUser') || {}).value || '', p = ($('#offPass') || {}).value || ''; if (!u.trim() || !p) { toast('Kirjoita käyttäjätunnus ja salasana.'); break; } try { localStorage.setItem('peace-off-auth', JSON.stringify({ user: u.trim(), pass: p })); } catch (x) { } renderSettings(); toast('Tunnus tallennettu tälle laitteelle'); break; }
+      case 'offforget': try { localStorage.removeItem('peace-off-auth'); } catch (x) { } renderSettings(); toast('Tunnus poistettu'); break;
       case 'offpick': { const p = c.off && c.off.list && c.off.list[parseInt(t.dataset.i, 10)]; if (p) { syncCheck(); await offUse(p); } break; }
       case 'cook': syncRecipe(); openCook(); break;
       case 'bkexp': await exportBackup(); break;
