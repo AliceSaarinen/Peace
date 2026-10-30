@@ -33,6 +33,7 @@ blocks.forEach(b => {
   if (en) t(!/[äöå]/i.test(outIng.map(i => i.name).join(' ')), 'kieli sekaisin', outIng.map(i => i.name).join(' | '));
   const FI_WORD = /[äöå]|\b(kuutioina|viipaleina|suikaleina|valinnainen|halutessa|tai|ja|noin|esim|sekoita|lisää|paista|keitä)\b/i;
   if (en) { const bad = outIng.map(i => i.note || '').concat(r.steps).filter(x => FI_WORD.test(x)); t(!bad.length, 'suomea englanninkielisessä', bad.join(' | ')); }
+  if (en && !process.env.LANGFI) { const bad = r.changes.map(c => c.from + ' → ' + c.to + ' | ' + c.why).concat([r.notes || '']).filter(x => /[äöå]/i.test(x)); t(!bad.length, 'suomea perusteluissa tai muistiinpanoissa', bad.join(' || ').slice(0, 300)); }
   (check || '').split(',').filter(Boolean).forEach(w => { const it = outIng.find(i => (i.name + ' ' + (i.note || '')).toLowerCase().includes(w.trim())); t(it && (it.changed || /tarkista|valitse|check|choose/i.test(it.note || '')), 'ei pakkausvaroitusta', w); });
   /* keittiökemia: odotettu tehtävä ja korvike, ja korvikkeen ominaisuudet sopivat tehtävään */
   const CH = window.VegChem;
