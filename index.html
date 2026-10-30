@@ -5107,14 +5107,15 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     const root = $('#cropRoot');
     root.innerHTML = `<div class="crop scan" role="dialog" aria-modal="true" aria-label="${REC ? 'Skannaa resepti' : 'Skannaa ainesosat'}">
       <div class="stagewrap"><div class="sview"><video playsinline muted autoplay></video><div class="sframe"></div><div class="sflash"></div></div></div>
-      <p class="shint" aria-live="polite">${REC ? 'Pidä puhelin reseptin yläpäässä ja siirrä sitä hitaasti alaspäin niin, että koko resepti kulkee kehyksen läpi.' : 'Kierrä tuotetta hitaasti niin, että koko ainesosaluettelo kulkee kehyksen läpi. Pitkässä luettelossa siirrä kameraa hitaasti alaspäin.'}</p>
+      <p class="shint" aria-live="polite">${REC ? 'Aseta reseptin alku kehykseen ja paina Aloita.' : 'Aseta ainesosaluettelon alku kehykseen ja paina Aloita.'}</p><p hidden class="shint2">${REC ? 'Pidä puhelin reseptin yläpäässä ja siirrä sitä hitaasti alaspäin niin, että koko resepti kulkee kehyksen läpi.' : 'Kierrä tuotetta hitaasti niin, että koko ainesosaluettelo kulkee kehyksen läpi. Pitkässä luettelossa siirrä kameraa hitaasti alaspäin.'}</p>
       <div class="sprog" aria-hidden="true"><i></i></div>
-      <div class="cbar"><button class="btn ghost" data-k="no" aria-label="Peruuta">${icon('i-x')}</button><span class="scount" aria-live="polite">0 kuvaa</span><button class="btn primary" data-k="ok" disabled>${icon('i-ok')}Valmis</button></div></div>`;
+      <div class="cbar"><button class="btn ghost" data-k="no" aria-label="Peruuta">${icon('i-x')}</button><span class="scount" aria-live="polite">0 kuvaa</span><button class="btn primary" data-k="ok" disabled hidden>${icon('i-ok')}Valmis</button><button class="btn primary" data-k="go">${icon('i-scan')}Aloita</button></div></div>`;
     document.body.style.overflow = 'hidden';
     const video = root.querySelector('video'), cnt = root.querySelector('.scount'), ok = root.querySelector('[data-k="ok"]'), bar = root.querySelector('.sprog i'), hint = root.querySelector('.shint'), flash = root.querySelector('.sflash');
     video.srcObject = stream;
     try { await video.play(); } catch (e) { }
-    const frames = [];
+    const frames = []; let started = false;
+    const go = root.querySelector('[data-k="go"]');
     let prev = null, acc = { x: 0, y: 0 }, maxSharp = 0, timer = 0, done = false, busyGrab = false, still = 0;
     const small = document.createElement('canvas'), sg = small.getContext('2d', { willReadFrequently: true });
     const stop = () => { done = true; clearInterval(timer); stream.getTracks().forEach(t => t.stop()); root.innerHTML = ''; document.body.style.overflow = ''; };
@@ -5134,7 +5135,7 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       if (frames.length >= MAXF) finish();
     };
     const tick = async () => {
-      if (done || busyGrab || !video.videoWidth) return;
+      if (done || busyGrab || !video.videoWidth || !started) return;
       const w = SCAN_W, h = Math.max(8, Math.round(SCAN_W * video.videoHeight / video.videoWidth));
       if (small.width !== w) { small.width = w; small.height = h; }
       const cur = scanGray(video, sg, w, h);
@@ -5170,6 +5171,12 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       const k = (e.target.closest('[data-k]') || {}).dataset; if (!k || !k.k) return;
       if (k.k === 'no') stop();
       if (k.k === 'ok') finish();
+      if (k.k === 'go' && !started) {
+        /* skannaus alkaa vasta, kun käyttäjä on asettanut kameran luettelon alkuun */
+        started = true; prev = null; acc = { x: 0, y: 0 }; still = 0;
+        go.hidden = true; ok.hidden = false;
+        hint.textContent = root.querySelector('.shint2').textContent;
+      }
     });
   }
   /* Kahden kuvan rivit yhteen: B:n alku = A:n loppu; B:n rivit siirretään A:n koordinaatteihin, jotta rivitys toimii koko sivulle */
