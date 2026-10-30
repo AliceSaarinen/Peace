@@ -768,7 +768,7 @@ M|maitohappobakteerit|Maitohappobakteerit|maitohappobakteeri,maitohappobakteerit
 M|entsyymit|Entsyymit|~entsyymi,~entsyymit,~entsyymeja,~enzymes,~enzyme,~enzym$|Mikrobi-, kasvi- tai eläinperäisiä.|0.8|
 M|kapseli|Kapselikuori|~kapseli,~kapselit,~kapselin,~capsule,kapselikuori,softgel,pehmeakapseli,pehmytkapseli|Kapselikuori on usein liivatetta. Vegaaniset kapselit ovat hypromelloosia (HPMC) tai pullulaania.|0.4|medicine,other
 W|palmu|Palmuöljy|palmuoljy,palmurasva,palmisydanoljy,palm oil,palm kernel,palmolja,~palmol$,~palmu$,palmfett|Palmuöljy (oma varoitus).||
-V|v1||munakoiso,eggplant,butternut,juustokumina,juustokuminaa,juustokuminan,cumin,silkkitofu,silken tofu,silk tofu,kala namak,flax egg,flax eggs,chia egg,chia eggs,pellavamuna,chiamuna,creamy,creaminess,peanut butter,nut butter,honeydew,honeysuckle,honeybush,milk thistle,cream of tartar,viinikivi,kalamata,voikukka,maidoton,maidottomia,laktoositon,munaton,liivatteeton,maitotuotteeton,dairy-free,dairy free,milk-free,milk free,lactose-free,lactose free,egg-free,egg free,gelatin-free,munankorvike,egg replacer,egg substitute,keinonahka,tekonahka,faux leather,vegan leather,pu-nahka,pu leather,synthetic leather,tekoturkis,faux fur,keinosilkki,artificial silk,art silk,hypromelloosi,hypromellose,hpmc,pullulaani,pullulan,cocoa butter,kaakaovoi,sheavoi,maapahkinavoi,pahkinavoi,mantelivoi,cashewvoi,omenavoi,kookosmaito,kauramaito,soijamaito,mantelimaito,riisimaito,kookoskerma,kaurakerma,soijakerma,kasvikerma,kasvirasva,kasvijuusto,kasvimaito,nyhtokaura,vegaaninen,vegan$,ei sisalla,porkkana,hunajameloni,osterivinokas,oyster mushroom,lobster mushroom,crabapple,crab apple,lihas,maitohorsma,beefsteak tomato,kanaali,kanava,made in turkey,valmistettu turkissa,valmistusmaa turkki,valmistusmaa: turkki,country of origin turkey|||
+V|v1||munakoiso,eggplant,butternut,juustokumina,juustokuminaa,juustokuminan,cumin,silkkitofu,silken tofu,silk tofu,kala namak,flax egg,flax eggs,chia egg,chia eggs,pellavamuna,chiamuna,creamy,creaminess,siemen-tuorejuusto,siemen-tuorejuustoa,siemen-tuorejuuston,siemen-juusto,siemen-juustoa,siemen-juuston,seed cream cheese,seed cheese,cashew-tuorejuusto,cashew-tuorejuustoa,cashew-tuorejuuston,cashew-tuorejuustoon,cashewtuorejuusto,cashew-juusto,cashew-juustoa,cashew-juuston,cashewjuusto,cashew cream cheese,cashew cheese,kermainen,kermaisen,kermaiseksi,kermaista,kermaisuus,kermaisuuden,kermaisesti,kermaisia,peanut butter,nut butter,honeydew,honeysuckle,honeybush,milk thistle,cream of tartar,viinikivi,kalamata,voikukka,maidoton,maidottomia,laktoositon,munaton,liivatteeton,maitotuotteeton,dairy-free,dairy free,milk-free,milk free,lactose-free,lactose free,egg-free,egg free,gelatin-free,munankorvike,egg replacer,egg substitute,keinonahka,tekonahka,faux leather,vegan leather,pu-nahka,pu leather,synthetic leather,tekoturkis,faux fur,keinosilkki,artificial silk,art silk,hypromelloosi,hypromellose,hpmc,pullulaani,pullulan,cocoa butter,kaakaovoi,sheavoi,maapahkinavoi,pahkinavoi,mantelivoi,cashewvoi,omenavoi,kookosmaito,kauramaito,soijamaito,mantelimaito,riisimaito,kookoskerma,kaurakerma,soijakerma,kasvikerma,kasvirasva,kasvijuusto,kasvimaito,nyhtokaura,vegaaninen,vegan$,ei sisalla,porkkana,hunajameloni,osterivinokas,oyster mushroom,lobster mushroom,crabapple,crab apple,lihas,maitohorsma,beefsteak tomato,kanaali,kanava,made in turkey,valmistettu turkissa,valmistusmaa turkki,valmistusmaa: turkki,country of origin turkey|||
 `;
 
 /* Sanat, jotka edeltävinä sanoina tai yhdyssanan alkuosina tekevät maito-, voi-, kerma- tai juustosanasta kasviperäisen */
@@ -856,7 +856,7 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
   /* Kotitekoiset versiot. base = ml (tai g) jota resepti vastaa. */
   const HOMEMADE = {
     tuorejuusto: { name: 'cashew-tuorejuustoa', title: 'Cashew-tuorejuusto', base: 200, items: [[2, 'dl', 'cashewpähkinöitä (liotettu)'], [2, 'rkl', 'sitruunamehua'], [1, 'tl', 'omenaviinietikkaa'], [0.5, 'tl', 'suolaa'], [0.5, 'dl', 'vettä']],
-      step: 'Tee cashew-tuorejuusto: liota cashewpähkinöitä 4 tuntia tai keitä niitä 10 minuuttia ja valuta. Soseuta ne sitruunamehun, etikan, suolan ja veden kanssa täysin sileäksi. Jäähdytä vähintään tunti, jolloin tuorejuusto jähmettyy.' },
+      step: 'Tee cashew-tuorejuusto: liota cashewpähkinöitä 4 tuntia tai keitä niitä 10 minuuttia ja valuta. Soseuta ne sitruunamehun, etikan, suolan ja veden kanssa täysin sileäksi. Jäähdytä vähintään tunti, jolloin se jähmettyy.' },
     kookoskerma: { name: 'kookoskermaa', title: 'Kookoskerma', base: 200, items: [[1, 'tölkki', 'täysrasvaista kookosmaitoa (vain kiinteä osa)']],
       step: 'Tee kookoskerma: jäähdytä kookosmaitotölkki jääkaapissa yön yli. Kaavi kiinteä osa kulhoon ja vatkaa se kuohkeaksi. Neste jää talteen esimerkiksi smoothieen.' },
     cashewkerma: { name: 'cashewkermaa', title: 'Cashewkerma', base: 200, items: [[1, 'dl', 'cashewpähkinöitä (liotettu)'], [1.5, 'dl', 'vettä']],
@@ -864,11 +864,22 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
     kaurajuoma: { name: 'kotitekoista kaurajuomaa', title: 'Kaurajuoma', base: 500, items: [[1, 'dl', 'kaurahiutaleita'], [5, 'dl', 'kylmää vettä'], [1, 'mm', 'suolaa']],
       step: 'Tee kaurajuoma: soseuta kaurahiutaleet, kylmä vesi ja suola 20–30 sekuntia ja siivilöi liinan läpi. Lyhyt soseutus estää juomaa muuttumasta limaiseksi.' },
     cashewjuusto: { name: 'cashew-juustoa', title: 'Cashew-juusto', base: 100, items: [[1.5, 'dl', 'cashewpähkinöitä (liotettu)'], [3, 'rkl', 'ravintohiivaa'], [1, 'rkl', 'sitruunamehua'], [0.5, 'tl', 'suolaa'], [0.5, 'tl', 'valkosipulijauhetta'], [1, 'dl', 'vettä']],
-      step: 'Tee cashew-juusto: soseuta ainekset sileäksi. Käytä juustokastikkeena tai levitä gratiinin pinnalle, jolloin se kuorettuu uunissa.' },
+      step: 'Tee cashew-juusto: soseuta ainekset sileäksi. Käytä kastikkeena tai levitä gratiinin pinnalle, jolloin se kuorettuu uunissa.' },
     cashewfraiche: { name: 'cashew-fraichea', title: 'Cashew-fraiche', base: 200, items: [[1.5, 'dl', 'cashewpähkinöitä (liotettu)'], [2, 'rkl', 'sitruunamehua'], [1, 'dl', 'vettä'], [1, 'mm', 'suolaa']],
       step: 'Tee cashew-fraiche: soseuta ainekset sileäksi ja anna maustua jääkaapissa puoli tuntia.' },
     cashewmajoneesi: { name: 'cashew-majoneesia', title: 'Cashew-majoneesi', base: 100, items: [[1, 'dl', 'cashewpähkinöitä (liotettu)'], [1, 'rkl', 'sitruunamehua'], [1, 'tl', 'sinappia'], [0.5, 'dl', 'vettä'], [1, 'mm', 'suolaa']],
       step: 'Tee cashew-majoneesi: soseuta ainekset paksuksi ja sileäksi.' }
+  };
+
+  /* Kotitekoiset versiot englanniksi (englanninkielinen resepti pysyy englanninkielisenä) */
+  const HOMEMADE_EN = {
+    tuorejuusto: { name: 'cashew cream cheese', title: 'Cashew cream cheese', items: ['soaked cashews', 'lemon juice', 'apple cider vinegar', 'salt', 'water'], step: 'Make the cashew cream cheese: soak the cashews for 4 hours or boil them for 10 minutes and drain. Blend with the lemon juice, vinegar, salt and water until completely smooth. Chill for at least an hour so it firms up.' },
+    kookoskerma: { name: 'coconut cream', title: 'Coconut cream', items: ['full-fat coconut milk (solid part only)'], step: 'Make the coconut cream: chill the can of coconut milk overnight. Scoop the solid part into a bowl and whip until fluffy. Save the liquid for a smoothie.' },
+    cashewkerma: { name: 'cashew cream', title: 'Cashew cream', items: ['soaked cashews', 'water'], step: 'Make the cashew cream: soak the cashews for 2–4 hours, drain and blend with the water until smooth.' },
+    kaurajuoma: { name: 'homemade oat milk', title: 'Oat milk', items: ['rolled oats', 'cold water', 'salt'], step: 'Make the oat milk: blend the oats, cold water and salt for 20–30 seconds and strain through a cloth. A short blend keeps it from turning slimy.' },
+    cashewjuusto: { name: 'cashew cheese', title: 'Cashew cheese', items: ['soaked cashews', 'nutritional yeast', 'lemon juice', 'salt', 'garlic powder', 'water'], step: 'Make the cashew cheese: blend everything until smooth. Use it as a sauce or spread it over a gratin, where it forms a crust in the oven.' },
+    cashewfraiche: { name: 'cashew crème fraîche', title: 'Cashew crème fraîche', items: ['soaked cashews', 'lemon juice', 'water', 'salt'], step: 'Make the cashew crème fraîche: blend everything until smooth and let it rest in the fridge for 30 minutes.' },
+    cashewmajoneesi: { name: 'cashew mayonnaise', title: 'Cashew mayonnaise', items: ['soaked cashews', 'lemon juice', 'mustard', 'water', 'salt'], step: 'Make the cashew mayo: blend everything until thick and smooth.' }
   };
 
   const NUT_RE = /(cashew|pahkin|mantel|pistaasi|pekaani|macadamia|walnut|pecan|almond|hazelnut|(^| )nuts?( |$))/;
@@ -883,7 +894,7 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
       { m: /(kaurakerma|kasvikerma|soijakerma|ruokakerma|kookoskerma ruoan)/, to: () => ({ homemade: 'cashewkerma' }), why: 'Ruokakerma tehdään itse cashewpähkinöistä.' },
       { m: /(kaurafraiche|smetana|vegaaninen smetana|kermaviili)/, to: () => ({ homemade: 'cashewfraiche' }), why: 'Hapan kerma tehdään itse cashewpähkinöistä.' },
       { m: /((soija|kaura|kasvi|manteli|riisi)juoma|kasvimaito)/, to: () => ({ homemade: 'kaurajuoma' }), why: 'Kasvijuoma tehdään itse kaurahiutaleista.' },
-      { m: /(vegaanista juustoa|vegaaninen juusto|raastejuust|kasvijuust|vegaanista mozzarellaa|vegaanista fetaa)/, to: () => ({ homemade: 'cashewjuusto' }), why: 'Juusto tehdään itse cashewpähkinöistä ja ravintohiivasta.' },
+      { m: /(vegaanista juusto|vegaaninen juusto|vegaanista juustoraast|juustoraaste|raastejuust|kasvijuust|vegaanista mozzarell|vegaanista fetaa|vegejuust|vegan cheese|vegan mozzarella|vegan parmesan|shredded vegan)/, to: () => ({ homemade: 'cashewjuusto' }), why: 'Juusto tehdään itse cashewpähkinöistä ja ravintohiivasta.' },
       { m: /(majoneesi)/, to: () => ({ homemade: 'cashewmajoneesi' }), why: 'Majoneesi tehdään itse cashewpähkinöistä.' },
       { m: /(margariini|leivontarasva|levite|vegaanista voita|vegaaninen voi)/, to: (x, c) => {
           if (c.R.has('rasvaton')) return { name: 'omenasosetta (sama määrä)', why: 'Rasvaton: omenasose pitää taikinan kosteana.' };
@@ -906,14 +917,18 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
       { m: /(soija|soy|tofu|tempeh|edamame)/, to: x => /juoma|milk/.test(x) ? 'kaurajuomaa' : /kastike|sauce/.test(x) ? 'kookosaminoja' : /jogurt|rahka/.test(x) ? 'kaurajogurttia' : /rouhe/.test(x) ? 'härkäpapurouhetta' : /tofu/.test(x) ? 'härkäpaputofua tai kikherneitä' : /lesitiini/.test(x) ? 'auringonkukkalesitiiniä' : 'soijatonta vastinetta', why: 'Soija vaihdetaan kauraan, härkäpapuun tai kookokseen.' }
     ],
     gluteeniton: [
+      { m: /(keksi|keksej|digestive|cracker|biscuit|savoiardi|ladyfinger|lasagnelevy|lasagne sheet|lasagna noodle|vehnatortill|flour tortill|(^| )tortilla)/, not: /(gluteeniton|maissitortill|corn tortill)/,
+        to: x => /lasagne|lasagna/.test(x) ? 'gluteenittomia lasagnelevyjä' : /tortill/.test(x) ? 'maissitortilloja' : /(savoiardi|ladyfinger)/.test(x) ? 'gluteenittomia savoiardi-keksejä' : 'gluteenittomia keksejä', why: 'Kekseissä, lasagnelevyissä ja vehnätortilloissa on gluteenia.' },
       { m: /(kaurapal|nyhtokaura)/, to: () => 'keitettyjä kikherneitä tai härkäpapuja', why: 'Kaurapaloissa ja nyhtökaurassa on tavallista kauraa.' },
-      { m: /(vehna|speltti|spelt|ohra|ruis|grahamjauho|manitoba|all-purpose|bread flour|(^| )jauho(t|ja|a)?( |$)|flour|bulgur|couscous|seitan|korppujauho|mannasuurimo|pasta|makaroni|spagetti|kaurahiutale|kaurajauho|soijakastike|nuudeli)/, not: FLOUR_SAFE,
-        to: x => /kaurahiutale/.test(x) ? 'gluteenittomia kaurahiutaleita' : /kaurajauho/.test(x) ? 'gluteenitonta kaurajauhoa' : /soijakastike/.test(x) ? 'tamaria (gluteeniton soijakastike)' : /pasta|makaroni|spagetti/.test(x) ? 'gluteenitonta pastaa' : /nuudeli/.test(x) ? 'riisinuudeleita' : /bulgur|couscous|manna/.test(x) ? 'kvinoaa' : /seitan/.test(x) ? 'tofua tai kikherneitä' : /korppu/.test(x) ? 'gluteenitonta korppujauhoa' : 'gluteenitonta jauhoseosta',
+      { m: /(vehna|speltti|spelt|ohra|ruis|grahamjauho|manitoba|all-purpose|bread flour|(^| )jauho(t|ja|a)?( |$)|flour|bulgur|couscous|seitan|korppujauho|mannasuurimo|pasta|makaron|spaget|kaurahiutale|kaurajauho|soijakastike|soy sauce|nuudel|noodle)/, not: /(peruna|maissi|riisi|tattari|kikherne|manteli|kookos|gluteeniton|herne|linssi|quinoa|kvinoa|hirssi|tapioka|psyllium|cornstarch|tamari)/,
+        to: x => /kaurahiutale/.test(x) ? 'gluteenittomia kaurahiutaleita' : /kaurajauho/.test(x) ? 'gluteenitonta kaurajauhoa' : /(soijakastike|soy sauce)/.test(x) ? 'tamaria (gluteeniton soijakastike)' : /pasta|makaron|spaget/.test(x) ? 'gluteenitonta pastaa' : /(nuudel|noodle)/.test(x) ? 'riisinuudeleita' : /bulgur|couscous|manna/.test(x) ? 'kvinoaa' : /seitan/.test(x) ? 'tofua tai kikherneitä' : /korppu/.test(x) ? 'gluteenitonta korppujauhoa' : 'gluteenitonta jauhoseosta',
         why: 'Hiivataikinaan lisätään 1 tl psylliumia jokaista 2–3 dl jauhoja kohden, jotta taikina sitoutuu.' }
     ],
     vehnaton: [
-      { m: /(vehna|speltti|spelt|grahamjauho|manitoba|all-purpose|bread flour|(^| )jauho(t|ja|a)?( |$)|flour|bulgur|couscous|seitan|mannasuurimo|korppujauho|pasta|makaroni|spagetti)/, not: /(peruna|maissi|riisi|tattari|kikherne|manteli|kookos|gluteeniton|herne|linssi|ruis|ohra|kaura|quinoa|kvinoa|hirssi|tapioka|cornstarch)/,
-        to: x => /pasta|makaroni|spagetti/.test(x) ? 'riisi- tai linssipastaa' : /bulgur|couscous|manna/.test(x) ? 'kvinoaa tai tattaria' : /seitan/.test(x) ? 'tofua tai kikherneitä' : /korppu/.test(x) ? 'ruiskorppujauhoja' : 'gluteenitonta jauhoseosta',
+      { m: /(keksi|keksej|digestive|cracker|biscuit|savoiardi|ladyfinger|lasagnelevy|lasagne sheet|lasagna noodle|vehnatortill|flour tortill|(^| )tortilla)/, not: /(gluteeniton|maissitortill|corn tortill|vehnaton)/,
+        to: x => /lasagne|lasagna/.test(x) ? 'gluteenittomia lasagnelevyjä' : /tortill/.test(x) ? 'maissitortilloja' : /(savoiardi|ladyfinger)/.test(x) ? 'gluteenittomia savoiardi-keksejä' : 'gluteenittomia keksejä (esim. kaura- tai maissipohjaisia)', why: 'Kekseissä, lasagnelevyissä ja vehnätortilloissa on vehnäjauhoa.' },
+      { m: /(vehna|speltti|spelt|grahamjauho|manitoba|all-purpose|bread flour|(^| )jauho(t|ja|a)?( |$)|flour|bulgur|couscous|seitan|mannasuurimo|korppujauho|pasta|makaron|spaget|nuudel|noodle)/, not: /(peruna|maissi|riisi|tattari|kikherne|manteli|kookos|gluteeniton|herne|linssi|ruis|ohra|kaura|quinoa|kvinoa|hirssi|tapioka|cornstarch)/,
+        to: x => /(nuudel|noodle)/.test(x) ? 'riisinuudeleita' : /pasta|makaron|spaget/.test(x) ? 'riisi- tai linssipastaa' : /bulgur|couscous|manna/.test(x) ? 'kvinoaa tai tattaria' : /seitan/.test(x) ? 'tofua tai kikherneitä' : /korppu/.test(x) ? 'ruiskorppujauhoja' : 'gluteenitonta jauhoseosta',
         why: 'Vehnä ja speltti vaihdetaan. Leivissä ruis- ja kaurajauhot käyvät myös, mutta rakenne muuttuu tiiviimmäksi.' }
     ],
     sokeriton: [
@@ -996,7 +1011,7 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
     return parts.join(', ');
   }
 
-  G.VegRules = { RESTRICTIONS, ORDER, HOMEMADE, RULES, isEnglish, translatePhrase, translateNote };
+  G.VegRules = { RESTRICTIONS, ORDER, HOMEMADE, HOMEMADE_EN, RULES, isEnglish, translatePhrase, translateNote };
   if (typeof module !== 'undefined') module.exports = G.VegRules;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -1520,7 +1535,7 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
     // 1. Lihan ja kalan käsittelyohjeet pois
     if (fleshy) t = t.replace(/\s*nahkapuoli (alaspäin|ylöspäin|alas|ylös)/gi, '').replace(/,? skin[- ]side (down|up)/gi, '').replace(/\s+ja (irtoaa|hiutaloituu|lohkeaa) (helposti|haarukalla)/gi, '').replace(/\s+and flakes easily( with a fork)?/gi, '');
     if (swaps.some(s => s.word === 'silkkitofu' || s.word === 'tofu') && famSet.has('muna')) t = t.replace(/\b([Rr])iko\s+(?=(kanan)?mun)/g, (m, r) => (r === 'R' ? 'L' : 'l') + 'usikoi ');
-    if (famSet.has('muna') && swaps.some(s => /tofu/.test(s.word || ''))) t = t.replace(/([Mm])unakokkeli/g, (m, a) => (a === 'M' ? 'T' : 't') + 'ofukokkeli');
+    if (famSet.has('muna')) { const tf = swaps.some(s => /tofu/.test(s.word || '')); t = t.replace(/([Mm])unakokkeli/g, (m, a) => tf ? (a === 'M' ? 'T' : 't') + 'ofukokkeli' : (a === 'M' ? 'K' : 'k') + 'okkeli'); }
     if (fleshy) {
       t = sentences(t).map(x => {
         if (!HANDLING.test(x)) return x;
@@ -1714,6 +1729,58 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
     // kokonaiset fraasit
     ['pellavamuna: 1 rkl pellavarouhetta + 3 rkl vettä', 'flax egg: 1 tbsp ground flaxseed + 3 tbsp water'],
     ['vegaanista leivontamargariinia (ei kevytlevitettä)', 'vegan baking butter (not a light spread)'],
+    ['liotettuja cashewpähkinöitä (soseutettuna kermaiseksi)', 'soaked cashews (blended until creamy)'],
+    ['kotitekoista kasvislientä (keitä sipulista, porkkanasta ja sellerinvarresta)', 'homemade vegetable broth (simmer onion, carrot and celery)'],
+    ['gluteenittomia keksejä (esim. kaura- tai maissipohjaisia)', 'gluten-free biscuits (e.g. oat or corn based)'],
+    ['keitettyjä vihreitä linssejä (sama määrä)', 'cooked green lentils (same amount)'],
+    ['herkkusieniä tai osterivinokkaita suikaleina', 'mushrooms or oyster mushrooms, sliced'],
+    ['kaurajuomaa + 1 tl maissitärkkelystä / dl', 'oat milk + 1 tsp cornstarch per 100 ml'],
+    ['kylmäpuristettua rypsiöljyä (0,8 × määrä)', 'cold-pressed canola oil (0.8 × the amount)'],
+    ['pähkinävoita tai omenasosetta (sama määrä)', 'nut butter or applesauce (same amount)'],
+    ['muutama taateli soseutettuna tai jätä pois', 'a few dates, blended, or leave out'],
+    ['keitettyjä kikherneitä tai härkäpapuja', 'cooked chickpeas or fava beans'],
+    ['savupaprikalla maustettuja papuja', 'beans seasoned with smoked paprika'],
+    ['kasvislientä tai vettä paistamiseen', 'vegetable broth or water for sautéing'],
+    ['auringonkukan- tai kurpitsansiemeniä', 'sunflower or pumpkin seeds'],
+    ['auringonkukansiemeniä (liotettu)', 'sunflower seeds (soaked)'],
+    ['gluteenittomia savoiardi-keksejä', 'gluten-free ladyfingers'],
+    ['gluteenittomia lasagnelevyjä', 'gluten-free lasagna sheets'],
+    ['gluteenittomia kaurahiutaleita', 'gluten-free rolled oats'],
+    ['gluteenittomia keksejä', 'gluten-free biscuits'],
+    ['gluteenitonta jauhoseosta', 'gluten-free flour blend'],
+    ['gluteenitonta kaurajauhoa', 'gluten-free oat flour'],
+    ['gluteenitonta korppujauhoa', 'gluten-free breadcrumbs'],
+    ['gluteenitonta pastaa', 'gluten-free pasta'],
+    ['härkäpaputofua tai kikherneitä', 'fava bean tofu or chickpeas'],
+    ['härkäpaputofua', 'fava bean tofu'],
+    ['härkäpapupaloja', 'fava bean chunks'],
+    ['härkäpapurouhetta', 'fava bean mince'],
+    ['riisi- tai linssipastaa', 'rice or lentil pasta'],
+    ['riisinuudeleita', 'rice noodles'],
+    ['ruiskorppujauhoja', 'rye breadcrumbs'],
+    ['kvinoaa tai tattaria', 'quinoa or buckwheat'],
+    ['maissitortilloja', 'corn tortillas'],
+    ['taatelisosetta (sama määrä)', 'date paste (same amount)'],
+    ['omenasosetta (sama määrä)', 'applesauce (same amount)'],
+    ['pähkinävoita (sama määrä)', 'nut butter (same amount)'],
+    ['tahinia (sama määrä)', 'tahini (same amount)'],
+    ['tahinia tai auringonkukansiemenvoita', 'tahini or sunflower seed butter'],
+    ['auringonkukkalesitiiniä', 'sunflower lecithin'],
+    ['kookosaminoja', 'coconut aminos'],
+    ['kaurajogurttia', 'oat yogurt'],
+    ['soijatonta vastinetta', 'soy-free alternative'],
+    ['keitettyjä kikherneitä', 'cooked chickpeas'],
+    ['jauhettuja cashewpähkinöitä tai manteleita', 'ground cashews or almonds'],
+    ['jauhettuja cashewpähkinöitä', 'ground cashews'],
+    ['(valinnainen, sisältää rasvaa)', '(optional, contains fat)'],
+    ['(jätä pois)', '(leave out)'],
+    ['nori-levällä maustettuna', 'seasoned with nori'],
+    ['tummaa suklaata (vähintään 70 %)', 'dark chocolate (at least 70%)'],
+    ['vaniljauutetta tai vaniljajauhetta', 'vanilla extract or vanilla powder'],
+    ['kotitekoista kaurajuomaa', 'homemade oat milk'],
+    ['pähkinävoita', 'nut butter'],
+    ['omenasosetta', 'applesauce'],
+    ['manteleita', 'almonds'],
     ['vegaanista leivontamargariinia (huoneenlämpöinen, ei kevytlevitettä)', 'vegan baking butter (room temperature, not a light spread)'],
     ['kylmää vegaanista leivontamargariinia (ei kevytlevitettä)', 'cold vegan baking butter (not a light spread)'],
     ['vegaanista leivontamargariinia (kiinteä, ei kevytlevitettä)', 'firm vegan baking butter (not a light spread)'],
@@ -2622,6 +2689,63 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
     return cur;
   }
 
+  /* Rajausten vaihdot myös valmistusvaiheisiin: "lisää sokeri" → "lisää taatelisose", "paista öljyssä" → "paista tilkassa vettä" */
+  const ENDS = (base, map) => (m, pre, end) => base + (map[end || ''] != null ? map[end || ''] : '');
+  const SOSE = { '': 'sose', n: 'soseen', a: 'sosetta', ta: 'sosetta', in: 'soseeseen', iin: 'soseeseen', lla: 'soseella', sta: 'soseesta', ssa: 'soseessa', t: 'sose', ita: 'sosetta', ja: 'sosetta', eita: 'sosetta' };
+  /* suomen sanarajat (\b ei tunne ä- ja ö-kirjaimia) */
+  const FW = (src, fl) => new RegExp('(?<![\\p{L}\\p{N}])(?:' + src + ')(?![\\p{L}\\p{N}])', fl || 'giu');
+  const RSTEP = {
+    sokeriton: (t, c, en) => en
+      ? t.replace(/\b(granulated |white |brown |light brown |dark brown |caster |powdered |icing |confectioners'? )?sugars?\b/gi, 'date paste').replace(/\b(maple |golden |corn )?syrup\b|\bhoney\b/gi, 'date paste').replace(/\bvanilla sugar\b/gi, 'vanilla extract')
+      : t.replace(FW('vaniljasokeri(n|a)?'), (m, e) => 'vaniljauute' + ({ n: 'en', a: 'tta' }[e] || ''))
+         .replace(FW('(fariini|tomu|rae|hieno|ruoko|kide)?sokeri(n|a|in|lla|sta|ssa|t|ta)?'), (m, pre, e) => 'taateli' + SOSE[e || ''])
+         .replace(FW('(?:[\\p{L}]*?)hillo(?:n|a|on|lla|sta)?'), m => 'taateli' + SOSE[/hillon$/.test(m) ? 'n' : /hilloa$/.test(m) ? 'a' : /hilloon$/.test(m) ? 'in' : /hillolla$/.test(m) ? 'lla' : /hillosta$/.test(m) ? 'sta' : ''])
+         .replace(FW('siira(?:ppi|pin|ppia|ppiin|pilla)|hunaja(?:n|a|an|lla)?'), m => 'taateli' + SOSE[/(pin|jan)$/.test(m) ? 'n' : /(ppia|jaa)$/.test(m) ? 'a' : /(ppiin|jaan)$/.test(m) ? 'in' : /lla$/.test(m) ? 'lla' : '']),
+    fat: (t, c, en) => {
+      if (en) {
+        t = t.replace(/\bheat (the |some )?oil\b/gi, 'heat a splash of water').replace(/\bin (hot |the |a little )?oil\b/gi, 'in a splash of water').replace(/\b(oil|grease|butter) (a|the) ([a-z0-9 ×x-]*?)(pan|dish|tin)\b/gi, 'line $2 $3$4 with parchment');
+        return t.replace(/\b(melted )?(vegan butter|oil)\b/gi, c.bake ? 'applesauce' : 'vegetable broth');
+      }
+      t = t.replace(/,?\s*(ja )?voitele [^.,]*?(margariinilla|öljyllä|rasvalla)/gi, (m, ja) => ja ? '' : ', vuoraa vuoka leivinpaperilla')
+           .replace(FW('öljyssä|margariinissa|voissa|rasvassa'), 'tilkassa vettä')
+           .replace(FW('kuumenna (?:öljy|margariini)'), 'kuumenna tilkka vettä')
+           .replace(/(nostele|lisää|laita) (pinnalle |päälle )?margariininokare[\p{L}]*( ja )?/giu, (m, v, p2, ja) => ja ? '' : '')
+           .replace(FW('margariinisula(?:lla|a|n)?|sulatetulla margariinilla'), m => /lla$/.test(m) ? 'kasvijuomalla' : 'kasvijuomaa')
+           .replace(FW('margariini(kreemi[\\p{L}]*)'), (m, r) => r);
+      t = t.replace(FW('kookosmaito|kookosmaidon|kookosmaitoa|kookosmaitoon|kookoskerma|kookoskerman|kookoskermaa|kookoskermaan'), m => 'kaurajuom' + ({ n: 'an', a: 'aa', on: 'aan', an: 'aan' }[(m.match(/(maidon|kerman)$/) ? 'n' : m.match(/(maitoa|kermaa)$/) ? 'a' : m.match(/(maitoon|kermaan)$/) ? 'on' : '')] || 'a'));
+      const to = c.bake ? ['omena', SOSE] : ['kasvislie', { '': 'mi', n: 'men', a: 'ntä', ta: 'ntä', in: 'meen', iin: 'meen', lla: 'mellä', sta: 'mestä', ssa: 'messä', t: 'mi' }];
+      return t.replace(FW('(?:sulatettu |sulatettua |sulatetun |pehmeä |pehmeää |pehmeän )?margariini(n|a|in|lla|sta|ssa)?'), (m, e) => to[0] + to[1][e || ''])
+              .replace(FW('öljy(n|ä|yn|llä|stä|ssä)?'), (m, e) => to[0] + to[1][{ n: 'n', 'ä': 'a', yn: 'in', 'llä': 'lla', 'stä': 'sta', 'ssä': 'ssa' }[e] || '']);
+    },
+    soijaton: (t, c, en) => en
+      ? t.replace(/\bsoy sauce\b/gi, 'coconut aminos').replace(/\bsilken tofu\b/gi, 'blended cashews').replace(/\b(smoked )?tofu\b/gi, 'fava bean tofu').replace(/\bsoy milk\b/gi, 'oat milk')
+      : t.replace(FW('silkkitofu(a|n|un)?'), (m, e) => 'cashew' + SOSE[{ a: 'a', n: 'n', un: 'in' }[e] || ''])
+         .replace(FW('(?:savu)?tofu([\\p{L}]*)'), (m, e) => 'härkäpaputofu' + e)
+         .replace(FW('soijakastike|soijakastiketta|soijakastikkeen|soijakastikkeeseen'), m => /tta$/.test(m) ? 'kookosaminoja' : /eseen$/.test(m) ? 'kookosaminoihin' : /en$/.test(m) ? 'kookosaminojen' : 'kookosaminot')
+         .replace(FW('soijajuom(a|an|aa|aan)'), (m, e) => 'kaurajuom' + e),
+    wheat: (t, c, en, gf) => en ? t.replace(/\bseitan\b/gi, 'tofu').replace(gf ? /\bsoy sauce\b/gi : /^$/, 'tamari')
+      : t.replace(FW('seitan(?:ia|in|iin|ista)?'), 'tofu').replace(gf ? FW('soijakastike|soijakastiketta|soijakastikkeen|soijakastikkeeseen') : /^$/, m => /tta$/.test(m) ? 'tamaria' : /en$/.test(m) ? 'tamarin' : /eseen$/.test(m) ? 'tamariin' : 'tamari').replace(FW('makaroni(?:t|ja|en|hin|eja|eihin)?|spageti(?:n)?|spagetti(?:a|in)?'), m => /(ja|eja|tia)$/i.test(m) ? 'pastaa' : /(en|tin)$/i.test(m) ? 'pastan' : /(hin|ihin|tiin)$/i.test(m) ? 'pastaan' : 'pasta')
+  };
+  function restrictSteps(steps, restrictions, ctx, en, changes, VS) {
+    const R = new Set(restrictions || []); if (!R.size) return steps;
+    let out = steps.slice();
+    /* yleinen: rajauksen vaihtama aines, jolla on taivutusmuodot (kaurapalat → sienet, tofu → kikherneet) */
+    const KEY = [[/savutofu/, 'savutofu'], [/silkkitofu/, 'silkkitofu'], [/harkapaputofu/, null], [/tofu/, 'tofu'], [/kikherne/, 'kikherneet'], [/seitan/, 'seitan'], [/kaurapal/, 'kaurapalat'], [/nyhtokaura/, 'nyhtokaura'], [/soijasuikal/, 'soijasuikaleet'], [/(jauhis|kasvipohjaista jauhista)/, 'jauhis'], [/harkapapurouhe/, 'harkapapurouhe'], [/linss/, 'linssit'], [/(herkkusien|osterivinok|sienia)/, 'sienet'], [/kasvismakkara/, 'kasvismakkara'], [/(kaurakerma)/, 'kaurakerma'], [/cashewkerma/, 'cashewkerma'], [/kookoskerma/, 'kookoskerma'], [/kookosmaito/, 'kookosmaito'], [/kaurafraiche/, 'kaurafraiche'], [/kaurajuoma/, 'kaurajuoma'], [/kasvislie/, 'kasvisliemi']];
+    /* aikaisin mainittu aines voittaa ('kaurapaloja, soijasuikaleita tai tofua' → kaurapalat) */
+    const keyOf = x => { const n = prepText(x); let best = null; for (const [re, k] of KEY) { const m = n.match(re); if (m && (!best || m.index < best.i)) best = { i: m.index, k }; } return best ? best.k : null; };
+    (changes || []).forEach(ch => {
+      if (!/^(Sokeriton|Öljytön|Rasvaton|Vehnätön|Gluteeniton|Soijaton|Pähkinätön|Whole food):/.test(ch.why || '')) return;
+      const a = keyOf(ch.from), b = keyOf(ch.to);
+      if (a && b && a !== b && VS.TW[a] && VS.TW[b]) out = out.map(st => VS.retarget(st, a, b));
+    });
+    if (R.has('wholefood') && en) out = out.map(st => st.replace(/\b(shredded |grated |melting )?vegan (cheddar |mozzarella |parmesan )?cheese\b/gi, 'cashew cheese').replace(/\bvegan cream cheese\b/gi, 'cashew cream cheese').replace(/\boat (cooking )?cream\b/gi, 'cashew cream'));
+    if (R.has('wholefood') && !en) out = out.map(st => st.replace(FW('vegetuorejuusto[\\p{L}]*'), m => 'cashew-tuorejuusto' + (/n$/.test(m) ? 'n' : /a$/.test(m) ? 'a' : '')).replace(FW('vegejuusto[\\p{L}]*'), 'cashew-juusto').replace(FW('kaurafraiche(?:n|a|en)?'), 'cashew-fraiche').replace(FW('kasvisliemikuutio(?:t|ita|n)?|liemikuutio(?:t|ita|n)?'), 'kasvisliemi'));
+    if (R.has('sokeriton')) out = out.map(st => RSTEP.sokeriton(st, ctx, en));
+    if (R.has('rasvaton') || R.has('oljyton')) out = out.map(st => RSTEP.fat(st, ctx, en));
+    if (R.has('soijaton')) out = out.map(st => RSTEP.soijaton(st, ctx, en));
+    if (R.has('vehnaton') || R.has('gluteeniton')) out = out.map(st => RSTEP.wheat(st, ctx, en, R.has('gluteeniton')));
+    return out.map(st => st.replace(/\s+([.,])/g, '$1').replace(/\s{2,}/g, ' ').trim());
+  }
   function convertRules(text, restrictions, avoid) { return convertParsed(parseRecipe(text), text, restrictions, avoid); }
   function convertParsed(p, text, restrictions, avoid, opts) {
     const RR = G.VegRules || require('./rules.js');
@@ -2709,7 +2833,7 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
           l.orig = ing.name + ' ' + (ing.note || '');
           let c = applyRestrictions(l, restrictions, ctx, changes, homemades);
           delete c.orig;
-          if (first && sub && sub.word) { c._sw = finalWord(sub.word, c.name, l.name) || undefined; if (!c._sw) delete c._sw; }
+          if (first && sub && sub.word) { /* rajaus vaihtoi korvikkeen: vaiheisiin vegaaninen sana, jonka rajaus muuttaa sitten edelleen */ c._sw = finalWord(sub.word, c.name, l.name) || ((restrictions || []).length ? sub.word : undefined); if (!c._sw) delete c._sw; }
           first = false;
           return c;
         });
@@ -2778,29 +2902,36 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
     // kotitekoiset osat omiksi otsikoikseen
     const preSteps = extraPre.slice();
     homemades.forEach(h => {
-      const hm = RR.HOMEMADE[h.key];
-      let title = hm.title;
-      if ((restrictions || []).includes('pahkinaton')) title = title.replace(/^Cashew/, 'Siemen');
-      out.push({ head: title + ' (tee itse)' });
-      hm.items.forEach(([q, u, name]) => {
+      const hm = RR.HOMEMADE[h.key], hmEn = outEn && RR.HOMEMADE_EN && RR.HOMEMADE_EN[h.key];
+      const nutFree = (restrictions || []).includes('pahkinaton');
+      let title = hmEn ? hmEn.title : hm.title;
+      if (nutFree) title = hmEn ? title.replace(/^Cashew/, 'Seed') : title.replace(/^Cashew/, 'Siemen');
+      out.push({ head: title + (hmEn ? ' (homemade)' : ' (tee itse)'), _hm: !!hmEn });
+      hm.items.forEach(([q, u, name], k) => {
         let it = { qty: q * h.ratio, qty2: null, unit: unitKey(u) || u, name, note: null, changed: false };
         it = applyRestrictions(it, restrictions, ctx, [], [], true);
+        if (hmEn) { it.name = it.name === name ? hmEn.items[k] : VS.toEn(it.name); if (nutFree) it.name = it.name.replace(/soaked cashews/, 'soaked sunflower seeds'); it._hm = true; }
         out.push(it);
       });
-      let st = hm.step;
-      if ((restrictions || []).includes('pahkinaton')) st = st.replace(/cashewpähkinöitä|cashewpähkinät/g, 'auringonkukansiemeniä').replace(/cashew-/gi, 'siemen-');
+      let st = hmEn ? hmEn.step : hm.step;
+      if (nutFree) st = hmEn ? st.replace(/cashews/g, 'sunflower seeds').replace(/cashew /gi, 'seed ') : st.replace(/cashewpähkinöitä|cashewpähkinät/g, 'auringonkukansiemeniä').replace(/cashew-/gi, 'siemen-');
       preSteps.push(st);
     });
+    /* homemade-nimet ainesluettelossa englanniksi */
+    if (outEn && RR.HOMEMADE_EN) out.forEach(i => { if (!i.head && / \(ohje alla\)$/.test(i.name)) { const k = Object.keys(RR.HOMEMADE).find(k => i.name.startsWith(RR.HOMEMADE[k].name)); if (k) i.name = RR.HOMEMADE_EN[k].name + ' (see below)'; } });
+    if (((restrictions || []).includes('rasvaton') || (restrictions || []).includes('oljyton')) && out.some(i => i._role && i._role.key === 'voi:kerrostus')) extraNotes.push(outEn ? 'Laminated (flaky) dough needs a solid fat between the layers, so it cannot be made fat-free. Without fat, make it as an ordinary yeast dough and skip the folding.' : 'Lehtevä taikina tarvitsee kiinteää rasvaa kerrosten väliin, joten sitä ei voi tehdä rasvattomana. Ilman rasvaa tee taikina tavallisena pullataikinana ja jätä taittelu pois.');
+    if ((restrictions || []).includes('wholefood') && out.some(i => !i.head && /margariini/.test(prepText(i.name)))) extraNotes.push(outEn ? 'Whole food: vegan butter was kept, because no whole-food fat behaves like butter in baking and frying. You can use coconut oil or nut butter instead, but the texture will change.' : 'Whole food: margariini jätettiin, koska mikään kokonainen raaka-aine ei toimi leivonnassa ja paistamisessa voin tavoin. Sen tilalla voi käyttää kookosöljyä tai pähkinävoita, mutta rakenne muuttuu.');
     VS.implicitSwaps(p.steps, swaps, ctx, en, ingsIn.filter(i => !i.head).map(i => i.name)).forEach(sw => { swaps.push(sw); changes.push({ from: sw.from + ' (valmistusohjeessa)', to: sw.to, why: 'Valmistusohjeessa mainittu eläinperäinen aines vaihdettiin, vaikka sitä ei ollut ainesluettelossa.' }); });
     let steps = p.steps.map(s => VS.rewriteStep(fToCText(s), swaps, ctx, en)).filter(Boolean);
     /* korvikkeiden tekniikat valmistuksen alkuun, ellei niitä jo mainita */
     if (CH) CH.techniques(out.filter(i => !i.head && i.changed).map(i => i.name), preSteps.concat(steps, extraNotes), outEn).forEach(t => preSteps.push(t));
     if (en && enRepl.length) steps = steps.map(st => enReplace(st, enRepl));
+    steps = restrictSteps(steps, restrictions, ctx, en, changes, VS);
     steps = (outEn ? preSteps.map(VS.stepEn) : preSteps).concat(steps);
     const notes = (p.tips || []).slice();
     if (en && !outEn) notes.push('Ainekset on suomennettu ja valmistusohjeen eläinperäiset ainekset vaihdettu. Valmistusohjeen suomentaminen onnistuu älykkäällä muunnoksella.');
     if (outEn) {
-      out.forEach(i => { if (i.head) i.head = VS.stepEn(i.head); else { if (i.changed) i.name = VS.toEn(i.name); if (i.note) i.note = VS.toEn(i.note); } });
+      out.forEach(i => { if (i._hm) { delete i._hm; return; } if (i.head) i.head = VS.stepEn(i.head); else { if (i.changed) i.name = VS.toEn(i.name); if (i.note) i.note = VS.toEn(i.note); } });
       changes.forEach(c => { c.to = VS.toEn(c.to); });
     }
     const ids = swaps.map(s => s.id);
