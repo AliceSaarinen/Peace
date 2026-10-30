@@ -1,5 +1,6 @@
 # Reseptien testisarja. Jokainen resepti: otsikkorivi "### nimi | aineksia | vaiheita | pakolliset sanat ainesluettelossa (pilkuin)".
 # Viides (valinnainen) kenttä: ainekset, joille odotetaan "tarkista pakkaus" -huomautusta.
+# Kuudes (valinnainen) kenttä: odotettu tehtävä=korvikkeen sana, esim. "muna:vaahto=aquafaba;voi:kuorrute=margariini".
 # Pakolliset sanat tarkistetaan muunnetusta ainesluettelosta (pienillä kirjaimilla, osamerkkijonona).
 ### Makaronilaatikko | 8 | 5 | makaron,sipuli,suola
 Makaronilaatikko
@@ -74,7 +75,7 @@ Liota liivatteet kylmässä vedessä. Vatkaa kerma vaahdoksi.
 Sekoita rahka, tuorejuusto, sokeri ja sitruunamehu. Sulata liivatteet sitruunamehussa ja lisää täytteeseen.
 Kääntele kermavaahto joukkoon ja kaada pohjan päälle.
 Anna hyytyä yön yli.
-### Uunipannukakku | 6 | 2 | vehnäjauho,sokeri,suola
+### Uunipannukakku | 6 | 2 | vehnäjauho,sokeri,suola |  | muna:kohotus=kikherne;maito:leivonta=soija
 Uunipannukakku
 1 l maitoa
 4 kananmunaa
@@ -95,7 +96,7 @@ Kanacurry
 Paista broilerisuikaleet öljyssä. Lisää curry ja paista hetki.
 Lisää kookosmaito, kermaviili ja hunaja. Hauduta 10 minuuttia.
 Tarjoa riisin kanssa.
-### Raparperipiirakka murotaikina samalla rivillä | 7 | 3 | raparper,vehnäjauho,sokeri
+### Raparperipiirakka murotaikina samalla rivillä | 7 | 3 | raparper,vehnäjauho,sokeri |  | voi:mureus=kylm;muna:sitoja=pellava
 Raparperipiirakka
 Murotaikina: 150 g voita, 1 dl sokeria, 1 kananmuna, 3 dl vehnäjauhoja
 Täyte: 500 g raparperia, 2 dl kermaviiliä, 1 dl sokeria
@@ -188,7 +189,7 @@ Caesar dressing
 1/2 cup olive oil
 Juice of 1 lemon
 Mash the anchovies, whisk in yolk, Worcestershire and lemon juice. Drizzle in oil while whisking. Stir in parmesan.
-### Chocolate chip cookies | 9 | 4 | flour,sugar,baking soda,chocolate | chocolate
+### Chocolate chip cookies | 9 | 4 | flour,sugar,baking soda,chocolate | chocolate | voi:vaahdotus=baking butter;muna:sitoja=flax
 Chocolate Chip Cookies
 Ingredients
 2 1/4 cups all-purpose flour
@@ -205,7 +206,7 @@ Preheat oven to 375°F.
 Whisk flour, baking soda and salt. In another bowl beat butter and sugars until creamy, then beat in eggs and vanilla.
 Gradually stir in the flour mixture and fold in chocolate chips.
 Drop by rounded tablespoons onto baking sheets and bake 9 to 11 minutes.
-### Mac and cheese | 6 | 3 | macaroni,flour,mustard
+### Mac and cheese | 6 | 3 | macaroni,flour,mustard |  | voi:kastike=;maito:kastike=soy;juusto:kastike=melting
 Mac and Cheese
 8 oz elbow macaroni
 2 tbsp butter
@@ -229,7 +230,7 @@ cooked rice, to serve
 Stir-fry the chicken in hot oil until golden.
 Add broccoli and garlic and cook 3 minutes.
 Stir in soy sauce, oyster sauce and fish sauce. Serve over rice.
-### Carbonara | 5 | 3 | spaghetti,pepper
+### Carbonara | 5 | 3 | spaghetti,pepper |  | muna:kastike=silken tofu
 Spaghetti Carbonara
 400 g spaghetti
 150 g pancetta, diced
@@ -252,7 +253,7 @@ pinch of salt
 Preheat the oven to 350°F (175°C) and butter a loaf pan.
 Mix butter into the mashed bananas, then sugar, egg and vanilla. Sprinkle baking soda and salt over and mix in the flour.
 Pour into the pan and bake for 60 minutes.
-### Tiramisu | 6 | 4 | coffee,sugar,ladyfinger | ladyfinger
+### Tiramisu | 6 | 4 | coffee,sugar,ladyfinger | ladyfinger | kerma:vaahto=whipping
 Tiramisu
 6 egg yolks
 3/4 cup white sugar
@@ -284,7 +285,7 @@ salt and chives
 1. Whisk the eggs with a pinch of salt.
 2. Melt the butter in a pan and pour in the eggs.
 3. Add the cheese, fold and sprinkle with chives.
-### Karjalanpiirakat | 7 | 4 | ruisjauho,riisi,suola
+### Karjalanpiirakat | 7 | 4 | ruisjauho,riisi,suola |  | maito:puuro=kaura
 Karjalanpiirakat
 Kuoritaikina: 2 dl vettä, 1 tl suolaa, 4 dl ruisjauhoja, 1 dl vehnäjauhoja
 Täyte:
@@ -421,7 +422,7 @@ Hummus
 1 clove garlic
 2 tbsp olive oil
 Blend everything until smooth, adding water as needed.
-### Panna cotta | 5 | 3 | sugar,vanilla
+### Panna cotta | 5 | 3 | sugar,vanilla |  | kerma:hyyto=coconut
 Panna Cotta
 2 cups heavy cream
 1/2 cup milk
@@ -442,3 +443,246 @@ Shoyu Ramen
 Heat the dashi with soy sauce.
 Cook the noodles and divide into bowls.
 Pour over the broth and top with eggs, pork and green onions.
+### Sokerikakku | 5 | 4 | sokeri,vehnäjauho,perunajauho | | muna:vaahto=aquafaba
+Sokerikakku
+4 kananmunaa
+1,5 dl sokeria
+1 dl vehnäjauhoja
+1 dl perunajauhoja
+1 tl leivinjauhetta
+1. Vatkaa munat ja sokeri vaaleaksi, kuohkeaksi vaahdoksi.
+2. Sekoita kuivat aineet ja siivilöi ne vaahtoon.
+3. Kääntele varovasti tasaiseksi ja kaada voideltuun vuokaan.
+4. Paista 175 asteessa 35–40 minuuttia.
+### Suklaamousse | 4 | 3 | suklaa,sokeri | | muna:vaahto=aquafaba;kerma:vaahto=vispattava
+Suklaamousse
+150 g tummaa suklaata
+3 kananmunaa
+2 rkl sokeria
+2 dl kuohukermaa
+1. Sulata suklaa vesihauteessa.
+2. Vatkaa munat ja sokeri kuohkeaksi vaahdoksi ja vaahdota kerma.
+3. Kääntele suklaa, munavaahto ja kermavaahto yhteen ja anna jähmettyä jääkaapissa 3 tuntia.
+### Voikreemikakku | 6 | 4 | tomusokeri,vanilja | | voi:kuorrute=margariini
+Voikreemikuorrute
+200 g pehmeää voita
+4 dl tomusokeria
+1 tl vaniljasokeria
+2 rkl maitoa
+1 valmis kakkupohja
+2 dl mansikkahilloa
+1. Vaahdota pehmeä voi kuohkeaksi.
+2. Lisää tomusokeri vähitellen ja vatkaa kuorrute kuohkeaksi.
+3. Lisää vaniljasokeri ja maito.
+4. Täytä kakkupohja hillolla ja kuorruta voikreemillä.
+### Murotaikinapiirakka | 6 | 4 | vehnäjauho,omena,kaneli | | voi:mureus=kylm
+Omenapiirakka murotaikinalla
+3 dl vehnäjauhoja
+150 g kylmää voita
+1 dl sokeria
+1 kananmuna
+4 omenaa
+1 tl kanelia
+1. Nypi kylmä voi ja jauhot muruksi.
+2. Lisää sokeri ja muna ja painele taikina vuokaan.
+3. Lisää omenaviipaleet ja kaneli.
+4. Paista 200 asteessa 30 minuuttia.
+### Korvapuustit lehtevät | 7 | 4 | hiiva,kaneli | | voi:kerrostus=levy
+Lehtevät korvapuustit
+2,5 dl maitoa
+25 g hiivaa
+1 dl sokeria
+7 dl vehnäjauhoja
+250 g kylmää voita
+2 tl kanelia
+1 dl sokeria täytteeseen
+1. Tee maidosta, hiivasta, sokerista ja jauhoista taikina ja anna levätä jääkaapissa.
+2. Kauli taikina, aseta kylmä voilevy päälle ja taita taikina voin ympärille. Kauli ja taita kolme kertaa.
+3. Levitä pinnalle sokeri ja kaneli, kääri rullalle ja leikkaa korvapuusteiksi.
+4. Paista 225 asteessa 12 minuuttia.
+### Lasagne valkokastikkeella | 9 | 4 | lasagnelev,tomaattimurska,sipuli | | voi:kastike=margariini;maito:kastike=soija;juusto:sulava=raaste
+Lasagne
+400 g naudan jauhelihaa
+1 sipuli
+400 g tomaattimurskaa
+lasagnelevyjä
+Valkokastike
+50 g voita
+4 rkl vehnäjauhoja
+6 dl maitoa
+150 g juustoraastetta
+1. Ruskista jauheliha ja sipuli, lisää tomaattimurska ja hauduta 15 minuuttia.
+2. Sulata voi kattilassa, lisää jauhot ja kuumenna hetki. Lisää maito vähitellen koko ajan sekoittaen ja keitä valkokastike paksuksi.
+3. Kokoa vuokaan kerroksittain levyjä, kastiketta ja valkokastiketta. Ripottele pinnalle juustoraaste.
+4. Paista 200 asteessa 40 minuuttia.
+### Panna cotta liivatteella | 5 | 3 | sokeri,vanilja | | kerma:hyyto=kookoskerma
+Panna cotta
+5 dl kuohukermaa
+1 dl sokeria
+1 vaniljatanko
+3 liivatelehteä
+2 dl marjoja
+1. Liota liivatelehtiä kylmässä vedessä 5 minuuttia.
+2. Kuumenna kerma, sokeri ja vanilja kiehuvaksi. Purista liivatteista vesi ja sekoita ne kuumaan kermaan.
+3. Kaada laseihin ja anna hyytyä jääkaapissa vähintään 4 tuntia. Tarjoa marjojen kanssa.
+### Broileri-kookoscurry kermalla | 6 | 3 | currytahna,sipuli,riisi | | kerma:keitto=kookosmaito
+Kermainen kanacurry
+500 g broilerin fileesuikaleita
+1 sipuli
+2 rkl currytahnaa
+3 dl ruokakermaa
+1 tlk tomaattimurskaa
+riisiä
+1. Kuullota sipuli ja currytahna, lisää broileri ja ruskista.
+2. Lisää tomaattimurska ja ruokakerma ja hauduta 15 minuuttia.
+3. Tarjoa riisin kanssa.
+### Eggs Benedict | 6 | 3 | english muffins,lemon | | muna:paaaines=tofu
+Eggs Benedict
+4 eggs
+2 English muffins
+4 slices ham
+3 egg yolks
+1 tbsp lemon juice
+1/2 cup butter, melted
+Poach the eggs in simmering water for 3 minutes.
+Whisk the egg yolks and lemon juice over a water bath, then slowly whisk in the melted butter to make the hollandaise.
+Toast the muffins, top with ham, poached eggs and hollandaise.
+### Kaurakeksit | 6 | 3 | kaurahiutale,sokeri | | muna:sitoja=pellava;voi:sulatettu=
+Kaurakeksit
+150 g voita
+1,5 dl sokeria
+1 kananmuna
+3 dl kaurahiutaleita
+1 dl vehnäjauhoja
+1 tl leivinjauhetta
+1. Sulata voi ja sekoita sokeri ja muna joukkoon.
+2. Lisää kaurahiutaleet, jauhot ja leivinjauhe.
+3. Nostele nokareet pellille ja paista 200 asteessa 8 minuuttia.
+### Mokkapalat | 8 | 3 | kaakao,sokeri,kahvi | | muna:kohotus=;voi:sulatettu=
+Mokkapalat
+3 kananmunaa
+2,5 dl sokeria
+4 dl vehnäjauhoja
+2 tl leivinjauhetta
+2 rkl kaakaojauhetta
+200 g voita
+2 dl maitoa
+Kuorrute
+1 dl kahvia
+1. Vatkaa munat ja sokeri.
+2. Lisää kuivat aineet, sulatettu voi ja maito ja levitä taikina pellille.
+3. Paista 200 asteessa 15 minuuttia ja valele kahvilla.
+### Piimäsämpylät soodalla | 5 | 3 | grahamjauho,suola | | 
+Piimäsämpylät
+5 dl piimää
+2 tl ruokasoodaa
+1 tl suolaa
+4 dl grahamjauhoja
+4 dl vehnäjauhoja
+1. Sekoita sooda ja suola jauhoihin.
+2. Lisää piimä ja sekoita nopeasti taikinaksi.
+3. Muotoile sämpylät ja paista 225 asteessa 20 minuuttia.
+### Kermaviilimuffinit | 7 | 3 | sokeri,vehnäjauho,mustiko | | muna:sitoja= 
+Mustikkamuffinit
+2 kananmunaa
+2 dl sokeria
+2 dl kermaviiliä
+100 g sulatettua voita
+4 dl vehnäjauhoja
+1 tl ruokasoodaa
+2 dl mustikoita
+1. Vatkaa munat ja sokeri, lisää kermaviili ja sulatettu voi.
+2. Sekoita jauhot ja sooda ja lisää ne taikinaan. Kääntele mustikat joukkoon.
+3. Paista 200 asteessa 20 minuuttia.
+### Buttermilk pancakes | 7 | 3 | flour,sugar,baking soda | | voi:sulatettu=
+Buttermilk Pancakes
+2 cups all-purpose flour
+2 tbsp sugar
+1 tsp baking soda
+1 tsp baking powder
+2 cups buttermilk
+2 eggs
+3 tbsp butter, melted
+Whisk the dry ingredients together.
+Whisk the buttermilk, eggs and melted butter, then stir into the dry ingredients.
+Cook on a hot griddle until bubbles form, flip and cook until golden.
+### Vaniljakastike | 5 | 3 | sokeri,vanilja | | muna:hyytyminen=tarkkelys
+Vaniljakastike
+5 dl maitoa
+2 kananmunaa
+3 rkl sokeria
+1 rkl maissitärkkelystä
+1 tl vaniljasokeria
+1. Sekoita kaikki ainekset kattilassa.
+2. Kuumenna koko ajan sekoittaen, kunnes kastike sakenee.
+3. Jäähdytä ja tarjoa.
+### Crème brûlée | 4 | 3 | sugar,vanilla | | kerma:keitto= 
+Creme Brulee
+2 cups heavy cream
+5 egg yolks
+1/2 cup sugar
+1 tsp vanilla extract
+Heat the cream and vanilla until steaming.
+Whisk the yolks with sugar and slowly pour in the hot cream. Bake in a water bath at 325°F for 40 minutes.
+Chill, sprinkle with sugar and caramelize with a torch.
+### Tuulihatut | 4 | 3 | vehnäjauho | | muna:rakenne=aquafaba 
+Tuulihatut
+1 dl vettä
+50 g voita
+1 dl vehnäjauhoja
+2 kananmunaa
+1. Kiehauta vesi ja voi, lisää jauhot ja sekoita kunnes taikina irtoaa kattilan reunoista.
+2. Jäähdytä hetki ja vatkaa munat joukkoon yksitellen.
+3. Pursota pellille ja paista 200 asteessa 25 minuuttia avaamatta uunia.
+### Gratin dauphinois | 5 | 3 | potatoes,garlic,nutmeg | | kerma:keitto=cooking cream;maito:neste=oat
+Gratin Dauphinois
+1 kg potatoes, thinly sliced
+2 cups heavy cream
+1 cup milk
+2 cloves garlic
+1/4 tsp nutmeg
+Heat the cream, milk, garlic and nutmeg.
+Layer the potatoes in a baking dish and pour over the cream mixture.
+Bake at 350°F for 75 minutes until tender and golden.
+### Nachos cheese sauce | 5 | 2 | flour,tortilla chips,jalapeno | | juusto:kastike=melting
+Nacho Cheese Sauce
+2 tbsp butter
+2 tbsp flour
+1 cup milk
+2 cups shredded cheddar cheese
+tortilla chips and jalapenos
+Melt the butter, whisk in the flour and cook for 1 minute, then whisk in the milk and simmer until thick.
+Remove from heat and stir in the cheese until melted. Serve with tortilla chips and jalapenos.
+### Munakokkeli | 4 | 2 | suola,ruohosipuli | | muna:paaaines=tofu;voi:paisto=margariini
+Munakokkeli
+6 kananmunaa
+1 dl maitoa
+1 rkl voita
+suolaa ja ruohosipulia
+1. Vatkaa munat ja maito.
+2. Sulata voi pannulla ja kypsennä munakokkeli miedolla lämmöllä sekoitellen.
+### Brioche | 7 | 3 | yeast,flour,sugar | | maito:leivonta=soy;voi:leivonta=baking butter 
+Brioche
+4 cups bread flour
+1/4 cup sugar
+2 tsp instant yeast
+1 tsp salt
+4 eggs
+1/2 cup milk
+1 cup butter, softened
+Mix the flour, sugar, yeast, salt, eggs and milk into a dough and knead for 10 minutes.
+Knead in the softened butter a little at a time until the dough is smooth and elastic.
+Let rise, shape into a loaf, let rise again and bake at 350°F for 35 minutes.
+### Kylmä juustokakku | 7 | 4 | keks,sokeri,sitruuna | | voi:pohja=margariini;kerma:hyyto=kookos 
+Kylmä juustokakku
+200 g digestive-keksejä
+75 g voita
+400 g tuorejuustoa
+2 dl kuohukermaa
+1 dl sokeria
+1 sitruunan mehu
+4 liivatelehteä
+1. Murskaa keksit, sekoita sulatettuun voihin ja painele vuoan pohjalle.
+2. Liota liivatteet kylmässä vedessä ja sulata ne sitruunamehussa.
+3. Vatkaa kerma vaahdoksi ja sekoita tuorejuuston ja sokerin kanssa. Lisää liivate.
+4. Kaada pohjan päälle ja anna hyytyä jääkaapissa yön yli.

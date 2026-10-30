@@ -1,0 +1,110 @@
+# Uudet reseptit, joilla sääntöjä EI ole viritetty: mittaa, yleistyykö osaaminen. Sama muoto kuin reseptit.txt.
+### Kanelikierteet | 8 | 4 | hiiva,kardemumma | | maito:leivonta=soija;voi:leivonta=margariini
+Kanelikierteet
+2,5 dl maitoa
+25 g hiivaa
+1 kananmuna
+1 dl sokeria
+1 tl kardemummaa
+7 dl vehnäjauhoja
+100 g voita
+Täyte
+100 g pehmeää voita
+1. Liuota hiiva lämpimään maitoon ja lisää muna, sokeri ja kardemumma.
+2. Vaivaa jauhot ja pehmeä voi taikinaan ja anna kohota 30 minuuttia.
+3. Kauli levyksi, levitä pinnalle täyte ja kierrä kierteiksi.
+4. Paista 225 asteessa 10 minuuttia.
+### Lemon drizzle cake | 7 | 3 | lemon,flour,sugar | | voi:vaahdotus=baking butter;muna:kohotus=
+Lemon Drizzle Cake
+225 g butter, softened
+225 g caster sugar
+4 eggs
+275 g self-raising flour
+1 tsp baking powder
+2 lemons, zested and juiced
+100 g icing sugar
+Beat the butter and sugar together until pale and fluffy, then beat in the eggs one at a time.
+Fold in the flour, baking powder and lemon zest and bake at 180°C for 45 minutes.
+Mix the lemon juice and icing sugar and pour over the warm cake.
+### Pinaattiletut | 6 | 3 | pinaatti,vehnäjauho | | muna:kohotus=kikherne;maito:leivonta=soija
+Pinaattiletut
+5 dl maitoa
+2 kananmunaa
+2,5 dl vehnäjauhoja
+150 g pakastepinaattia
+1 tl suolaa
+2 rkl voita paistamiseen
+1. Sekoita maito, munat ja jauhot taikinaksi ja anna turvota 15 minuuttia.
+2. Lisää sulanut pinaatti ja suola.
+3. Paista voissa ohuiksi letuiksi.
+### Kukkakaaligratiini | 7 | 3 | kukkakaal,muskott | | voi:kastike=margariini;maito:kastike=soija;juusto:sulava=raaste
+Kukkakaaligratiini
+1 kukkakaali
+30 g voita
+3 rkl vehnäjauhoja
+5 dl maitoa
+1/4 tl muskottipähkinää
+100 g juustoraastetta
+suolaa
+1. Keitä kukkakaalin kukinnot puolikypsiksi ja nostele vuokaan.
+2. Sulata voi, lisää jauhot ja kuumenna. Lisää maito vähitellen ja keitä paksuksi valkokastikkeeksi. Mausta muskotilla ja suolalla.
+3. Kaada kastike kukkakaalin päälle, ripottele juustoraaste pinnalle ja gratinoi 225 asteessa 20 minuuttia.
+### Strawberry pavlova | 5 | 3 | sugar,strawberries | | kerma:vaahto=whipping
+Strawberry Pavlova
+4 egg whites
+1 cup caster sugar
+1 tsp cornstarch
+1 cup heavy cream
+2 cups strawberries
+Whisk the egg whites to stiff peaks, then gradually whisk in the sugar and cornstarch until glossy.
+Spread into a circle and bake at 250°F for 75 minutes, then let cool in the oven.
+Whip the cream and spread it over the pavlova, then top with strawberries.
+### Lohilaatikko | 6 | 3 | perun,sipuli,tilli | | muna:hyytyminen=kikherne;maito:hyytyminen=soija
+Lohilaatikko
+1 kg perunoita
+300 g kylmäsavulohta
+1 sipuli
+3 kananmunaa
+5 dl maitoa
+1 nippu tilliä
+1. Viipaloi perunat ja lohi ja kerrosta ne vuokaan sipulin ja tillin kanssa.
+2. Vatkaa munat ja maito munamaidoksi ja kaada vuokaan.
+3. Paista 200 asteessa noin tunti.
+### Shortbread | 3 | 3 | flour,sugar | | voi:mureus=cold
+Shortbread
+250 g plain flour
+175 g cold butter, cubed
+75 g caster sugar
+Rub the butter into the flour until it resembles breadcrumbs, then stir in the sugar.
+Press the dough into a tin and prick all over with a fork.
+Bake at 160°C for 40 minutes until pale golden.
+### Kermainen tomaattikeitto | 5 | 3 | tomaatti,sipuli,valkosipuli | | kerma:keitto=kaurakerma
+Tomaattikeitto
+1 sipuli
+2 valkosipulinkynttä
+2 tlk tomaattimurskaa
+5 dl kasvislientä
+2 dl ruokakermaa
+1. Kuullota sipuli ja valkosipuli öljyssä.
+2. Lisää tomaattimurska ja liemi ja keitä 15 minuuttia.
+3. Soseuta, lisää kerma ja kuumenna kiehuvaksi.
+### Chocolate fudge frosting | 5 | 2 | cocoa,powdered sugar | | voi:kuorrute=baking butter
+Chocolate Fudge Frosting
+1 cup butter, softened
+3 cups powdered sugar
+2/3 cup cocoa powder
+1/4 cup milk
+1 tsp vanilla extract
+Beat the butter until creamy, then add the powdered sugar and cocoa a little at a time.
+Add the milk and vanilla and beat for 3 minutes until fluffy.
+### Juustosämpylät | 6 | 3 | hiiva,vehnäjauho | | juusto:sulava=raaste
+Juustosämpylät
+5 dl vettä
+50 g hiivaa
+1 tl suolaa
+2 rkl öljyä
+13 dl vehnäjauhoja
+200 g juustoraastetta
+1. Liuota hiiva lämpimään veteen ja lisää suola ja öljy.
+2. Vaivaa jauhot ja puolet juustosta taikinaan ja anna kohota.
+3. Muotoile sämpylät, ripottele pinnalle loput juustosta ja paista 225 asteessa 15 minuuttia.

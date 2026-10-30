@@ -138,6 +138,9 @@ textarea:focus,input:focus{border-color:#E3B7C4;outline:none;box-shadow:0 0 0 3p
 .prob i{display:block;height:100%;background:var(--sage);border-radius:9px}
 .cert{display:flex;gap:8px;align-items:center;background:var(--sage-soft);color:var(--sage);font-weight:800;border-radius:12px;padding:8px 12px;font-size:.92rem}
 .note{background:var(--blue-soft);color:#3F5A78;border-radius:12px;padding:10px 12px;font-size:.92rem}
+.rolechip{display:inline-block;align-self:flex-start;width:auto;margin:3px 0 2px;padding:1px 9px;border-radius:999px;background:var(--blue-soft);color:#3F5A78;font-size:.78rem;font-weight:700}
+.rolenote{color:#3F5A78 !important}
+table.chem{width:100%;border-collapse:collapse;font-size:.9rem;margin:8px 0}table.chem th{text-align:left;font-weight:700;padding:5px 4px}table.chem td{padding:5px 4px;text-align:right;font-variant-numeric:tabular-nums}table.chem tr+tr{border-top:1px dotted #E2CDB0}table.chem td.ok{color:#4F7A4A;font-weight:700}table.chem td.warn{color:#A0522D;font-weight:700}
 .tipnote{display:flex;gap:8px;align-items:flex-start;margin-top:10px}.tipnote svg{width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block}.tipx{border:0;background:none;color:inherit;font-size:1.3rem;line-height:1;padding:0 4px;cursor:pointer}
 .note.warm{background:var(--butter);color:var(--butter-ink)}
 details>summary{cursor:pointer;font-weight:800;color:var(--rose-ink);list-style:none}
@@ -1178,6 +1181,10 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
       breading: has(/(leivit|korppujauh|panko|breadcrumb|paneer|dredg|dip (in|into) (the )?egg|kierita)/),
       mayo: has(/(majoneesi|mayonnaise|aioli)/) && has(/(oljy|oil)/) && has(/(keltuai|yolk|muna|egg)/),
       carbonara: has(/carbonara/),
+      curry: has(/(curry|korma|tikka|masala|dal |dhal|madras|vindaloo|rendang|laksa|tom kha|kookosmai|coconut milk)/),
+      hollandaise: has(/(hollandaise|bearnaise|benedict)/),
+      mousse: has(/(mousse|suklaavaahto|kinuskivaahto)/),
+      choux: has(/(tuulihat|choux|eclair|profiterol|gougere|cream puff)/),
       cheesecake: has(/(juustokakku|cheesecake)/),
       icecream: has(/(jaatelo|ice cream|parfait|semifreddo)/),
       stew: has(/(pata|patа|stroganoff|bourguignon|gulassi|goulash|stew|ragu|ragout|kaalipata|karjalanpaisti|haudu|hauduta|simmer)/),
@@ -1232,6 +1239,7 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
         why: 'Aquafaba vaahtoutuu ja kovettuu kuten munanvalkuainen: marengit, macaronsit, mousset ja vaahdot onnistuvat. 1 valkuainen = 2 rkl (30 g) aquafabaa. Viinikivijauhe vakauttaa vaahdon.', word: 'aquafaba', fams: ['valkuainen', 'muna'], notes: [AQ_NOTE] }; } });
   add({ id: 'keltuainen', m: /( keltuai| munankeltuai| kananmunankeltuai| egg yolks?| yolks? )/,
     pick: (ing, c) => { const n = eggCount(ing, 'yolk');
+      if (c.hollandaise) return { lines: [line(n != null ? n * 0.4 : 1, 'dl', 'soijajuomaa'), line(n != null ? n / 2 : 1, 'tl', 'maissitärkkelystä'), line(n != null ? n / 8 : 0.25, 'tl', 'kurkumaa', 'väriä varten'), line(n != null ? n / 10 : 0.25, 'tl', 'mustaa suolaa (kala namak)', 'kananmunan makua varten')], why: 'Hollandaise-kastikkeessa keltuaiset sakeuttavat ja emulgoivat voin. Soijajuoman proteiini ja maissitärkkelys tekevät saman: kuumenna ne kiehuvaksi, ota liedeltä ja vatkaa sulatettu margariini joukkoon ohuena nauhana.', word: 'soijajuoma', fams: ['keltuainen'] };
       if (c.custard || c.icecream) return { lines: n != null ? [line(Math.max(0.5, n / 2), 'rkl', 'maissitärkkelystä'), line(Math.max(1, n) / 8, 'tl', 'kurkumaa', 'väriä varten, valinnainen')] : [Object.assign({}, ing, { name: 'maissitärkkelystä (1 rkl / 2 keltuaista)' })],
         why: 'Keltuaiset sakeuttavat kreemin; maissitärkkelys tekee saman ja kurkuma antaa keltaisen värin. Keitä seosta sekoittaen, kunnes se sakenee (noin minuutti kiehumisen jälkeen).', word: 'tarkkelys', fams: ['keltuainen'] };
       if (c.mayo) return { lines: n != null ? [line(n * 3, 'rkl', AQ)] : [Object.assign({}, ing, { name: AQ })], why: 'Aquafaba emulgoi öljyn majoneesiksi kuten keltuainen. Lisää öljy ohuena nauhana sauvasekoittimen käydessä.', word: 'aquafaba', fams: ['keltuainen'] };
@@ -1248,7 +1256,7 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
       const fallback = name => [Object.assign({}, ing, { name })];
       if (/(voitel|brush|egg wash|voiteluun)/.test(t) || (c.wash && /voitel/.test(t))) return { lines: [line(known ? N * 2 : 2, 'rkl', 'kasvijuomaa', 'voiteluun'), line(known ? N : 1, 'tl', 'siirappia tai öljyä', 'voiteluun')], why: 'Kasvijuoma ja ripaus siirappia antavat pinnalle värin ja kiillon kuten munavoitelu.', word: 'kasvijuoma', fams: ['muna', 'keltuainen', 'valkuainen'] };
       if (/(leivit|breading|dredg|panerointi|korppujauh)/.test(t) || (c.breading && !c.bake && !c.binder)) return { lines: [line(N * 0.5, 'dl', 'kasvijuomaa', 'leivitykseen'), line(N, 'rkl', 'vehnäjauhoja', 'leivitykseen')], why: 'Kasvijuoman ja jauhojen ohut taikina kiinnittää korppujauhot kuten kananmuna.', word: 'kasvijuomaseos', fams: ['muna', 'keltuainen', 'valkuainen'] };
-      if (/(keitett|kovaksi|hard.?boiled|boiled)/.test(t)) return { lines: [line(N * 60, 'g', 'kiinteää tofua', 'kuutioina'), line(N / 8, 'tl', 'mustaa suolaa (kala namak)'), line(N / 8, 'tl', 'kurkumaa')], why: 'Tofukuutiot mustalla suolalla ja kurkumalla muistuttavat keitettyä kananmunaa salaateissa ja leivillä.', word: 'tofu', fams: ['muna', 'keltuainen', 'valkuainen'] };
+      if (c.solidEgg || /(keitett|kovaksi|hard.?boiled|boiled)/.test(t)) return { lines: [line(N * 60, 'g', 'kiinteää tofua', 'kuutioina'), line(N / 8, 'tl', 'mustaa suolaa (kala namak)'), line(N / 8, 'tl', 'kurkumaa')], why: 'Tofukuutiot mustalla suolalla ja kurkumalla muistuttavat keitettyä kananmunaa salaateissa ja leivillä.', word: 'tofu', fams: ['muna', 'keltuainen', 'valkuainen'] };
       if (c.tiramisu) return { lines: [line(N * 0.5, 'dl', 'vispattavaa kasvikermaa', 'vaahdoksi vatkattuna')], why: 'Tiramisun kreemi saa ilmavuutensa vatkatusta kasvikermasta, joten munia ei tarvita. 1 muna = 0,5 dl kasvikermaa.', word: 'kasvikerma', fams: ['muna', 'keltuainen', 'valkuainen'], drop: /^(erottele|separate)/i };
       if (c.meringue || c.eggFoam || (c.whip && c.sponge)) return { lines: [line(N * 3, 'rkl', AQ), line(N / 8, 'tl', 'viinikivijauhetta', 'vatkaamiseen')].concat(c.sponge ? [line(N / 4, 'tl', 'leivinjauhetta', 'lisäkohotukseen')] : []), why: 'Vatkattu aquafaba korvaa vaahdoksi vatkatut munat. 1 muna = 3 rkl aquafabaa. Pohjaan lisätään hieman leivinjauhetta, koska aquafaba ei kanna yhtä paljon kuin munavaahto.', word: 'aquafaba', fams: ['muna', 'keltuainen', 'valkuainen'], notes: [AQ_NOTE] };
       if (c.carbonara) return { lines: [line(N * 50, 'g', 'silkkitofua'), line(N, 'rkl', 'ravintohiivaa'), line(N / 6, 'tl', 'mustaa suolaa (kala namak)', 'kananmunan makua varten')], why: 'Soseutettu silkkitofu ja ravintohiiva tekevät carbonarakastikkeesta samettisen; musta suola tuo munan maun.', word: 'silkkitofu', fams: ['muna', 'keltuainen', 'valkuainen'] };
@@ -1259,6 +1267,7 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
       if (c.cheesecake) return { lines: [line(N, 'rkl', 'maissitärkkelystä')], why: 'Uunijuustokakun täyte hyytyy maissitärkkelyksen avulla kuten munien. 1 muna = 1 rkl maissitärkkelystä.', word: 'tarkkelys', fams: ['muna', 'keltuainen', 'valkuainen'], notes: ['Anna juustokakun jäähtyä uunissa luukku raollaan ja hyytyä jääkaapissa yön yli, niin täyte jähmettyy.'] };
       if (c.pancake) return { lines: [line(N * 2, 'rkl', 'kikhernejauhoja'), line(N * 2, 'rkl', 'vettä'), line(N / 4, 'tl', 'leivinjauhetta')], why: 'Kikhernejauho sitoo lettu- ja pannukakkutaikinan ja antaa kauniin värin; leivinjauhe korvaa munan kohotuksen.', word: 'kikhernejauho', fams: ['muna', 'keltuainen', 'valkuainen'] };
       if (c.frenchtoast) return { lines: [line(N * 2, 'rkl', 'kikhernejauhoja'), line(N / 4, 'tl', 'leivinjauhetta')], why: 'Kikhernejauho sakeuttaa kasvijuoman niin, että leipä saa paistettaessa munamaisen, rapean pinnan.', word: 'kikhernejauho', fams: ['muna', 'keltuainen', 'valkuainen'] };
+      if (c.choux) return { lines: [line(N * 3, 'rkl', AQ), line(N * 0.5, 'tl', 'leivinjauhetta'), line(N * 0.5, 'rkl', 'perunajauhoja')], why: 'Tuulihattutaikinassa munat kantavat rakenteen ja paisuttavat taikinan höyryn avulla. Aquafaban proteiini, perunajauho ja leivinjauhe hoitavat saman, mutta kuoresta tulee hieman tiiviimpi; paista ensin 220 asteessa 10 minuuttia ja sitten 190 asteessa.', word: 'aquafaba', fams: ['muna', 'keltuainen', 'valkuainen'] };
       if (c.pasta) return { lines: [line(N * 3, 'rkl', 'vettä'), line(N, 'tl', 'oliiviöljyä')], why: 'Tuore pasta onnistuu ilman munaa durumvehnästä (semolinasta), vedestä ja öljystä. Lisää vettä tilkka kerrallaan, kunnes taikina on kiinteää ja sileää.', word: null, fams: [] };
       if (c.casserole && !c.sweet && !c.binder) return { lines: [line(N * 2, 'rkl', 'kikhernejauhoja')], why: 'Kikhernejauho sakeuttaa ja hyydyttää laatikon munamaidon kuten kananmuna. Vatkaa se kasvijuomaan paakuttomaksi. 1 muna = 2 rkl kikhernejauhoja.', word: 'kikhernejauho', fams: ['muna', 'keltuainen', 'valkuainen'] };
       if (c.binder) return { lines: [line(N, 'rkl', 'pellavarouhetta'), line(N * 3, 'rkl', 'vettä')], why: 'Pellavamuna sitoo pihvi- ja pullamassan kuten kananmuna. Jos massa on löysää, lisää 1–2 rkl perunajauhoja tai kaurahiutaleita.', word: 'pellavamuna', fams: ['muna', 'keltuainen', 'valkuainen'], pre: FLAX_PRE };
@@ -1278,9 +1287,11 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
   add({ id: 'kerma', m: /( kerma|kuohukerma|vispikerma|ruokakerma|kahvikerma| cream | heavy cream| whipping cream| double cream| single cream| kermavaahto| sahne| gradde)/, not: /( kermaviil| sour cream| cream cheese| kermajuust| ice cream| coconut cream| cream of tartar| kaurakerma| kasvikerma| kookoskerma| vispattava kasvi| creme fraiche| jaatelo| kermaperuna)/,
     pick: (ing, c) => { const t = norm(ing.name + ' ' + (ing.note || ''));
       if (/(kahvi|coffee|half and half|kahvikerma)/.test(t)) return { name: 'kauraista kahvikermaa tai barista-kaurajuomaa', why: 'Kestää kuumaa kahvia juoksettumatta.', word: 'kaurakerma', fams: ['kerma'] };
+      if (c.curry && !c.sweet) return { name: 'kookosmaitoa (täysrasvainen)', why: 'Curryissa kookosmaito kestää pitkän haudutuksen ja hapot (tomaatti, jogurtti) juoksettumatta, ja sen maku sopii mausteisiin luontevasti.', word: 'kookosmaito', fams: ['kerma'] };
+      if (c.role === 'hyyto') return { name: 'kookoskermaa (täysrasvainen)', why: 'Kookoskerma jähmettyy kylmässä ja tekee hyytyvästä jälkiruoasta täyteläisen ja kermaisen. Liivatteen tilalle tulee agar, joka hyytyy keitettynä.', word: 'kookoskerma', fams: ['kerma'] };
       if (c.icecream) return { name: 'kookoskermaa (täysrasvainen)', why: 'Kookoskerman korkea rasvapitoisuus tekee jäätelöstä pehmeää ja estää jääkiteitä.', word: 'kookoskerma', fams: ['kerma'] };
       const whipped = /(vispi|kuohu|whipping|heavy|double|kermavaahto|vaahdoksi)/.test(t) && (c.whip || c.sweet);
-      if (whipped || (c.whip && c.sweet && !c.savory)) return { name: 'vispattavaa kasvikermaa', why: 'Vaahtoutuu kuten kuohukerma. Vatkaa jääkaappikylmänä vasta juuri ennen käyttöä; vaahto kestää hyvin kakun täytteenä.', word: 'kasvikerma', fams: ['kerma'], notes: ['Vispattava kasvikerma vaahtoutuu parhaiten jääkaappikylmänä ja kylmään kulhoon vatkattuna.'] };
+      if (c.role !== 'keitto' && c.role !== 'hyyto' && c.role !== 'leivonta' && (whipped || (c.whip && c.sweet && !c.savory))) return { name: 'vispattavaa kasvikermaa', why: 'Vaahtoutuu kuten kuohukerma. Vatkaa jääkaappikylmänä vasta juuri ennen käyttöä; vaahto kestää hyvin kakun täytteenä.', word: 'kasvikerma', fams: ['kerma'], notes: ['Vispattava kasvikerma vaahtoutuu parhaiten jääkaappikylmänä ja kylmään kulhoon vatkattuna.'] };
       if (c.sweet && !c.savory && c.custard) return { name: 'kaurakermaa (ruoanvalmistukseen) tai kookoskermaa', why: 'Kestää keittämisen ja antaa jälkiruoalle täyteläisyyden.', word: 'kaurakerma', fams: ['kerma'] };
       return { name: 'kaurakermaa (ruoanvalmistukseen)', why: 'Kaurakerma kestää kuumennuksen ja keittämisen juoksettumatta ja sakenee kastikkeissa kuten ruokakerma.', word: 'kaurakerma', fams: ['kerma'] }; } });
   add({ id: 'hapankerma', m: /( kermaviili| smetana| creme fraiche| ranskankerma| sour cream| fraiche| crème fraîche)/, not: /( kaurafraiche| vegaani)/,
@@ -1305,6 +1316,7 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
   add({ id: 'sulatejuusto', m: /( sulatejuust| juustokastike| cheese sauce| velveeta| juustoviipal| cheese slices| kermajuustoviipal)/, pick: (ing) => ({ name: /viipal|slices/.test(norm(ing.name)) ? 'vegaanisia juustoviipaleita' : 'vegaanista sulatejuustoa tai cashew-juustokastiketta', why: 'Sulaa tasaisesti kuten sulatejuusto.', word: 'vegejuusto', fams: ['juusto'] }) });
   add({ id: 'juusto', m: /(juusto| juustoa|juustoraaste| raaste | mozzarella| cheddar| emmental| gouda| edam | oltermanni| koskenlaskija| polar | gruyere| gruyère| cheese| kase | ost | fromage| manchego| provolone| juustoraastetta)/, not: /( vegaani| kasvijuust| tuorejuust| raejuust| kaalinraast| porkkanaraast)/,
     pick: (ing, c) => { const t = norm(ing.name);
+      if (c.cheeseSauce) return { lines: [Object.assign({}, ing, { name: 'sulavaa vegaanista juustoraastetta', note: null }), line(Math.max(1, (ing.qty || 2) / (ing.unit === 'g' ? 50 : 1)), 'rkl', 'ravintohiivaa', 'juustoisempaan makuun')], why: 'Vegaaninen raaste sulaa kastikkeeseen tasaisesti, kun kastike on kuumaa mutta ei kiehu; ravintohiiva syventää juustoista makua.', word: 'vegejuusto', fams: ['juusto'] };
       if (/mozzarella/.test(t)) return { name: c.bake || /pizza/.test(t) ? 'sulavaa vegaanista mozzarellaa (raaste tai pallo)' : 'vegaanista mozzarellaa', why: 'Sulaa ja venyy pizzassa ja gratiineissa.', word: 'vegejuusto', fams: ['juusto'], notes: ['Vegaaninen juusto sulaa ja ruskistuu parhaiten, kun sen pinnalle sivelee ohuesti öljyä ja kypsentää lopuksi grillivastuksen alla.'] };
       if (/(raaste|raastet|grated|shredded)/.test(t) || c.bake) return { name: 'vegaanista juustoraastetta (sulava)', why: 'Sulava vegaaninen raaste toimii gratiineissa, piirakoissa ja pizzoissa.', word: 'vegejuusto', fams: ['juusto'], notes: ['Vegaaninen juusto sulaa ja ruskistuu parhaiten, kun sen pinnalle sivelee ohuesti öljyä ja kypsentää lopuksi grillivastuksen alla.'] };
       return { name: 'vegaanista juustoa (sama määrä)', why: 'Vegaanisia juustoja on viipaleina, raasteena ja paloina; valitse käyttötarkoitukseen sopiva.', word: 'vegejuusto', fams: ['juusto'] }; } });
@@ -1316,12 +1328,19 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
   add({ id: 'rahka', m: /( rahka| maitorahka| quark| kvarg| tuorejuustorahka)/, not: /( vegaani| soijarahka| kaurarahka| vegerahka)/,
     pick: (ing, c) => ({ name: 'vegaanista rahkaa (soijapohjainen)', why: c.cheesecake || c.bake ? 'Soijarahka on paksu ja proteiinipitoinen, joten se hyytyy uunissa kuten maitorahka.' : 'Paksu ja proteiinipitoinen kuten rahka.', word: 'vegerahka', fams: ['rahka'] }) });
   add({ id: 'maito', m: /( maito| maitoa| maidon| kevytmaito| taysmaito| rasvaton maito| milk | whole milk| skim milk| milch | mjolk | lait | latte )/, not: /( kookosmai| kauramai| mantelimai| maitosuklaa| maitorahka| kasvijuoma| kaurajuoma| soijajuoma| coconut milk| oat milk| almond milk| soy milk| plant milk| buttermilk| maitojauhe| milk powder| condensed| kondensoi| milk chocolate| non dairy| dairy free)/,
-    pick: (ing, c) => c.bake || c.custard || c.pancake ? { name: 'soijajuomaa', why: 'Soijajuomassa on proteiinia lähes yhtä paljon kuin maidossa, joten se ruskistaa ja sitoo leivonnaiset ja kreemit kuten maito.', word: 'soijajuoma', fams: ['maito'] }
+    pick: (ing, c) => (G.VegChem && (c.role === 'neste' || c.role === 'puuro') && G.VegChem.best('maito', c.role).id === 'kaurajuoma' && !c.custard && !c.pancake) ? { name: 'kaurajuomaa (maustamaton, ei makeutettu)', why: 'Kaurajuoma on mieto ja kestää kuumennuksen, joten se toimii kastikkeissa, keitoissa ja puuroissa kuten maito.', word: 'kaurajuoma', fams: ['maito'] }
+      : c.role === 'kastike' && !c.bake ? { name: 'soijajuomaa (maustamaton)', why: 'Soijajuoman proteiini antaa valkokastikkeelle maidon kaltaisen täyteläisen rungon, eikä se maistu makealta.', word: 'soijajuoma', fams: ['maito'] }
+      : c.bake || c.custard || c.pancake || c.role === 'hyytyminen' ? { name: 'soijajuomaa', why: 'Soijajuomassa on proteiinia lähes yhtä paljon kuin maidossa, joten se ruskistaa ja sitoo leivonnaiset ja kreemit kuten maito.', word: 'soijajuoma', fams: ['maito'] }
       : { name: 'kaurajuomaa (maustamaton, ei makeutettu)', why: 'Kaurajuoma on mieto ja kestää kuumennuksen, joten se toimii kastikkeissa, keitoissa ja puuroissa kuten maito.', word: 'kaurajuoma', fams: ['maito'] } });
   add({ id: 'voi', m: /( voi | voita | voin | voirasva| butter | unsalted butter| salted butter| beurre | burro | smor | ghee| voisula| sulatettua voita| sulatettu voi| ruskistettu voi| voinokare| voita | voikreemi)/, not: /( peanut butter| almond butter| maapahkinavoi| pahkinavoi| mantelivoi| kaakaovoi| cocoa butter| shea| vegaani| vegan butter| kasvimargariini| margariini| sheavoi| buttermilk| butternut| voileip)/,
     pick: (ing, c) => { const t = norm(ing.name + ' ' + (ing.note || ''));
       if (/ghee/.test(t)) return { name: 'hajutonta kookosöljyä tai vegaanista margariinia', why: 'Kestää korkean paistolämmön kuten kirkastettu voi.', word: 'kookosoljy', fams: ['voi'] };
-      if (/(laminoin|lehtitaikin|voitaikin|croissant|puff)/.test(t + ' ' + (c.bread ? ' ' : ''))) return { name: 'vegaanista leivontamargariinia levynä (kylmä)', why: 'Lehti- ja voitaikinaan tarvitaan kiinteää, kylmää rasvaa, joka kerrostuu kuten voi.', word: 'margariini', fams: ['voi'] };
+      /* tehtävän mukaan (keittiökemia-moduuli päättelee tehtävän reseptistä) */
+      if (c.role === 'vaahdotus') return { name: 'vegaanista leivontamargariinia (huoneenlämpöinen, ei kevytlevitettä)', why: 'Pehmeä 80-prosenttinen margariini vaahtoutuu sokerin kanssa kuten voi ja sitoo ilmaa taikinaan. Kevytlevitteissä on liikaa vettä: vaahto ei pysy ja kakku jää tiiviiksi.', word: 'margariini', fams: ['voi'] };
+      if (c.role === 'mureus') return { name: 'kylmää vegaanista leivontamargariinia (ei kevytlevitettä)', why: 'Kylmä, kiinteä rasva jää taikinaan pieninä paloina ja tekee pohjasta murean. Leivontamargariinissa on 80 % rasvaa kuten voissa; levitteissä on liikaa vettä, jolloin pohjasta tulee sitkeä.', word: 'margariini', fams: ['voi'] };
+      if (c.role === 'kuorrute') return { name: 'vegaanista leivontamargariinia (kiinteä, ei kevytlevitettä)', why: 'Voikreemi tarvitsee kiinteää, 80-prosenttista rasvaa. Vaahdota margariini ensin kuohkeaksi 3–5 minuuttia ja lisää tomusokeri vähitellen; jos kreemi pehmenee, jäähdytä sitä 15 minuuttia.', word: 'margariini', fams: ['voi'] };
+      if (c.role === 'kastike') return { name: 'vegaanista margariinia (sama määrä)', why: 'Margariini ja jauhot suurustavat kastikkeen kuten voi: kuumenna seosta hetki ennen nesteen lisäämistä, niin jauhojen maku kypsyy.', word: 'margariini', fams: ['voi'] };
+      if (c.role === 'kerrostus' || /(laminoin|lehtitaikin|voitaikin|croissant|puff)/.test(t + ' ' + (c.bread ? ' ' : ''))) return { name: 'vegaanista leivontamargariinia levynä (kylmä)', why: 'Lehti- ja voitaikinaan tarvitaan kiinteää, kylmää rasvaa, joka kerrostuu kuten voi.', word: 'margariini', fams: ['voi'] };
       if (c.bake && /(sulat|melted|sulatettu)/.test(t)) return { name: 'kasviöljyä (rypsi- tai auringonkukkaöljy)', factor: 0.8, why: 'Sulatetun voin tilalle leivonnassa sopii öljy: taikina pysyy mehevänä. Voissa on noin 80 % rasvaa, joten öljyä tarvitaan 0,8 × voin määrä.', word: 'oljy', fams: ['voi'] };
       if (/(ruskistet|brown butter|browned)/.test(t)) return { name: 'vegaanista margariinia (sama määrä)', why: 'Margariini ruskistuu heikommin kuin voi, koska siinä ei ole maitoproteiinia. Pähkinäisen maun saat lisäämällä pannuun 1 rkl kasvijuomaa ja ruskistamalla rauhallisesti.', word: 'margariini', fams: ['voi'] };
       if (c.bake) return { name: 'vegaanista leivontamargariinia (ei kevytlevitettä)', why: 'Leivontamargariinissa on sama 80 % rasvaa kuin voissa, joten määrä pysyy samana ja kakut, pullat ja voikreemit onnistuvat. Kevytlevitteet sisältävät liikaa vettä leivontaan.', word: 'margariini', fams: ['voi'] };
@@ -1501,6 +1520,7 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
     // 1. Lihan ja kalan käsittelyohjeet pois
     if (fleshy) t = t.replace(/\s*nahkapuoli (alaspäin|ylöspäin|alas|ylös)/gi, '').replace(/,? skin[- ]side (down|up)/gi, '').replace(/\s+ja (irtoaa|hiutaloituu|lohkeaa) (helposti|haarukalla)/gi, '').replace(/\s+and flakes easily( with a fork)?/gi, '');
     if (swaps.some(s => s.word === 'silkkitofu' || s.word === 'tofu') && famSet.has('muna')) t = t.replace(/\b([Rr])iko\s+(?=(kanan)?mun)/g, (m, r) => (r === 'R' ? 'L' : 'l') + 'usikoi ');
+    if (famSet.has('muna') && swaps.some(s => /tofu/.test(s.word || ''))) t = t.replace(/([Mm])unakokkeli/g, (m, a) => (a === 'M' ? 'T' : 't') + 'ofukokkeli');
     if (fleshy) {
       t = sentences(t).map(x => {
         if (!HANDLING.test(x)) return x;
@@ -1549,7 +1569,7 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
           if (c && (c === 'nom' || c === 'gen')) {
             const prev = ((tokens[k - 1] || {}).w || '').toLowerCase(), next = ((tokens[k + 1] || {}).w || '').toLowerCase();
             const ok = /^(sulatettu|sulatetun|sulata|sulaneen|sulanut|pehmeä|pehmeän|pehmennetty|pehmennetyn|kylmä|kylmän|kuutioitu|kuutioidun|ruskistettu|ruskistetun|loput|lopun|suolaton|suolattoman|nokare|nokareen|ja|sekä)$/.test(prev) ||
-              /^(ja|sekä|sokeri|sokerin|sokeria|sulaa|sulanut|kuohuu|ruskistuu|pannulle|pannulla|kattilaan|kattilassa|kanssa|joukkoon|sekaan|päälle|seokseen|kuutioina|nokareina|huoneenlämpöisenä|pehmeänä)$/.test(next);
+              /^(ja|sekä|sokeri|sokerin|sokeria|sulaa|sulanut|kuohuu|ruskistuu|pannulle|pannulla|kattilaan|kattilassa|kanssa|joukkoon|sekaan|päälle|seokseen|kuutioina|nokareina|huoneenlämpöisenä|pehmeänä|ympärille|ympäri|alle|päällä|sisään|sisälle|tilalle|määrä|levy|levynä|kerros|kerrokset)$/.test(next);
             if (!ok) c = null;
           }
           if (c) { rep = formOf(tw, c); break; }
@@ -1667,15 +1687,24 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
   const PANTRY_WORD = { savutofu: 'savutofu', tofu: 'tofu', soijajuoma: 'soijajuoma', kaurajuoma: 'kaurajuoma', mantelijuoma: 'mantelijuoma', kasvijuoma: 'kasvijuoma', kerma: 'kaurakerma', vispi: 'kasvikerma', fraiche: 'kaurafraiche', jogurtti: 'kasvijogurtti', rahka: 'vegerahka', tuorejuusto: 'vegetuorejuusto', juusto: 'vegejuusto', margariini: 'margariini', kookosmaito: 'kookosmaito', liemi: 'kasvisliemi', jauhis: 'jauhis', kaurapalat: 'kaurapalat', makkara: 'kasvismakkara', majoneesi: 'vegemajoneesi', ravintohiiva: 'ravintohiiva' };
 
   /* Vaiheissa mainitut eläinperäiset ainekset, joita ei ole ainesluettelossa ("paista voissa") */
-  function implicitSwaps(steps, swaps, ctx, en) {
+  function implicitSwaps(steps, swaps, ctx, en, ingNames) {
     const have = new Set(); swaps.forEach(s => (s.fams || []).forEach(f => have.add(f)));
+    /* keltuaiset tai valkuaiset on jo vaihdettu: ohjeen "munat" viittaavat niihin */
+    if (have.has('keltuainen') || have.has('valkuainen')) have.add('muna');
+    /* ainesluettelossa on jo kasviversio (kasvisliemi, kaurajogurtti): ohjeen "liemi" viittaa siihen */
+    const names = norm((ingNames || []).join(' '));
+    if (/(kasvislie|kasvisliem|vegetable (broth|stock)|sienilie|sieniliem|mushroom (broth|stock)|liemikuutio|kombu)/.test(names)) have.add('liemi');
+    if (/(kaurajogurt|soijajogurt|kookosjogurt|kasvijogurt|plant yog|vegan yog)/.test(names)) have.add('jogurtti');
     const C = [['voi', 'margariini', 'voi', 'margariini'], ['maito', ctx.bake ? 'soijajuoma' : 'kasvijuoma', 'maito', 'kasvijuoma'], ['kerma', 'kaurakerma', 'kerma', 'kaurakerma'], ['muna', 'kasvijuoma', 'kananmuna', 'kasvijuoma (voiteluun) tai pellavamuna'], ['juusto', 'vegejuusto', 'juusto', 'vegaaninen juusto'], ['hunaja', 'siirappi', 'hunaja', 'siirappi'], ['liemi', 'kasvisliemi', 'liha- tai kanaliemi', 'kasvisliemi'], ['jogurtti', 'kasvijogurtti', 'jogurtti', 'kasvijogurtti']];
     const text = steps.join(' ');
     const out = [];
     C.forEach(([f, word, from, to]) => {
       if (have.has(f)) return;
       const cand = { id: f, fams: f === 'muna' ? ['muna', 'keltuainen', 'valkuainen'] : [f], word, implicit: true };
-      if (rewriteStep(text, [cand], ctx, en) !== rewriteStep(text, [], ctx, en)) out.push(Object.assign(cand, { from, to }));
+      /* kermaviili ei ole viiliä: sen osa "viili" ei saa tuottaa jogurttivaihtoa */
+      const tx = f === 'jogurtti' ? text.replace(/kermaviil[a-zäöå]*/gi, '') : text;
+      const sp = x => String(x).replace(/\s+/g, ' ').trim();
+      if (sp(rewriteStep(tx, [cand], ctx, en)) !== sp(rewriteStep(tx, [], ctx, en))) out.push(Object.assign(cand, { from, to }));
     });
     return out;
   }
@@ -1685,6 +1714,13 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
     // kokonaiset fraasit
     ['pellavamuna: 1 rkl pellavarouhetta + 3 rkl vettä', 'flax egg: 1 tbsp ground flaxseed + 3 tbsp water'],
     ['vegaanista leivontamargariinia (ei kevytlevitettä)', 'vegan baking butter (not a light spread)'],
+    ['vegaanista leivontamargariinia (huoneenlämpöinen, ei kevytlevitettä)', 'vegan baking butter (room temperature, not a light spread)'],
+    ['kylmää vegaanista leivontamargariinia (ei kevytlevitettä)', 'cold vegan baking butter (not a light spread)'],
+    ['vegaanista leivontamargariinia (kiinteä, ei kevytlevitettä)', 'firm vegan baking butter (not a light spread)'],
+    ['vegaanista leivontamargariinia levynä (kylmä)', 'cold vegan baking butter block'],
+    ['soijajuomaa (maustamaton)', 'unsweetened soy milk'],
+    ['sulavaa vegaanista juustoraastetta', 'melting vegan shredded cheese'],
+    ['juustoisempaan makuun', 'for a cheesier flavour'], ['soodan pariksi', 'to activate the baking soda'], ['korvaa munien kohotusta', 'replaces the lift from the eggs'],
     ['vegaanista margariinia (sama määrä)', 'vegan butter (same amount)'],
     ['kasviöljyä (rypsi- tai auringonkukkaöljy)', 'vegetable oil (canola or sunflower)'],
     ['kaurajuomaa (maustamaton, ei makeutettu)', 'oat milk (plain, unsweetened)'],
@@ -2591,6 +2627,10 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
     const RR = G.VegRules || require('./rules.js');
     const VS = G.VegSubs || require('./subs.js');
     const ctx = Object.assign(VS.contextOf(text, p.title), recipeContext(text));
+    /* keittiökemia: aineksen tehtävä reseptissä, reseptin tasapaino ja tekniikat */
+    const CH = G.VegChem || null, R = CH ? CH.prepare(p, text, ctx) : null;
+    const fb = (opts && opts.fb) || {};
+    let eggDough = false;
     const en = RR.isEnglish(text);
     /* englanninkielinen resepti voidaan pitää englanninkielisenä (ainekset ja korvikkeet englanniksi) */
     const outEn = en && !!(opts && opts.lang === 'en');
@@ -2626,10 +2666,17 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
         if (en && !outEn) { const core = hk.replace(/^(for the|for)\s+/, ''); const tr = HEADS[hk] || HEADS[core] || (RR.translatePhrase(core) || {}).name; if (tr) h = tr.charAt(0).toUpperCase() + tr.slice(1); }
         out.push({ head: h }); return;
       }
-      const altKey = norm(ing.name), altI = opts && opts.alt && opts.alt[altKey];
-      let sub = VS.subFor(ing, ctx), altN = 0;
+      const role = R ? CH.roleOf(ing, R) : null;
+      const ictx = role ? Object.assign({}, ctx, role.flags, { role: role.role, fam: role.fam }) : ctx;
+      const altKey = norm(ing.name);
+      let altI = opts && opts.alt && opts.alt[altKey], fbNote = null;
+      let sub = VS.subFor(ing, ictx), altN = 0;
       if (sub && (sub.name || sub.lines)) {
-        const alts = VS.altsFor(ing, ctx); altN = alts.length;
+        const alts = VS.altsFor(ing, ictx); altN = alts.length;
+        /* käyttäjän palaute: korvike, joka ei onnistunut tässä tehtävässä, vaihtuu seuraavaan */
+        const bad = role && fb[role.key] || [];
+        const keyOf = v => VS.norm(((v.lines || [{ name: v.name }])[0] || {}).name || '').trim();
+        if (altI == null && bad.length && bad.includes(keyOf(sub))) { const k = alts.findIndex(v => !bad.includes(keyOf(v))); if (k >= 0) { altI = k + 1; fbNote = `Korvike vaihdettiin, koska merkitsit aiemman (${(sub.lines ? sub.lines[0].name : sub.name)}) epäonnistuneeksi tässä käytössä.`; } }
         if (altI && alts[altI - 1]) sub = alts[altI - 1];
       }
       const pendingPre = [];
@@ -2667,10 +2714,16 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
           return c;
         });
         if (altN && done[0]) { done[0]._alt = { key: altKey, n: altN, i: altI || 0, from: ing.name }; done.forEach(c => { c._g = altKey; }); }
+        if (role && role.fam === 'muna' && /^(sitoja|kohotus|rakenne|vaahto)$/.test(role.role)) eggDough = true;
+        if (role && done[0]) {
+          done[0]._role = { key: role.key, label: role.label, conf: role.conf, fam: role.fam, role: role.role, sub: VS.norm(((sub.lines || [{ name: sub.name }])[0] || {}).name || '').trim() };
+          if (role.conf < 0.7) pushUniq(extraNotes, `${ing.name.charAt(0).toUpperCase() + ing.name.slice(1)}: tehtävää tässä reseptissä ei voitu päätellä varmasti (arvio: ${role.label}). Jos lopputulos ei miellytä, valitse toinen korvike aineksen kohdalta.`);
+        }
+        if (fbNote) pushUniq(extraNotes, fbNote);
         done.forEach(c => out.push(c));
         const fin = prepText(done.map(c => c.name).join(' '));
         pendingPre.forEach(pr => { if (/soijasuikal/.test(pr) && !/soija/.test(fin)) return; if (/tofusta neste/.test(pr) && !/tofu/.test(fin)) return; if (/pellavarouhe/.test(pr) && !/pellava/.test(fin)) return; pushUniq(extraPre, pr); });
-        changes.push({ from: before, to: lines.map(ingText).join(' + '), why: why || '' });
+        changes.push({ from: before, to: lines.map(ingText).join(' + '), why: why || '', role: role ? role.label : null });
         /* englanninkielisissä vaiheissa alkuperäinen nimi ("fish sauce") vaihdetaan korvikkeen lyhyeen nimeen */
         if (en) { const wEn = (done[0]._sw && VS.EN[done[0]._sw]) || (sub && sub.word && VS.EN[sub.word]); const shortEn = wEn || VS.toEn(done[0].name).replace(/\s*\([^)]*\)/g, '').split(/,\s|\s+or\s+|\s+\+\s+/)[0].trim(); if (shortEn && !/[äöå]/i.test(shortEn)) enRepl.push({ name: ing.name, to: shortEn }); }
         if (sub && (sub.fams || []).length) {
@@ -2695,6 +2748,23 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
       delete cur.orig;
       out.push(cur);
     });
+    /* reseptin tasapaino: happo soodalle, kohotus munien tilalle, huomiot nesteestä, rasvasta ja ruskistumisesta */
+    let chem = null;
+    if (R && changes.length) {
+      try {
+        const bal = CH.balance(ingsIn.filter(i => !i.head), out.filter(i => !i.head), R, en);
+        if (bal) {
+          bal.add.forEach(x => {
+            const own = x._chem === 'kohotus' && out.find(i => !i.head && !i.changed && i.qty != null && i.unit === 'tl' && /(leivinjauhe|baking powder)/i.test(i.name));
+            if (own) { own.qty += x.qty; own.note = (own.note ? own.note + ', ' : '') + (outEn || en ? '+' + x.qty + ' tsp to replace the eggs' : 'sisältää +' + String(x.qty).replace('.', ',') + ' tl munien tilalle'); own.changed = true; own.kind = 'vegan'; }
+            else out.push(Object.assign({}, x, { _helper: true }));
+            changes.push({ from: x._chem === 'happo' ? 'happo soodalle' : 'munien kohotus', to: ingText(x), why: x._chem === 'happo' ? 'Ruokasooda tarvitsee happoa kohotakseen.' : 'Munat kohottivat taikinaa; leivinjauhe hoitaa sen nyt.', role: 'reseptin tasapaino' });
+          });
+          bal.notes.forEach(x => pushUniq(extraNotes, x));
+          chem = bal.summary;
+        }
+      } catch (e) { chem = null; }
+    }
     // apurivit (viinikivijauhe, kurkuma, musta suola) yhteen ja määrät siisteiksi
     for (let i = 0; i < out.length; i++) {
       const a = out[i];
@@ -2721,8 +2791,10 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
       if ((restrictions || []).includes('pahkinaton')) st = st.replace(/cashewpähkinöitä|cashewpähkinät/g, 'auringonkukansiemeniä').replace(/cashew-/gi, 'siemen-');
       preSteps.push(st);
     });
-    VS.implicitSwaps(p.steps, swaps, ctx, en).forEach(sw => { swaps.push(sw); changes.push({ from: sw.from + ' (valmistusohjeessa)', to: sw.to, why: 'Valmistusohjeessa mainittu eläinperäinen aines vaihdettiin, vaikka sitä ei ollut ainesluettelossa.' }); });
+    VS.implicitSwaps(p.steps, swaps, ctx, en, ingsIn.filter(i => !i.head).map(i => i.name)).forEach(sw => { swaps.push(sw); changes.push({ from: sw.from + ' (valmistusohjeessa)', to: sw.to, why: 'Valmistusohjeessa mainittu eläinperäinen aines vaihdettiin, vaikka sitä ei ollut ainesluettelossa.' }); });
     let steps = p.steps.map(s => VS.rewriteStep(fToCText(s), swaps, ctx, en)).filter(Boolean);
+    /* korvikkeiden tekniikat valmistuksen alkuun, ellei niitä jo mainita */
+    if (CH) CH.techniques(out.filter(i => !i.head && i.changed).map(i => i.name), preSteps.concat(steps, extraNotes), outEn).forEach(t => preSteps.push(t));
     if (en && enRepl.length) steps = steps.map(st => enReplace(st, enRepl));
     steps = (outEn ? preSteps.map(VS.stepEn) : preSteps).concat(steps);
     const notes = (p.tips || []).slice();
@@ -2732,14 +2804,14 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
       changes.forEach(c => { c.to = VS.toEn(c.to); });
     }
     const ids = swaps.map(s => s.id);
-    if (ctx.bake && ids.includes('muna') && !ctx.meringue) notes.push('Kananmunattomat leivonnaiset kypsyvät usein hieman hitaammin: tarkista kypsyys tikulla 5 minuuttia ohjeaikaa myöhemmin.');
+    if (ctx.bake && ids.includes('muna') && !ctx.meringue && !ctx.custard && (!R || eggDough)) notes.push('Kananmunattomat leivonnaiset kypsyvät usein hieman hitaammin: tarkista kypsyys tikulla 5 minuuttia ohjeaikaa myöhemmin.');
     if (ctx.meringue && (ids.includes('valkuainen') || ids.includes('muna'))) notes.push(/macaron/.test(prepText(text)) ? 'Aquafaba-macaronsit: anna kuorten kuivua pöydällä, kunnes pinta ei tartu sormeen (30–90 min), ja paista 120–130 °C noin 20 minuuttia. Anna jäähtyä kokonaan pellillä ennen irrottamista.' : 'Aquafabamarengit paistetaan matalassa lämmössä: 90–100 °C noin 1,5–2 tuntia, ja ne jätetään kuivumaan sammutettuun uuniin luukku raollaan.');
     extraNotes.forEach(x => pushUniq(notes, x));
     if ((avoid || []).length) {
       const hits = out.filter(i => !i.head && (avoid || []).some(a => prepText(i.name).includes(prepText(a))));
       if (hits.length) notes.push('Huom. vältettävä aine reseptissä: ' + hits.map(h => h.name).join(', ') + '.');
     }
-    return { title: p.title, servings: p.servings, servingsLabel: p.servingsLabel, ingredients: out, steps, tools: p.tools || [], changes, notes: notes.join(' '), categories: guessCategories(text), mode: 'rules', lang: outEn ? 'en' : 'fi', srcLang: en ? 'en' : 'fi' };
+    return { title: p.title, servings: p.servings, servingsLabel: p.servingsLabel, ingredients: out, steps, tools: p.tools || [], changes, notes: notes.join(' '), categories: guessCategories(text), chem, mode: 'rules', lang: outEn ? 'en' : 'fi', srcLang: en ? 'en' : 'fi' };
   }
   /* Englanninkielinen vaihe: jäljelle jäänyt alkuperäinen eläinperäinen nimi korvikkeen nimeksi.
      Kokeillaan koko nimeä, sitten ilman ensimmäistä sanaa ja lopuksi ensimmäistä sanaa ("pecorino romano" → "pecorino"). */
@@ -2832,6 +2904,326 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
 
 </script>
 
+<script>
+/* ---------- Vegaaninen keittiökemia ----------
+   1) Tuotteiden ominaisuudet: mitä kukin vegaaninen tuote osaa (rasva, proteiini, vesi, happamuus, keittokestävyys,
+      vaahtoutuminen, sulaminen, jähmettyminen, ruskistuminen). Arvot 100 grammassa, likiarvoja Finelin ja pakkausmerkintöjen tasolta.
+   2) Aineksen tehtävä reseptissä: sama muna voi sitoa, kohottaa, vaahtoutua, hyytyä tai emulgoida. Tehtävä päätellään määristä,
+      valmistusvaiheiden sanoista ja muista aineksista, ja korvike valitaan tehtävän mukaan.
+   3) Koko reseptin tasapaino: neste, rasva, proteiini, kohotus ja happo–emäs ennen ja jälkeen muunnoksen; selvät puutteet
+      korjataan automaattisesti, muista kerrotaan.
+   4) Tekniikat: jokaiseen korvikkeeseen kuuluva työvaihe (agar keitetään, aquafaba vatkataan, cashewt liotetaan…). */
+(function (G) {
+  const norm = s => ' ' + String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim() + ' ';
+
+  /* --- 1. Vegaaniset tuotteet ---
+     fat/prot/water/sugar g/100 g; acid: hapan; boil: kestää keittämisen (0–2); whip: vaahtoutuu (0–2); melt: sulaa (0–2);
+     set: hyytyy tai jähmettyy (0–2); brown: ruskistuu (0–2); neutral: maun neutraalius (0–2); solid: kiinteä jääkaappilämmössä */
+  const P = {
+    kaurajuoma: { n: 'kaurajuomaa (maustamaton, ei makeutettu)', fat: 1.5, prot: 1, water: 90, sugar: 4, boil: 2, whip: 0, brown: 1, neutral: 1, set: 0 },
+    soijajuoma: { n: 'soijajuomaa', fat: 1.8, prot: 3.3, water: 91, sugar: 0.5, boil: 1, whip: 0, brown: 2, neutral: 1, set: 1, curdle: 1 },
+    mantelijuoma: { n: 'mantelijuomaa (maustamaton)', fat: 1.1, prot: 0.4, water: 96, sugar: 0, boil: 1, whip: 0, brown: 0, neutral: 1, set: 0 },
+    kookosmaito: { n: 'kookosmaitoa', fat: 17, prot: 1.6, water: 76, sugar: 2, boil: 2, whip: 0, brown: 0, neutral: 0, set: 1, solid: 1 },
+    kookoskerma: { n: 'kookoskermaa (täysrasvainen)', fat: 25, prot: 2, water: 70, sugar: 2, boil: 2, whip: 1, brown: 0, neutral: 0, set: 2, solid: 2 },
+    kaurakerma: { n: 'kaurakermaa (ruoanvalmistukseen)', fat: 13, prot: 1, water: 80, sugar: 3, boil: 2, whip: 0, brown: 1, neutral: 1, set: 0 },
+    soijakerma: { n: 'soijakermaa (ruoanvalmistukseen)', fat: 16, prot: 2.7, water: 78, sugar: 1, boil: 2, whip: 0, brown: 1, neutral: 1, set: 1 },
+    vispi: { n: 'vispattavaa kasvikermaa', fat: 27, prot: 1, water: 66, sugar: 3, boil: 1, whip: 2, brown: 0, neutral: 1, set: 1, solid: 1 },
+    kaurafraiche: { n: 'kaurafraichea', fat: 15, prot: 1, water: 78, sugar: 3, acid: 1, boil: 2, whip: 0, brown: 0, neutral: 1, set: 0 },
+    soijajogurtti: { n: 'maustamatonta soijajogurttia', fat: 2.2, prot: 4, water: 88, sugar: 1, acid: 1, boil: 0, whip: 0, brown: 1, neutral: 1, set: 1 },
+    kaurajogurtti: { n: 'maustamatonta kaurajogurttia', fat: 3, prot: 1, water: 86, sugar: 3, acid: 1, boil: 0, whip: 0, brown: 0, neutral: 1, set: 0 },
+    tuorejuusto: { n: 'vegaanista tuorejuustoa', fat: 22, prot: 3, water: 68, sugar: 1, acid: 1, boil: 1, whip: 0, brown: 0, neutral: 1, set: 1, solid: 1 },
+    raaste: { n: 'vegaanista juustoraastetta (sulava)', fat: 22, prot: 0.5, water: 50, sugar: 0, boil: 1, whip: 0, melt: 2, brown: 1, neutral: 1, set: 0, solid: 2 },
+    margariini: { n: 'vegaanista leivontamargariinia (ei kevytlevitettä)', fat: 80, prot: 0, water: 18, sugar: 0, boil: 2, whip: 1, brown: 1, neutral: 1, set: 0, solid: 2 },
+    levite: { n: 'kasvirasvalevitettä (60 %)', fat: 60, prot: 0, water: 38, sugar: 0, boil: 1, whip: 0, brown: 0, neutral: 1, set: 0, solid: 1 },
+    oljy: { n: 'kasviöljyä (rypsi- tai auringonkukkaöljy)', fat: 100, prot: 0, water: 0, sugar: 0, boil: 2, whip: 0, brown: 1, neutral: 2, set: 0, solid: 0 },
+    kookosoljy: { n: 'hajutonta kookosöljyä', fat: 100, prot: 0, water: 0, sugar: 0, boil: 2, whip: 0, brown: 0, neutral: 1, set: 2, solid: 2 },
+    silkkitofu: { n: 'silkkitofua', fat: 2.5, prot: 5, water: 90, sugar: 0.5, boil: 1, whip: 0, brown: 0, neutral: 2, set: 1 },
+    tofu: { n: 'kiinteää tofua', fat: 8, prot: 14, water: 75, sugar: 0.5, boil: 2, whip: 0, brown: 2, neutral: 2, set: 2 },
+    aquafaba: { n: 'aquafabaa (kikherneiden keitinlientä)', fat: 0.2, prot: 1, water: 95, sugar: 0.5, boil: 1, whip: 2, brown: 0, neutral: 1, set: 1 },
+    pellava: { n: 'pellavarouhetta', fat: 42, prot: 18, water: 7, sugar: 1, boil: 2, whip: 0, brown: 1, neutral: 1, set: 1, gel: 2 },
+    kikhernejauho: { n: 'kikhernejauhoja', fat: 6, prot: 22, water: 10, sugar: 10, boil: 2, whip: 0, brown: 2, neutral: 1, set: 2 },
+    tarkkelys: { n: 'maissitärkkelystä', fat: 0, prot: 0, water: 12, sugar: 0, boil: 2, whip: 0, brown: 0, neutral: 2, set: 2 },
+    agar: { n: 'agar-agar-jauhetta', fat: 0, prot: 0, water: 15, sugar: 0, boil: 2, whip: 0, brown: 0, neutral: 2, set: 2 },
+    ravintohiiva: { n: 'ravintohiivaa', fat: 4, prot: 45, water: 5, sugar: 0, boil: 2, whip: 0, brown: 1, neutral: 0, set: 0, umami: 2 },
+    cashew: { n: 'liotettuja cashewpähkinöitä', fat: 44, prot: 18, water: 5, sugar: 6, boil: 2, whip: 0, brown: 1, neutral: 1, set: 1 }
+  };
+
+  /* --- Tehtävän vaatimukset: paino kullekin ominaisuudelle (+ hyvä, − huono) ja rasvan tavoiteväli --- */
+  const NEED = {
+    'maito:neste': { boil: 1, neutral: 1, sweetPenalty: 1, prefer: ['kaurajuoma', 'soijajuoma', 'mantelijuoma'] },
+    'maito:puuro': { boil: 2, neutral: 1, prefer: ['kaurajuoma', 'soijajuoma'] },
+    'maito:kastike': { boil: 1, prot: 1, set: 1, prefer: ['soijajuoma', 'kaurajuoma'] },
+    'maito:hyytyminen': { prot: 2, set: 2, prefer: ['soijajuoma'] },
+    'maito:leivonta': { prot: 2, brown: 2, prefer: ['soijajuoma', 'kaurajuoma'] },
+    'kerma:vaahto': { whip: 3, prefer: ['vispi', 'kookoskerma'] },
+    'kerma:keitto': { boil: 3, neutral: 1, prefer: ['kaurakerma', 'soijakerma'] },
+    'kerma:hyyto': { set: 2, fat: [20, 35], prefer: ['kookoskerma', 'vispi'] },
+    'kerma:jaatelo': { fat: [20, 35], solid: 1, prefer: ['kookoskerma'] },
+    'kerma:leivonta': { boil: 1, fat: [10, 30], prefer: ['kaurakerma', 'vispi'] },
+    'voi:leivonta': { fat: [78, 85], solid: 2, prefer: ['margariini'] },
+    'voi:vaahdotus': { fat: [78, 85], solid: 2, whip: 1, prefer: ['margariini'] },
+    'voi:kerrostus': { fat: [78, 85], solid: 3, prefer: ['margariini'] },
+    'voi:mureus': { fat: [78, 100], solid: 3, prefer: ['margariini', 'kookosoljy'] },
+    'voi:kuorrute': { fat: [78, 85], solid: 2, whip: 1, prefer: ['margariini'] },
+    'voi:sulatettu': { fat: [80, 100], prefer: ['oljy', 'margariini'] },
+    'voi:paisto': { boil: 2, prefer: ['margariini', 'oljy'] },
+    'voi:kastike': { fat: [78, 85], prefer: ['margariini'] },
+    'voi:maku': { fat: [60, 85], prefer: ['margariini', 'levite'] },
+    'voi:pohja': { fat: [75, 100], solid: 2, prefer: ['margariini', 'kookosoljy'] }
+  };
+  /* Tuotteen sopivuus tehtävään 0–1 (käytetään myös käyttäjän omille kaappituotteille) */
+  function fit(pr, key) {
+    const nd = NEED[key]; if (!nd || !pr) return 1;
+    let s = 0, w = 0;
+    ['boil', 'whip', 'set', 'brown', 'neutral', 'solid', 'melt'].forEach(k => { if (nd[k]) { s += nd[k] * Math.min(2, pr[k] || 0) / 2; w += nd[k]; } });
+    if (nd.prot) { s += nd.prot * Math.min(1, (pr.prot || 0) / 3); w += nd.prot; }
+    if (nd.fat) { const [a, b] = nd.fat, f = pr.fat || 0; s += 2 * (f >= a && f <= b ? 1 : Math.max(0, 1 - Math.min(Math.abs(f - a), Math.abs(f - b)) / 25)); w += 2; }
+    if (nd.sweetPenalty && pr.sugar > 5) { s -= 1; }
+    return w ? Math.max(0, Math.min(1, s / w)) : 1;
+  }
+  function best(fam, role) {
+    const key = fam + ':' + role, nd = NEED[key]; if (!nd) return null;
+    let top = null;
+    (nd.prefer || Object.keys(P)).forEach((id, i) => { const sc = fit(P[id], key) - i * 0.01; if (!top || sc > top.sc) top = { id, sc }; });
+    return top && Object.assign({ id: top.id, score: top.sc }, P[top.id]);
+  }
+  /* Käyttäjän oma tuote: ravintoarvoista sopivuus tehtävään (esim. kevytlevite ei sovi leivontaan) */
+  function pantryFit(prod, fam, role) {
+    const key = fam + ':' + role, nd = NEED[key]; if (!nd || !prod) return { ok: true };
+    const fat = prod.nutr && typeof prod.nutr.fat === 'number' ? prod.nutr.fat : null;
+    if (nd.fat && fat != null && fat < nd.fat[0] - 8) return { ok: false, why: `rasvaa ${String(Math.round(fat)).replace('.', ',')} %, tähän tarvitaan noin ${nd.fat[0]} %` };
+    if (role === 'vaahto' && prod.type && prod.type !== 'vispi' && prod.type !== 'kookosmaito') return { ok: false, why: 'ei vaahtoudu' };
+    return { ok: true };
+  }
+
+  /* --- Eläinperäisten ainesten koostumus (100 g) ja tyypillinen paino --- */
+  const A = [
+    ['valkuainen', /( valkuai| egg whites?)/, { water: 88, prot: 11, fat: 0, sugar: 0.7, pc: 30, gdl: 100 }],
+    ['keltuainen', /( keltuai| egg yolks?)/, { water: 50, prot: 16, fat: 27, sugar: 0.5, pc: 18, gdl: 100 }],
+    ['muna', /( kananmun| muna | munaa | munat | munia | eggs? )/, { water: 75, prot: 12.5, fat: 10, sugar: 0.7, pc: 55, gdl: 100 }],
+    ['hapan', /(kermaviil| smetana| fraiche| sour cream)/, { water: 78, prot: 3, fat: 12, sugar: 3, acid: 1, gdl: 105 }],
+    ['piima', /(piima| buttermilk| kefir)/, { water: 90, prot: 3.4, fat: 1, sugar: 4, acid: 1, gdl: 103 }],
+    ['jogurtti', /(jogurt| yogurt| yoghurt| viili )/, { water: 85, prot: 4, fat: 2.5, sugar: 4, acid: 1, gdl: 105 }],
+    ['rahka', /(rahka| quark| skyr)/, { water: 80, prot: 10, fat: 0.5, sugar: 4, acid: 1, gdl: 110 }],
+    ['tuorejuusto', /(tuorejuust| cream cheese| mascarpone| ricotta)/, { water: 55, prot: 7, fat: 25, sugar: 3, acid: 1, gdl: 100 }],
+    ['voi', /( voi | voita | voin | butter )/, { water: 16, prot: 0.7, fat: 81, sugar: 0.6, gdl: 95 }],
+    ['kerma', /( kerma| kuohukerma| vispikerma| ruokakerma| cream )/, { water: 58, prot: 2.2, fat: 35, sugar: 3, gdl: 100 }],
+    ['juusto', /( juusto| juustoa| juustoraaste| cheese| parmesa| mozzarella| cheddar)/, { water: 40, prot: 26, fat: 28, sugar: 0, gdl: 45 }],
+    ['maito', /( maito| maitoa| kevytmaito| taysmaito| milk )/, { water: 88, prot: 3.4, fat: 2.5, sugar: 4.8, gdl: 103 }],
+    ['hunaja', /( hunaja| honey)/, { water: 17, prot: 0.3, fat: 0, sugar: 82, gdl: 140 }]
+  ];
+  const VOL = { ml: 1, cl: 10, dl: 100, l: 1000, tl: 5, rkl: 15, cup: 236.6, tbsp: 14.79, tsp: 4.93 };
+  const MASS = { g: 1, kg: 1000, oz: 28.35, lb: 453.6 };
+  function animalOf(name) { const t = norm(name); if (/( kasvi| vegaani| vegan| kaura| soija| kookos| mantel| plant| oat | soy | coconut| maapahkinavoi| peanut butter| kaakaovoi| cocoa butter)/.test(t)) return null; for (const [id, re, c] of A) if (re.test(t)) return { id, c }; return null; }
+  function gramsOf(ing, gdl, pc) {
+    if (ing.qty == null) return null;
+    const u = String(ing.unit || '').toLowerCase();
+    if (MASS[u]) return ing.qty * MASS[u];
+    if (VOL[u]) return ing.qty * VOL[u] / 100 * (gdl || 100);
+    if (!u || u === 'kpl') return pc ? ing.qty * pc : null;
+    return null;
+  }
+  /* Koostumus yhdelle ainekselle: eläinperäiselle omat arvot, muille ravintoarvotaulukko (vesi = loput) */
+  function compOf(ing) {
+    const an = animalOf(ing.name);
+    if (an && !ing.changed) { const g = gramsOf(ing, an.c.gdl, an.c.pc); if (g == null) return null; return { g, water: g * an.c.water / 100, fat: g * an.c.fat / 100, prot: g * an.c.prot / 100, sugar: g * an.c.sugar / 100, acid: !!an.c.acid, fam: an.id }; }
+    const N = G.VegNutr; if (!N) return null;
+    const r = N.forIngredient(Object.assign({}, ing, { _orig: null }), 1, ing.gPerDl);
+    if (!r || !r.known) return null;
+    const v = r.v, dry = (v.prot || 0) + (v.carb || 0) + (v.fat || 0) + (v.fiber || 0) + (v.salt || 0);
+    const t = norm(ing.name);
+    return { g: r.g, water: Math.max(0, r.g - dry), fat: v.fat || 0, prot: v.prot || 0, sugar: v.sugar || 0, acid: ACID.test(t) };
+  }
+  const ACID = /(sitruunamehu|limemehu|lemon juice|lime juice|etikka|vinegar|jogurt|yogurt|piima|buttermilk|kermaviil|fraiche|sour cream|smetana|rahka|kefir|viinikivi|cream of tartar|appelsiinimehu|orange juice|omenasose|applesauce|kaakaojauhe|natural cocoa|sitruunan mehu)/;
+  const FLOUR = /( vehnajauho| jauhoja| jauhot | jauho | flour| spelttijauho| ruisjauho| kaurajauho| grahamjauho| hiivaleipajauho| puolikarkea| erikoisvehnajauho)/;
+  const LEAV = [[/( leivinjauhe| baking powder)/, 1], [/( ruokasooda| leivontasooda| sooda | baking soda| bicarbonate)/, 3]];
+  function tsp(ing) { if (ing.qty == null) return 0; const u = ing.unit; if (u === 'tl' || u === 'tsp') return ing.qty; if (u === 'rkl' || u === 'tbsp') return ing.qty * 3; if (u === 'g') return ing.qty / 4; if (u === 'ml') return ing.qty / 5; return 0; }
+
+  /* --- 2. Aineksen tehtävä --- */
+  const SENT = t => String(t || '').split(/(?<=[.!?])\s+|\n/).map(norm);
+  /* Reseptin yhteiset tiedot tehtävien päättelyyn */
+  function prepare(p, text, ctx) {
+    const ings = (p.ingredients || []).filter(i => !i.head);
+    const steps = SENT((p.steps || []).join('\n'));
+    const full = (p.steps || []).map(norm);
+    /* ainesten osaotsikot (Valkokastike, Kuorrute, Pohja…) kertovat tehtävästä */
+    const heads = new Map(); let h = '';
+    (p.ingredients || []).forEach(i => { if (i.head) h = norm(i.head); else heads.set(norm(i.name), h); });
+    const all = norm((p.title || '') + ' ' + text);
+    let flour = 0, eggs = 0, leav = 0, soda = 0, yeast = false;
+    ings.forEach(i => {
+      const t = norm(i.name);
+      if (FLOUR.test(t) && !/(maissi|peruna|tarkkel|korppu)/.test(t)) { const g = gramsOf(i, 60); if (g) flour += g; }
+      const an = animalOf(i.name);
+      if (an && (an.id === 'muna')) { const VS = G.VegSubs; const n = VS && VS.eggCount ? VS.eggCount(i, 'whole') : i.qty; if (n) eggs += n; }
+      LEAV.forEach(([re, k]) => { if (re.test(t)) { leav += tsp(i) * k; if (k === 3) soda += tsp(i); } });
+      if (/( hiiva| yeast)/.test(t)) yeast = true;
+    });
+    return { ings, steps, full, heads, all, flour, eggs, leav, soda, yeast, ctx };
+  }
+  const RX = {
+    muna: /( muna| munat| munan| munia| munaa| kananmun| egg| eggs)/,
+    voi: /( voi | voin | voita | voihin | voissa | voilla | voista | voinokare| butter| margariini)/,
+    maito: /( maito| maitoa| maidon| milk)/,
+    kerma: /( kerma| kerman| cream)/,
+    juusto: /( juusto| juustoa| juuston| raaste| cheese| mozzarella| cheddar)/
+  };
+  const L = {
+    'muna:vaahto': 'vaahtoutuu ja kohottaa', 'muna:rakenne': 'kantaa rakenteen', 'muna:sitoja': 'sitoo', 'muna:kohotus': 'sitoo ja kohottaa',
+    'muna:hyytyminen': 'hyytyy kypsyessään', 'muna:emulgointi': 'emulgoi', 'muna:kiilto': 'antaa kiillon', 'muna:leivitys': 'liimaa leivityksen',
+    'muna:paaaines': 'pääaines', 'muna:taikina': 'sitoo pastataikinan', 'muna:kastike': 'sitoo kastikkeen', 'muna:kastaminen': 'sitoo kastetun pinnan',
+    'voi:kerrostus': 'kerrostaa taikinan', 'voi:vaahdotus': 'vaahdotetaan sokerin kanssa', 'voi:mureus': 'tekee murean', 'voi:sulatettu': 'sulatettuna rasvana',
+    'voi:kuorrute': 'kuorrutteen runko', 'voi:pohja': 'sitoo keksipohjan', 'voi:kastike': 'suurustaa kastikkeen', 'voi:paisto': 'paistorasva', 'voi:maku': 'maku ja kiilto', 'voi:leivonta': 'leivonnan rasva',
+    'maito:kastike': 'kastikkeen runko', 'maito:hyytyminen': 'hyytyy kreemiksi', 'maito:leivonta': 'neste ja ruskistuminen', 'maito:puuro': 'puuron neste', 'maito:neste': 'neste',
+    'kerma:vaahto': 'vaahdoksi', 'kerma:keitto': 'kermaisuus keitettäessä', 'kerma:hyyto': 'hyytyvä jälkiruoka', 'kerma:jaatelo': 'jäätelön rasva', 'kerma:leivonta': 'leivonnan neste',
+    'juusto:sulava': 'sulaa ja ruskistuu', 'juusto:kastike': 'juustokastike', 'juusto:pala': 'paloina tai viipaleina', 'juusto:raaste': 'maku pinnalle'
+  };
+  function famOf(ing) {
+    const t = norm(ing.name + ' ' + (ing.note || ''));
+    if (/( valkuai| keltuai| egg white| egg yolk| yolks?)/.test(t)) return null; // omat sääntönsä
+    const an = animalOf(ing.name); if (!an) return null;
+    if (an.id === 'muna' || an.id === 'voi' || an.id === 'maito' || an.id === 'kerma' || an.id === 'juusto') return an.id;
+    return null;
+  }
+  /* Valmistusvaiheiden lauseet, joissa aines mainitaan */
+  const mentions = (R, fam) => R.full.filter(s => RX[fam].test(s));
+  function roleOf(ing, R) {
+    const fam = famOf(ing); if (!fam) return null;
+    const c = R.ctx || {}, t = norm(ing.name + ' ' + (ing.note || '')), all = R.all, ms = mentions(R, fam).join(' ');
+    const hd = R.heads.get(norm(ing.name)) || '';
+    const any = re => re.test(all), inS = re => re.test(ms) || re.test(t) || re.test(hd);
+    let role = null, conf = 0.9; const flags = {};
+    if (fam === 'muna') {
+      const VS = G.VegSubs, n = VS && VS.eggCount ? VS.eggCount(ing, 'whole') : ing.qty;
+      const ratio = R.flour ? R.eggs * 55 / R.flour : 9;
+      const doughS = /( jauho| jauhot| jauhoja| flour| taikina| dough| batter| vaivaa| knead)/.test(ms);
+      const washOnly = c.wash && R.steps.filter(x => RX.muna.test(x)).every(x => /( voitel| brush| egg wash| kiilto)/.test(x));
+      if (!doughS && inS(/( poach| keita munat| keitetyt munat| kovaksi keit| pehmeaksi keit| hard boil| soft boil| fried egg| paista munat| paistetut munat| uppomun)/)) { role = 'paaaines'; flags.solidEgg = true; flags.bake = false; }
+      else if (c.mayo || (any(/( hollandaise| bearnaise| majonee| aioli| mayonnaise)/) && inS(/( hollandaise| bearnaise| majonee| aioli| mayonnaise| emulg| whisk in the (melted )?butter| oljy| oil)/))) role = 'emulgointi';
+      else if (/( voitel| brush| egg wash| voiteluun| for brushing| glaze)/.test(t) || washOnly) role = 'kiilto';
+      else if (c.carbonara) role = 'kastike';
+      else if (c.frenchtoast) role = 'kastaminen';
+      else if (c.pancake) role = 'kohotus';
+      else if (c.breading && /( leivit| dip | dredg| kierita)/.test(ms + t)) role = 'leivitys';
+      else if (c.pasta) role = 'taikina';
+      else if (c.choux) { role = 'rakenne'; conf = 0.5; flags.choux = true; }
+      else if (c.mousse) { role = 'vaahto'; flags.eggFoam = true; flags.whip = true; }
+      else if (c.meringue || c.eggFoam || (c.bake && inS(/( vatkaa| vaahdota| whisk| beat)( the)? (kanan)?(munat|munia|eggs)( ja sokeri| and (the )?sugar)?[^.,]{0,25}(kuohkea| vaahdo| paksu| vaalea| pale| thick| fluffy| ribbon| stiff| foam)/))) { role = 'vaahto'; flags.eggFoam = true; }
+      else if (c.bake && doughS && !c.custard && !c.cheesecake) { role = c.cookie || c.bread || (n != null && n <= 2) ? 'sitoja' : 'kohotus'; }
+      else if (c.custard || c.quiche || c.cheesecake || any(/( flan | creme caramel| clafoutis| uunimunakas| kiusaus| munamaito)/)) { role = 'hyytyminen'; if (!c.quiche && !c.cheesecake && !c.casserole && c.sweet) flags.custard = true; }
+      else if (c.bake && !c.cookie && !c.bread && (R.eggs >= 4 && ratio >= 0.9)) { role = 'rakenne'; flags.sponge = true; conf = 0.7; }
+      else if (c.omelette || any(/( munakokkel| scrambled| fried egg| paistettu muna| keitetyt munat| keitetty muna| kovaksi keitet| hard boiled| soft boiled| pehmeaksi keitet| deviled| shakshuka)/)) role = 'paaaines';
+      else if (c.binder) role = 'sitoja';
+      else if (c.casserole) role = 'hyytyminen';
+      else if (c.bake) { role = c.cookie || (n != null && n <= 2) ? 'sitoja' : 'kohotus'; conf = c.bread ? 0.8 : 0.85; }
+      else if (!R.flour && R.eggs >= 2) { role = 'paaaines'; conf = c.sweet ? 0.6 : 0.75; }
+      else { role = 'sitoja'; conf = 0.5; }
+    } else if (fam === 'voi') {
+      if (any(/( lehtitaikin| voitaikin| croissant| puff pastry| laminoi| laminat| wienerleip| korvapuust)/) && any(/( taita| kaantele| fold| roll out)/)) role = 'kerrostus';
+      else if (any(/( voikreemi| buttercream| kuorrute| frosting| icing)/) && (inS(/( kuorrut| frosting| icing| voikreemi| buttercream| tomusokeri| powdered sugar| icing sugar)/) || (R.flour < 60 && any(/( tomusokeri| powdered sugar| icing sugar)/)))) role = 'kuorrute';
+      else if (inS(/( keksimuru| murskaa keksit| murskatut keksit| digestive| graham cracker| cookie crumbs| crumbs| keksipohja| pohjan)/) && any(/( keksi| digestive| cracker| cookie)/)) role = 'pohja';
+      else if (inS(/( suurus| roux| bechamel| valkokastike| white sauce)|(voi|butter)[^.]{0,40}(jauho|flour)[^.]{0,80}(maito|milk|liemi|broth|stock)/)) role = 'kastike';
+      else if (/( sulat| melted| sulatettu)/.test(t) || inS(/( sulata| sulatettu| melt the butter| melted butter)/)) role = c.bake && !c.casserole && !c.binder ? 'sulatettu' : 'paisto';
+      else if (inS(/( vaahdota| vatkaa)[^.]{0,40}(voi| margariini)|(voi|margariini)[^.]{0,30}sokeri[^.]{0,30}(vaahdo|kuohkea)|cream (the )?butter| beat (the )?butter| butter and sugar until/)) role = 'vaahdotus';
+      else if (inS(/( nypi| nypit| rub in| rub the butter| cut in| murotaikin| crumble| murupinta| kylma voi| cold butter| cubed butter| pastry cutter)/) || any(/( murotaikin| shortbread| pie crust| piirakkapohj| crumble| murupiiras)/)) role = 'mureus';
+      else if (c.bake && !c.casserole && !c.binder && R.flour >= 60) { role = 'leivonta'; conf = 0.8; }
+      else if (inS(/( paista| ruskista| kuullota| freesaa| fry| saute| sear| brown)/)) role = 'paisto';
+      else { role = 'maku'; conf = 0.75; }
+    } else if (fam === 'maito') {
+      if (inS(/( suurus| roux| bechamel| valkokastike| white sauce| juustokastike| cheese sauce)/) || (any(/( kastike| sauce| gravy)/) && inS(/(jauho|flour)[^.]{0,60}(maito|milk)/)) || any(/( bechamel| valkokastike| white sauce| mac and cheese| makaronijuusto)/)) role = 'kastike';
+      else if (c.custard || c.pancake || any(/( vanukas| pudding| uunipannukakku| custard)/) || (c.casserole && R.eggs > 0)) role = c.pancake ? 'leivonta' : 'hyytyminen';
+      else if (any(/( puuro| porridge| oatmeal| velli)/)) role = 'puuro';
+      else if (c.bake && !c.casserole && R.flour >= 60) role = 'leivonta';
+      else { role = 'neste'; conf = 0.8; }
+    } else if (fam === 'kerma') {
+      if (/( kahvi| coffee)/.test(t)) return null;
+      if (c.icecream) role = 'jaatelo';
+      else if (any(/( panna ?cotta| pannacotta| hyydyt| hyytel| liivate| gelatin)/) && c.sweet) role = 'hyyto';
+      else if ((/( vispi| kuohu| whipping| heavy| double| kermavaahto| vaahdoksi)/.test(t) && (c.whip || c.sweet) || (c.whip && c.sweet && !c.savory)) && (inS(/( vaahdo| vatkaa| whip| beat| kermavaahto| whipped| stiff peaks| soft peaks)/) || (c.whip && !c.custard))) role = 'vaahto';
+      else if (c.bake && !c.quiche && !c.casserole && !c.binder && R.flour >= 60) role = 'leivonta';
+      else { role = 'keitto'; conf = 0.85; }
+    } else if (fam === 'juusto') {
+      if (/( parmesa| parmigiano| pecorino| grana)/.test(t)) role = 'raaste';
+      else if (any(/( juustokastike| cheese sauce| mac and cheese| makaronijuusto| queso| fondue)/) || inS(/( sulata[^.]{0,30}kastikkee| stir in the cheese| whisk in the cheese)/)) { role = 'kastike'; flags.cheeseSauce = true; }
+      else if (c.bake || c.casserole || any(/( pizza| gratin| gratiini| lasagne| lasagna| toast| quesadilla| uunissa| oven| broil| grilli)/)) role = 'sulava';
+      else { role = 'pala'; conf = 0.8; }
+    }
+    if (!role) return null;
+    const key = fam + ':' + role;
+    return { fam, role, key, label: L[key] || role, conf, flags };
+  }
+
+  /* --- 3. Reseptin tasapaino --- */
+  function sum(list) {
+    const s = { water: 0, fat: 0, prot: 0, sugar: 0, acid: false, known: 0, n: 0 };
+    list.forEach(i => { if (!i || i.head) return; s.n++; const c = compOf(i); if (!c) return; s.known++; s.water += c.water; s.fat += c.fat; s.prot += c.prot; s.sugar += c.sugar; if (c.acid) s.acid = true; });
+    return s;
+  }
+  /* before = alkuperäiset ainekset, after = muunnetut. Palauttaa korjausrivit, huomiot ja yhteenvedon. */
+  function balance(before, after, R, en) {
+    const c = R.ctx || {};
+    if (!c.bake || c.casserole || c.binder || R.flour < 100) return null;
+    const b = sum(before), a = sum(after);
+    const add = [], notes = [];
+    const leavAfter = after.filter(i => i && !i.head).reduce((s, i) => { const t = norm(i.name); let x = 0; LEAV.forEach(([re, k]) => { if (re.test(t)) x += tsp(i) * k; }); return s + x; }, 0);
+    /* happo–emäs: ruokasooda tarvitsee happoa. Jos happo hävisi muunnoksessa, lisätään sitruunamehu. */
+    if (R.soda > 0 && b.acid && !a.acid) {
+      add.push({ qty: Math.max(1, Math.round(R.soda * 2) / 2), qty2: null, unit: 'rkl', name: 'sitruunamehua tai omenaviinietikkaa', note: 'soodan pariksi', changed: true, kind: 'vegan', _helper: true, _chem: 'happo' });
+      notes.push('Ruokasooda kohottaa vain hapon kanssa. Alkuperäisen happaman maitotuotteen tilalle tuli mieto kasvituote, joten sitruunamehu tai etikka hoitaa nyt saman reaktion.');
+    }
+    /* kohotus: munien kohottava vaikutus korvataan leivinjauheella, ellei korvike sitä jo tuonut */
+    const eggsGone = R.eggs >= 2 && !c.bread && !R.yeast && !c.meringue && !c.eggFoam && !c.cookie;
+    if (eggsGone && leavAfter - R.leav < R.eggs * 0.2) {
+      const need = Math.round(R.eggs * 0.25 * 4) / 4;
+      add.push({ qty: need, qty2: null, unit: 'tl', name: 'leivinjauhetta', note: 'korvaa munien kohotusta', changed: true, kind: 'vegan', _helper: true, _chem: 'kohotus' });
+      notes.push(`Munat kohottivat taikinaa, joten leivinjauhetta lisättiin ${String(need).replace('.', ',')} tl.`);
+    }
+    /* neste ja rasva suhteessa jauhoihin */
+    const dW = (a.water - b.water) / R.flour, dF = (a.fat - b.fat) / R.flour, dP = b.prot ? (a.prot - b.prot) / b.prot : 0;
+    if (dW < -0.06) { const rk = Math.max(1, Math.round((b.water - a.water) / 15)); notes.push(`Taikinasta puuttuu nyt noin ${rk} rkl nestettä alkuperäiseen verrattuna. Jos taikina tuntuu kuivalta, lisää kasvijuomaa ruokalusikka kerrallaan.`); }
+    else if (dW > 0.08) notes.push('Taikinassa on nyt hieman enemmän nestettä kuin alkuperäisessä. Jos se tuntuu löysältä, lisää 1–2 rkl jauhoja.');
+    if (dF < -0.08 && b.fat > 0.1 * R.flour) notes.push('Taikinassa on nyt vähemmän rasvaa kuin alkuperäisessä, joten leivonnaisesta voi tulla hieman kuivempi. Tarkista, että margariinissa on rasvaa vähintään 80 %.');
+    if (dP < -0.35 && b.prot > 0.08 * R.flour && !c.bread) notes.push('Maito- ja munaproteiini ruskistavat pintaa; vegaaninen versio jää vaaleammaksi. Voitele pinta ennen paistoa kasvijuoman ja siirapin seoksella, jos haluat kullanruskean pinnan.');
+    const pct = (x, y) => y ? Math.round((x - y) / y * 100) : 0;
+    return {
+      add, notes,
+      summary: { water: [Math.round(b.water), Math.round(a.water), pct(a.water, b.water)], fat: [Math.round(b.fat), Math.round(a.fat), pct(a.fat, b.fat)], prot: [Math.round(b.prot), Math.round(a.prot), pct(a.prot, b.prot)], leav: [Math.round(R.leav * 4) / 4, Math.round((leavAfter + add.filter(x => x._chem === 'kohotus').reduce((s, x) => s + x.qty, 0)) * 4) / 4], acid: [b.acid, a.acid || add.some(x => x._chem === 'happo')], soda: R.soda > 0, known: a.known + '/' + a.n }
+    };
+  }
+
+  /* --- 4. Tekniikat: korvikkeen nimi → työvaihe valmistusohjeen alkuun --- */
+  const TECH = [
+    [/agar/, /agar/, 'Agar hyytyy vain keitettynä: sekoita agar-jauhe kylmään nesteeseen ja keitä sekoittaen 2 minuuttia. Seos hyytyy jo huoneenlämmössä, joten kaada se muotteihin heti.'],
+    [/aquafaba/, /aquafab/, 'Aquafaba: kaada kikhernetölkin liemi rasvattomaan kulhoon ja vatkaa sähkövatkaimella kovaksi vaahdoksi (5–10 min). Jos liemi on vetistä, keitä sitä ensin kokoon noin kolmasosa ja jäähdytä.'],
+    [/liotettu.{0,5}cashew|cashew.{0,20}liotet|cashewkerma/, /cashew/, 'Liota cashewpähkinöitä kiehuvassa vedessä 15 minuuttia (tai kylmässä 4 tuntia), valuta ja soseuta tehosekoittimessa sileäksi.'],
+    [/kiintea.{0,3}tofu|savutofu|marinoitu.{0,3}tofu/, /(purista tofu|tofusta neste|press the tofu)/, 'Purista tofusta nestettä: kääri se talouspaperiin ja aseta päälle paino 10–15 minuutiksi. Kuiva tofu ruskistuu ja imee maun paremmin.'],
+    [/kookoskerma/, /kookoskerm/, 'Kookoskerma vaahtoutuu ja jähmettyy vain kylmänä: pidä tölkkiä jääkaapissa yön yli ja käytä vain kiinteä osa.'],
+    [/chiansiemen|chiamuna|chia/, /chia/, 'Sekoita chiansiemenet veteen ja anna turvota 10 minuuttia hyytelömäiseksi.'],
+    [/silkkitofu/, /silkkitofu/, 'Soseuta silkkitofu sauvasekoittimella täysin sileäksi ennen kuin sekoitat sen muihin aineksiin.'],
+    [/leivontamargariinia levyna|margariinia levyna/, /levy/, 'Pidä margariinilevy jääkaappikylmänä koko taittelun ajan; jos taikina lämpenee, jäähdytä sitä 15 minuuttia kerrosten välissä.']
+  ];
+  const TECH_EN = [
+    'Agar only sets when boiled: whisk the agar powder into cold liquid and boil, stirring, for 2 minutes. It sets at room temperature, so pour it into the moulds straight away.',
+    'Aquafaba: pour the liquid from a can of chickpeas into a grease-free bowl and whip with an electric mixer to stiff peaks (5–10 min). If it is watery, reduce it by a third first and let it cool.',
+    'Soak the cashews in boiling water for 15 minutes (or cold water for 4 hours), drain and blend until completely smooth.',
+    'Press the tofu: wrap it in paper towels and put a weight on top for 10–15 minutes. Dry tofu browns better and absorbs more flavour.',
+    'Coconut cream only whips and sets when cold: chill the can overnight and use only the solid part.',
+    'Mix the chia seeds with the water and let them swell for 10 minutes until gel-like.',
+    'Blend the silken tofu until completely smooth before mixing it with the other ingredients.',
+    'Keep the vegan butter block fridge-cold throughout the folding; if the dough warms up, chill it for 15 minutes between turns.'
+  ];
+  function techniques(outNames, have, en) {
+    const res = [], h = norm(have.join(' '));
+    TECH.forEach(([re, seen, txt], i) => { if (outNames.some(n => re.test(norm(n))) && !seen.test(h)) res.push(en ? TECH_EN[i] : txt); });
+    return res;
+  }
+
+  const IDS = [[/kookosoljy/, 'kookosoljy'], [/soijajuoma/, 'soijajuoma'], [/(kaurajuoma|kasvijuoma)/, 'kaurajuoma'], [/mantelijuoma/, 'mantelijuoma'], [/vispattava/, 'vispi'], [/kookoskerma/, 'kookoskerma'], [/kookosmaito/, 'kookosmaito'], [/soijakerma/, 'soijakerma'], [/kaurakerma/, 'kaurakerma'], [/kaurafraiche/, 'kaurafraiche'], [/margariini/, 'margariini'], [/levite/, 'levite'], [/oljy/, 'oljy'], [/(juustoraaste|sulava)/, 'raaste'], [/tuorejuust/, 'tuorejuusto'], [/silkkitofu/, 'silkkitofu'], [/tofu/, 'tofu'], [/aquafaba/, 'aquafaba'], [/pellava/, 'pellava'], [/kikhernejauho/, 'kikhernejauho'], [/tarkkelys/, 'tarkkelys'], [/agar/, 'agar'], [/soijajogurt/, 'soijajogurtti'], [/kaurajogurt/, 'kaurajogurtti']];
+  function idOf(name) { const t = norm(name); for (const [re, id] of IDS) if (re.test(t)) return id; return null; }
+  G.VegChem = { idOf, P, NEED, fit, best, pantryFit, prepare, roleOf, balance, techniques, compOf, famOf, LABELS: L };
+  if (typeof module !== 'undefined') module.exports = G.VegChem;
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
 <script>
 /* Ravintoarvot 100 grammassa (likiarvot, Fineli- ja pakkausmerkintätasoa).
    Sarakkeet: kcal, proteiini, hiilihydraatit, josta sokerit, rasva, josta tyydyttynyt, kuitu, suola (g).
@@ -4924,7 +5316,9 @@ hiilihydraatit sokereita proteiini suolaa kuitua
   function effIng(i) {
     if (!i || i.head || i.pid === '') return i;
     const opts = pantryFor(i);
-    const p = i.pid ? S.pantry.find(x => x.id === i.pid) : opts.find(x => x.isDefault);
+    /* oletustuote vaihdetaan automaattisesti vain, jos se sopii aineksen tehtävään (esim. kevytlevite ei leivontaan) */
+    const fitOk = x => !i._role || !window.VegChem || window.VegChem.pantryFit(x, i._role.fam, i._role.role).ok;
+    const p = i.pid ? S.pantry.find(x => x.id === i.pid) : opts.find(x => x.isDefault && fitOk(x));
     if (!p) return i;
     return Object.assign({}, i, { name: p.name, _orig: i.name, _nutr: p.nutr || null, _gdl: p.gdl || null, _p: p, _auto: !i.pid });
   }
@@ -5235,7 +5629,7 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     const all = r.ingDraft + '\n' + r.stepDraft;
     const p = C.buildParsed(rv);
     /* englanninkielinen resepti pysyy oletuksena englanninkielisenä (ainekset ja ohjeet samalla kielellä) */
-    const rec = C.convertParsed(p, all, r.restrictions, S.settings.avoid, { lang: RR.isEnglish(all) ? 'en' : 'fi' });
+    const rec = C.convertParsed(p, all, r.restrictions, S.settings.avoid, { lang: RR.isEnglish(all) ? 'en' : 'fi', fb: S.settings.subFb || {} });
     if (!rv.title) rec.title = 'Nimetön resepti';
     S.current = Object.assign({ id: uid(), ts: Date.now(), saved: false, restrictions: r.restrictions.slice(), original: all.trim().slice(0, 20000), shopping: { checked: [] } }, rec);
     S.servings = S.current.servings; S.units = S.settings.units; S.openIng = null;
@@ -5304,7 +5698,7 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     const r = r0 || S.current; if (!r || !r.original) return null;
     const cls = C.classify(r.original, '', S.settings.ignoreLines || [], { noTitle: true });
     const p = C.buildParsed(cls);
-    return C.convertParsed(p, r.original, r.restrictions || [], S.settings.avoid, { lang: lang || r.lang, alt: alt || r.alt || {} });
+    return C.convertParsed(p, r.original, r.restrictions || [], S.settings.avoid, { lang: lang || r.lang, alt: alt || r.alt || {}, fb: S.settings.subFb || {} });
   }
   function applyReconvert(rec, extra) {
     const r = S.current;
@@ -5389,14 +5783,16 @@ hiilihydraatit sokereita proteiini suolaa kuitua
           const idx = r.ingredients.indexOf(i);
           const e = effIng(i);
           const has = !e._p ? pantryFor(i).length : 0;
-          return `<li class="tap" data-act="ing" data-i="${idx}" role="button" aria-expanded="${S.openIng === idx}">${icon('heart', 'h')}<span class="amt">${amountHTML(e)}</span><span class="nm">${esc(e.name)}${!e._p && (k === 'restr' || k === 'homemade') ? `<span class="kind ${k}">${KIND[k]}</span>` : ''}${e._p ? `<em class="nt">tilalla ${esc(e._orig)}</em><button class="swapbtn on" data-act="swap" data-i="${idx}">${icon('i-swap')}oma tuote · vaihda</button>` : (i.note ? `<em class="nt">${esc(i.note)}</em>` : '')}${i._alt && !e._p && r.mode !== 'ai' && r.original ? `<button class="swapbtn" data-act="alt" data-i="${idx}">${icon('i-swap')}${i._alt.i ? 'Oma valinta · vaihda' : (i._alt.n === 1 ? '1 muu korvike' : i._alt.n + ' muuta korviketta')}</button>` : ''}${has ? `<button class="swapbtn" data-act="swap" data-i="${idx}">${icon('i-swap')}Kaapissa ${has === 1 ? 'vaihtoehto' : has + ' vaihtoehtoa'}</button>` : ''}</span>${S.openIng === idx ? ingNutHTML(i, idx) : ''}</li>`;
+          return `<li class="tap" data-act="ing" data-i="${idx}" role="button" aria-expanded="${S.openIng === idx}">${icon('heart', 'h')}<span class="amt">${amountHTML(e)}</span><span class="nm">${esc(e.name)}${!e._p && (k === 'restr' || k === 'homemade') ? `<span class="kind ${k}">${KIND[k]}</span>` : ''}${!e._p && i._role && i.changed ? `<em class="nt rolenote">${esc(i._role.label)}${i._role.conf < 0.7 ? ' (arvio)' : ''}</em>` : ''}${e._p ? `<em class="nt">tilalla ${esc(e._orig)}</em><button class="swapbtn on" data-act="swap" data-i="${idx}">${icon('i-swap')}oma tuote · vaihda</button>` : (i.note ? `<em class="nt">${esc(i.note)}</em>` : '')}${i._alt && !e._p && r.mode !== 'ai' && r.original ? `<button class="swapbtn" data-act="alt" data-i="${idx}">${icon('i-swap')}${i._alt.i ? 'Oma valinta · vaihda' : (i._alt.n === 1 ? '1 muu korvike' : i._alt.n + ' muuta korviketta')}</button>` : ''}${has ? `<button class="swapbtn" data-act="swap" data-i="${idx}">${icon('i-swap')}Kaapissa ${has === 1 ? 'vaihtoehto' : has + ' vaihtoehtoa'}</button>` : ''}</span>${S.openIng === idx ? ingNutHTML(i, idx) : ''}</li>`;
         }).join('')}</ul>
         <button class="btn soft small nutbtn" data-act="nut">${icon('i-leaf')}Ravintoarvot annosta kohden</button>
       </div>
       ${(r.tools || []).length ? `<div class="card">${ch('Tarvikkeet', 'blue')}<ul class="tools">${r.tools.map(t => `<li><span>${esc(t)}</span></li>`).join('')}</ul></div>` : ''}
       <div class="card">${ch('Valmistus', 'rose')}<ol class="steps">${effSteps(r).map(s => `<li><span>${esc(s)}</span></li>`).join('')}</ol>
         ${S.servings !== r.servings ? `<p class="muted" style="font-size:.85rem">Määrät on skaalattu ${S.servings} ${esc(r.servingsLabel || 'annokselle')}. Jos vuoan koko muuttuu, tarkista paistoaika: matala vuoka kypsyy nopeammin, korkea hitaammin.</p>` : ''}</div>
-      ${r.changes && r.changes.length ? `<div class="card" style="margin-top:14px">${ch('Mitä muutettiin', 'blue')}<ul class="changes">${r.changes.map(c => `<li><span class="ft"><s>${esc(c.from)}</s> → ${esc(c.to)}</span><span class="muted">${esc(c.why)}</span></li>`).join('')}</ul></div>` : ''}
+      ${r.changes && r.changes.length ? `<div class="card" style="margin-top:14px">${ch('Mitä muutettiin', 'blue')}<ul class="changes">${r.changes.map(c => `<li><span class="ft"><s>${esc(c.from)}</s> → ${esc(c.to)}</span>${c.role ? `<span class="rolechip">${c.role === 'reseptin tasapaino' ? 'reseptin tasapaino' : 'tehtävä: ' + esc(c.role)}</span>` : ''}<span class="muted">${esc(c.why)}</span></li>`).join('')}</ul></div>` : ''}
+      ${chemHTML(r)}
+      ${r.mode !== 'ai' && r.original && (r.changes || []).length ? fbHTML(r) : ''}
       ${r.notes ? `<div class="card" style="margin-top:14px">${ch('Muistiinpanot')}<p>${esc(r.notes)}</p></div>` : ''}
       <div class="row">
         ${r.saved ? `<button class="btn soft" disabled>${icon('i-ok')}Tallessa reseptikirjassa</button><button class="btn ghost" data-act="rdelete">Poista kirjasta</button>` : `<button class="btn primary" data-act="rsave">${icon('i-book')}Tallenna reseptikirjaan</button>`}
@@ -5406,6 +5802,53 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       </div>`;
   }
 
+  /* Keittiökemia: taikinan koostumus ennen ja jälkeen muunnoksen */
+  function chemHTML(r) {
+    const c = r.chem; if (!c) return '';
+    const row = (lab, v) => { const d = v[2], ok = Math.abs(d) <= 12; return `<tr><th>${lab}</th><td>${v[0]} g</td><td>${v[1]} g</td><td class="${ok ? 'ok' : 'warn'}">${d > 0 ? '+' : ''}${d} %</td></tr>`; };
+    return `<div class="card" style="margin-top:14px">${ch('Keittiökemia', 'blue')}
+      <p class="muted" style="font-size:.88rem">Taikinan koostumus alkuperäisessä ja vegaanisessa versiossa (likiarvot). Isot erot on korjattu tai niistä kerrotaan muistiinpanoissa.</p>
+      <table class="chem"><tr><th></th><td>Alkuper.</td><td>Vegaan.</td><td>Ero</td></tr>${row('Neste', c.water)}${row('Rasva', c.fat)}${row('Proteiini', c.prot)}
+      <tr><th>Kohotus</th><td>${String(c.leav[0]).replace('.', ',')} tl</td><td>${String(c.leav[1]).replace('.', ',')} tl</td><td class="${c.leav[1] >= c.leav[0] ? 'ok' : 'warn'}">${c.leav[1] >= c.leav[0] ? 'riittää' : 'vähemmän'}</td></tr>
+      ${c.soda ? `<tr><th>Happo soodalle</th><td>${c.acid[0] ? 'on' : 'ei'}</td><td>${c.acid[1] ? 'on' : 'ei'}</td><td class="${c.acid[1] || !c.acid[0] ? 'ok' : 'warn'}">${c.acid[1] || !c.acid[0] ? 'kunnossa' : 'puuttuu'}</td></tr>` : ''}</table>
+      <p class="muted" style="font-size:.8rem">Kohotus leivinjauheeksi muunnettuna (1 tl ruokasoodaa ≈ 3 tl leivinjauhetta).</p></div>`;
+  }
+  /* Miten onnistui? Palaute tallentuu laitteelle ja ohjaa seuraavaa muunnosta */
+  function fbHTML(r) {
+    if (r.fbDone) return `<div class="card" style="margin-top:14px">${ch('Miten onnistui?')}<p class="muted">Kiitos palautteesta! ${r.fbDone === 'bad' ? 'Merkityt korvikkeet vaihdetaan jatkossa toiseen vastaavassa käytössä.' : 'Samat korvikkeet pysyvät jatkossakin.'}</p></div>`;
+    return `<div class="card" style="margin-top:14px">${ch('Miten onnistui?')}<p class="muted">Kun olet tehnyt reseptin, kerro miten kävi. Sovellus muistaa sen tällä laitteella.</p>
+      <div class="row"><button class="btn soft" data-act="fbok">${icon('i-ok')}Onnistui</button><button class="btn ghost" data-act="fbbad">Jokin ei onnistunut</button></div></div>`;
+  }
+  function openFb() {
+    const r = S.current; if (!r) return;
+    const items = r.ingredients.map((i, idx) => ({ i, idx })).filter(x => !x.i.head && x.i._role);
+    if (!items.length) { toast('Tässä reseptissä ei ole korvikkeita, joille palaute tallentuisi.'); return; }
+    const root = $('#sheetRoot');
+    root.innerHTML = `<div class="sheet-bg" data-act="fbclose"><div class="sheet" role="dialog" aria-modal="true" aria-label="Mikä ei onnistunut">
+      <div class="grab"></div>
+      <h3 style="font-size:1.6rem;color:var(--blue)">Mikä ei onnistunut?</h3>
+      <p class="muted">Valitse korvikkeet, jotka eivät toimineet. Ne vaihdetaan toiseen tässä ja jatkossa vastaavissa resepteissä.</p>
+      ${items.map(({ i, idx }) => `<label class="swopt"><input type="checkbox" data-fbi="${idx}" style="margin-right:10px"><span class="grow"><b>${esc(i.name)}</b><span class="muted">tilalla ${esc((i._alt && i._alt.from) || '')} · tehtävä: ${esc(i._role.label)}</span></span></label>`).join('')}
+      <div class="row"><button class="btn primary" data-act="fbsave">Tallenna ja vaihda korvikkeet</button><button class="btn ghost small" data-act="fbclose">Peruuta</button></div>
+    </div></div>`;
+    root.onchange = null;
+    root.onclick = async ev => {
+      const t = ev.target.closest('[data-act]'); if (!t) return;
+      if (t.dataset.act === 'fbclose' && (t === ev.target || t.tagName === 'BUTTON')) { root.innerHTML = ''; return; }
+      if (t.dataset.act === 'fbsave') {
+        const sel = [...root.querySelectorAll('[data-fbi]:checked')].map(x => r.ingredients[parseInt(x.dataset.fbi, 10)]).filter(Boolean);
+        if (!sel.length) { toast('Valitse ainakin yksi korvike.'); return; }
+        const fb = Object.assign({}, S.settings.subFb || {});
+        sel.forEach(i => { const k = i._role.key; fb[k] = [...new Set([...(fb[k] || []), i._role.sub])].slice(-6); });
+        S.settings.subFb = fb; await saveSettings();
+        root.innerHTML = '';
+        const alt = Object.assign({}, r.alt || {}); sel.forEach(i => { if (i._alt) delete alt[i._alt.key]; });
+        const rec = reconvert(null, alt);
+        if (rec) { const y = window.scrollY; applyReconvert(rec, { alt, fbDone: 'bad' }); renderRecipe(); window.scrollTo(0, y); }
+        toast('Kiitos! Korvikkeet vaihdettiin.');
+      }
+    };
+  }
   const fmtN = (k, v) => k === 'kcal' ? Math.round(v) + ' kcal' : (v < 10 ? (Math.round(v * 10) / 10) : Math.round(v)).toString().replace('.', ',') + ' g';
   function gPerDlOf(i) { return i.gPerDl || C.density(i.name); }
   function pickHTML(i, idx) {
@@ -5427,14 +5870,15 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     const r = S.current, i = r && r.ingredients[idx]; if (!i || i.head) return;
     const e = effIng(i), cur = e._p ? e._p.id : '', orig = e._orig || i.name;
     const match = pantryFor(i), rest = S.pantry.filter(p => !match.includes(p));
-    const sub = p => (p.type === 'muu' ? (p.key ? `korvaa "${p.key}"` : 'oma tuote') : ptypeLabel(p.type)) + (p.isDefault ? ' · oletus' : '');
+    const fitOf = p => i._role && window.VegChem ? window.VegChem.pantryFit(p, i._role.fam, i._role.role) : { ok: true };
+    const sub = p => { const f = fitOf(p); return (p.type === 'muu' ? (p.key ? `korvaa "${p.key}"` : 'oma tuote') : ptypeLabel(p.type)) + (p.isDefault ? ' · oletus' : '') + (f.ok ? '' : ` · ei sovi tähän: ${f.why}`); };
     const opt = p => `<button class="swopt" data-act="swpick" data-pid="${p.id}" aria-pressed="${pressed(cur === p.id)}"><span class="grow"><b>${esc(p.name)}</b><span class="muted">${esc(sub(p))}</span></span>${cur === p.id ? icon('i-ok') : ''}</button>`;
     const root = $('#sheetRoot');
     root.innerHTML = `<div class="sheet-bg" data-act="swclose"><div class="sheet" role="dialog" aria-modal="true" aria-label="Vaihda aines">
       <div class="grab"></div>
       <div class="row" style="justify-content:space-between;align-items:flex-start;flex-wrap:nowrap"><div class="grow"><h3 style="font-size:1.6rem;color:var(--blue)">Vaihda aines</h3><p class="muted">Reseptissä: ${esc(orig)}</p></div><button class="btn ghost small" data-act="swclose">Valmis</button></div>
       <button class="swopt" data-act="swpick" data-pid="" aria-pressed="${pressed(!cur)}"><span class="grow"><b>${esc(orig)}</b><span class="muted">Reseptin oma aines</span></span>${!cur ? icon('i-ok') : ''}</button>
-      ${match.length ? `<div class="label">Sopivat kaapistasi</div>${match.map(opt).join('')}` : ''}
+      ${match.length ? `<div class="label">Sopivat kaapistasi</div>${match.slice().sort((a, b) => fitOf(b).ok - fitOf(a).ok).map(opt).join('')}` : ''}
       ${rest.length ? `<div class="label">${match.length ? 'Muut kaapin tuotteet' : 'Kaapin tuotteet'}</div>${rest.map(opt).join('')}` : ''}
       ${!S.pantry.length ? `<p class="muted">Ruokakaapissa ei ole vielä tuotteita. Lisää oma tuote, niin se vaihdetaan tähän heti.</p>` : ''}
       <button class="btn soft" data-act="swnew">${icon('i-plus')}Lisää uusi tuote kaappiin tämän tilalle</button>
@@ -6174,6 +6618,8 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       case 'fold': { S.fold[val] = !S.fold[val]; const f = t.closest('.fold, .hfold'); f.classList.toggle('open', S.fold[val]); t.setAttribute('aria-expanded', S.fold[val] ? 'true' : 'false'); f.querySelector('.foldb').hidden = !S.fold[val]; break; }
       case 'swap': syncRecipe(); openSwap(parseInt(t.dataset.i, 10)); break;
       case 'alt': syncRecipe(); openAlt(parseInt(t.dataset.i, 10)); break;
+      case 'fbok': { const r = S.current; if (!r) break; r.fbDone = 'ok'; await persistCur(); const y = window.scrollY; renderRecipe(); window.scrollTo(0, y); toast('Kiitos! Hienoa, että onnistui.'); break; }
+      case 'fbbad': openFb(); break;
       case 'pdef': { const p = S.pantry.find(x => x.id === t.dataset.id); if (!p) break; p.isDefault = !p.isDefault;
         if (p.isDefault) for (const o of S.pantry.filter(x => x.type === p.type && x.id !== p.id && x.isDefault && (p.type !== 'muu' || x.key === p.key))) { o.isDefault = false; await put('pantry', o); }
         await put('pantry', p); renderPantry(); toast(p.isDefault ? `${p.name} on nyt oletus resepteissä` : 'Oletus poistettu'); break; }
