@@ -45,6 +45,8 @@ p{margin:0}
 main{position:relative;z-index:1}
 .top .bq{position:absolute;top:0;width:118px;height:81px;pointer-events:none}
 .top .bq.l{left:-22px}.top .bq.r{right:-22px}
+/* koristekukat eivät saa leventää sivua (iPhonella sivu muuten liikkui sivuttain) */
+html,body{overflow-x:hidden}@supports (overflow:clip){html,body{overflow-x:clip}}
 .top .title{text-align:center;padding:16px 0 2px;position:relative}
 .top h1{display:flex;justify-content:center;line-height:1}
 .top .peace{width:86px;height:86px}
@@ -514,6 +516,7 @@ textarea.let:focus{background:#FFFDF9;border-color:#E3B7C4;box-shadow:none}
     <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11m-4.5-4.5L12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 15.5v-11M7.5 9 12 4.5 16.5 9M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.2 1.2M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6.5 9.5 5.5 5.5 5.5-5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-swap" viewBox="0 0 24 24"><path d="M5 8h13m-3-3.5L18.5 8 15 11.5M19 16H6m3-3.5L5.5 16 9 19.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-joinu" viewBox="0 0 24 24"><path d="M5 4.5h14M12 20V9m-4.5 4.5L12 9l4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
@@ -3225,7 +3228,8 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
     const full = (p.steps || []).map(norm);
     /* ainesten osaotsikot (Valkokastike, Kuorrute, Pohja…) kertovat tehtävästä */
     const heads = new Map(); let h = '';
-    (p.ingredients || []).forEach(i => { if (i.head) h = norm(i.head); else heads.set(norm(i.name), h); });
+    (p.ingredients || []).forEach(i => { if (i.head) h = norm(i.head); else { heads.set(i, h); if (!heads.has(norm(i.name))) heads.set(norm(i.name), h); } });
+    const frostHead = (p.ingredients || []).some(i => i.head && /(kuorrut|frosting|icing|voikreemi|buttercream|glaze|kuorrutus)/i.test(i.head));
     const all = norm((p.title || '') + ' ' + text);
     let flour = 0, eggs = 0, leav = 0, soda = 0, yeast = false;
     ings.forEach(i => {
@@ -3236,7 +3240,7 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
       LEAV.forEach(([re, k]) => { if (re.test(t)) { leav += tsp(i) * k; if (k === 3) soda += tsp(i); } });
       if (/( hiiva| yeast)/.test(t)) yeast = true;
     });
-    return { ings, steps, full, heads, all, flour, eggs, leav, soda, yeast, ctx };
+    return { ings, steps, full, heads, frostHead, all, flour, eggs, leav, soda, yeast, ctx };
   }
   const RX = {
     muna: /( muna| munat| munan| munia| munaa| kananmun| egg| eggs)/,
@@ -3267,7 +3271,8 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
   function roleOf(ing, R) {
     const fam = famOf(ing); if (!fam) return null;
     const c = R.ctx || {}, t = norm(ing.name + ' ' + (ing.note || '')), all = R.all, ms = mentions(R, fam).join(' ');
-    const hd = R.heads.get(norm(ing.name)) || '';
+    const hd = (R.heads.has(ing) ? R.heads.get(ing) : R.heads.get(norm(ing.name))) || '';
+    const inFrost = /(kuorrut|frosting|icing|voikreemi|buttercream|glaze)/.test(hd);
     const any = re => re.test(all), inS = re => re.test(ms) || re.test(t) || re.test(hd);
     let role = null, conf = 0.9; const flags = {};
     if (fam === 'muna') {
@@ -3297,7 +3302,8 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
       else { role = 'sitoja'; conf = 0.5; }
     } else if (fam === 'voi') {
       if (any(/( lehtitaikin| voitaikin| croissant| puff pastry| laminoi| laminat| wienerleip| korvapuust)/) && any(/( taita| kaantele| fold| roll out)/)) role = 'kerrostus';
-      else if (any(/( voikreemi| buttercream| kuorrute| frosting| icing)/) && (inS(/( kuorrut| frosting| icing| voikreemi| buttercream| tomusokeri| powdered sugar| icing sugar)/) || (R.flour < 60 && any(/( tomusokeri| powdered sugar| icing sugar)/)))) role = 'kuorrute';
+      else if (inFrost) role = 'kuorrute';
+      else if (!R.frostHead && any(/( voikreemi| buttercream| kuorrute| frosting| icing)/) && (inS(/( kuorrut| frosting| icing| voikreemi| buttercream| tomusokeri| powdered sugar| icing sugar)/) || (R.flour < 60 && any(/( tomusokeri| powdered sugar| icing sugar)/)))) role = 'kuorrute';
       else if (inS(/( keksimuru| murskaa keksit| murskatut keksit| digestive| graham cracker| cookie crumbs| crumbs| keksipohja| pohjan)/) && any(/( keksi| digestive| cracker| cookie)/)) role = 'pohja';
       else if (inS(/( suurus| roux| bechamel| valkokastike| white sauce)|(voi|butter)[^.]{0,40}(jauho|flour)[^.]{0,80}(maito|milk|liemi|broth|stock)/)) role = 'kastike';
       else if (/( sulat| melted| sulatettu)/.test(t) || inS(/( sulata| sulatettu| melt the butter| melted butter)/)) role = c.bake && !c.casserole && !c.binder ? 'sulatettu' : 'paisto';
@@ -5710,6 +5716,13 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     if (nl >= 0) { rows[L.i].t = v.replace(/\n/g, ''); leOp(L.n, 'enter', L.i, nl); return; }
     rows[L.i].t = v; leCaret(e); leCount(L.n);
   });
+  /* liitetty pelkkä reseptisivun linkki haetaan heti */
+  document.addEventListener('paste', e => {
+    if (!e.target || e.target.id !== 'rIng') return;
+    const t = (e.clipboardData && e.clipboardData.getData('text')) || '';
+    const u = linkOnly(t);
+    if (u && !(e.target.value || '').trim()) { e.preventDefault(); syncRecipe(); readRecipeUrl(u); }
+  });
   document.addEventListener('keydown', e => {
     const ta = e.target; if (!ta.classList || !ta.classList.contains('let')) return;
     const L = leOf(ta), rows = LE.rows(L.n); if (!rows) return;
@@ -5757,8 +5770,10 @@ hiilihydraatit sokereita proteiini suolaa kuitua
           <label aria-label="Kuvaa resepti" title="Kuvaa resepti">${icon('i-cam')}<input id="rOcrCam" type="file" accept="image/*" capture="environment"></label>
           <label aria-label="Valitse reseptin kuva" title="Valitse reseptin kuva">${icon('i-img')}<input id="rOcrGal" type="file" accept="image/*" multiple></label>
           <button data-act="rscan" aria-label="Skannaa pitkä resepti liikuttamalla kameraa alaspäin" title="Skannaa pitkä resepti">${icon('i-scan')}</button>
+          <button data-act="rlink" aria-label="Liitä reseptisivun linkki" title="Liitä reseptisivun linkki">${icon('i-link')}</button>
         </div>
         ${tipHTML('recipe', `<b>Vinkki:</b> pitkän reseptin voi skannata ${icon('i-scan')} siirtämällä puhelinta hitaasti alaspäin.`)}
+        ${tipHTML('link', `<b>Reseptisivu netistä:</b> kopioi sivun linkki (Jaa → Kopioi) ja paina ${icon('i-link')}, niin resepti haetaan sivulta. ${/iPhone|iPad|iPod/.test(navigator.userAgent) ? '<button class="linkbtn" data-act="iosshare">Jakaminen suoraan Safarista</button>' : ''}`)}
         ${r.busy ? `<div class="busy"><div class="spinner"></div><span id="rOcrMsg">${esc(r.busy)}</span></div>` : ''}
         ${r.ocrErr ? `<p class="note warm" style="font-size:.88rem"><b>Tekstintunnistus ei käynnistynyt:</b> ${esc(r.ocrErr)}. Voit myös liittää reseptin tekstinä.</p>` : ''}
         <label class="flabel" for="rIng"><span class="label">Resepti</span></label>
@@ -5792,19 +5807,23 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     if (!r.ingDraft.trim()) { toast('Liitä ensin resepti.'); return; }
     if (r.ocrRaw) { const n = learnOcr(r.ocrRaw, r.ingDraft); r.ocrRaw = null; if (n) setTimeout(() => toast(`Opittu ${n} korjaus${n > 1 ? 'ta' : ''} tekstintunnistukseen`), 1200); }
     const fromPhoto = !!r.ocrRaw0; r.ocrRaw0 = null;
+    const fromWeb = !!r.fromWeb; r.fromWeb = null;
+    /* pelkkä linkki: haetaan resepti sivulta */
+    const only = linkOnly(r.ingDraft); if (only && r.ingDraft.trim().length < only.length + 160 && r.ingDraft.trim().split('\n').length <= 3) { readRecipeUrl(only); return; }
     r.review = C.classify(r.ingDraft, r.stepDraft, S.settings.ignoreLines || [], { noTitle: true });
     r.review.title = r.nameDraft.trim();
     if (!r.review.title && r.review.titleGuess) { r.review.title = r.nameDraft = r.review.titleGuess; }
     /* selkeä resepti muunnetaan heti; rivit näytetään tarkistettaviksi vain, jos tulkinta on epävarma */
-    const why = force ? 'pyydetty' : reviewNeed(r.review, fromPhoto);
+    const why = force ? 'pyydetty' : reviewNeed(r.review, fromPhoto, fromWeb);
     if (!why) { r.formOpen = false; convertRecipe(); return; }
     r.reviewWhy = why === 'pyydetty' ? '' : why;
     renderRecipe(); scrollToEl('#reviewBox');
   }
   /* Milloin rivien tulkinta kannattaa näyttää: kuvasta luettu, ei aineksia tai vaiheita, tai ohitettu rivi näyttää ainekselta */
-  function reviewNeed(rv, fromPhoto) {
+  function reviewNeed(rv, fromPhoto, fromWeb) {
     const ing = rv.lines.filter(x => x.k === 'ing'), st = rv.lines.filter(x => x.k === 'step'), sk = rv.lines.filter(x => x.k === 'skip');
     if (fromPhoto) return 'Resepti luettiin kuvasta, joten tarkista, että rivit tulkittiin oikein.';
+    if (fromWeb) return 'Resepti haettiin verkkosivulta. Tarkista, että mukana on vain resepti, ja paina sitten Muunna vegaaniseksi.';
     if (ing.length < 2) return 'Reseptistä löytyi vain vähän aineksia. Tarkista, että rivit tulkittiin oikein.';
     if (!st.length) return 'Valmistusohjetta ei löytynyt. Tarkista rivit tai lisää vaiheet.';
     const QTY = /^\s*(?:[-•*]\s*)?\d+(?:[.,/]\d+)?\s*(?:g|kg|dl|ml|l|tl|rkl|kpl|cups?|tbsp|tsp|oz|lb|pkt|prk|tlk)\b/i;
@@ -5828,7 +5847,7 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     if (!rv.title) rec.title = 'Nimetön resepti';
     S.current = Object.assign({ id: uid(), ts: Date.now(), saved: false, restrictions: r.restrictions.slice(), original: all.trim().slice(0, 20000), shopping: { checked: [] } }, rec);
     S.servings = S.current.servings; S.units = S.current.lang === 'en' && /\b(cups?|tbsp|tsp|oz|lb)\b/i.test(all) && S.settings.units === 'metric' ? 'us' : S.settings.units; S.openIng = null;
-    r.review = null; r.ingDraft = ''; r.stepDraft = ''; r.nameDraft = '';
+    r.review = null; r.ingDraft = ''; r.stepDraft = ''; r.nameDraft = ''; r.formOpen = false; r.reviewWhy = '';
     saveDraft(); renderRecipe(); scrollToEl('#recipeOut');
   }
 
@@ -6811,6 +6830,7 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       <div class="card">
         ${ch('Tietoa', 'blue')}
         <p class="muted">${S.store === 'db' ? 'Reseptikirja, historia ja asetukset tallentuvat Claude-tiliisi ja näkyvät kaikilla laitteillasi.' : 'Tiedot tallentuvat tälle laitteelle. Tallenna välillä varmuuskopio, niin voit siirtää tiedot toiseen laitteeseen.'}</p>
+        <p class="muted">Reseptisivun linkistä resepti haetaan lukupalvelun (r.jina.ai) kautta; palvelulle välittyy vain sivun osoite.</p>
         <p class="muted">Kaikki toimii sovelluksen omalla tietokannalla ja säännöillä, ilman Claudea. Ensimmäisen käynnistyksen jälkeen sovellus toimii myös ilman verkkoyhteyttä.</p>
         <p class="muted">Tietokannassa on ${C.ENTRIES.filter(e => e.st !== 'V').length} ainesosaryhmää ja ${C.ENTRIES.filter(e => e.st !== 'V').reduce((n, e) => n + e.aliases.length, 0)} nimeä suomeksi, ruotsiksi, englanniksi, saksaksi, E-koodeina ja kosmetiikan INCI-niminä.</p>
       </div>`;
@@ -6858,6 +6878,16 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       case 'rmode': syncRecipe(); S.rin.mode = val; renderRecipe(); break;
       case 'rconvert': await convertRecipe(); break;
       case 'rcheck': startReview(); break;
+      case 'rlink': {
+        syncRecipe();
+        let txt = '';
+        try { txt = await navigator.clipboard.readText(); } catch (e) { txt = ''; }
+        const u = linkOnly(txt) || linkOnly(S.rin.ingDraft || '');
+        if (u) readRecipeUrl(u);
+        else { toast('Kopioi ensin reseptisivun linkki (Jaa → Kopioi) ja paina sitten tätä. Voit myös liittää linkin tekstikenttään.'); const ta = $('#rIng'); if (ta) ta.focus(); }
+        break;
+      }
+      case 'iosshare': openIosShare(); break;
       case 'rnew': S.rin.formOpen = true; renderRecipe(); { const ta = $('#rIng'); if (ta) ta.focus(); } break;
       case 'rreview': { const r = S.current; if (!r || !r.original) break; S.rin.ingDraft = r.original; S.rin.nameDraft = r.title || ''; S.rin.formOpen = true; startReview(true); break; }
       case 'rvcancel': syncReview(); S.rin.review = null; renderRecipe(); break;
@@ -7024,12 +7054,94 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       toast('Jaettu teksti lisätty. Paina Tarkista.');
       return;
     }
+    const link = onlyUrl ? text : linkOnly(text);
+    if (link) { readRecipeUrl(link); return; }
     setTab('recipe');
     S.rin.ingDraft = (S.rin.ingDraft && S.rin.ingDraft.trim() ? S.rin.ingDraft.trim() + '\n\n' : '') + text;
     renderRecipe();
-    toast(onlyUrl ? 'Linkki lisätty. Sovellus ei voi avata reseptisivua itse: valitse sivulta reseptin teksti ja jaa se Peaceen, tai kopioi ja liitä se tähän.' : 'Jaettu resepti lisätty. Tarkista teksti ja jatka.');
+    toast('Jaettu resepti lisätty. Tarkista teksti ja jatka.');
+  }
+  function openIosShare() {
+    const root = $('#sheetRoot');
+    const base = location.origin + location.pathname.replace(/index\.html$/, '');
+    root.innerHTML = `<div class="sheet-bg" data-act="iosclose"><div class="sheet" role="dialog" aria-modal="true" aria-label="Jakaminen iPhonella">
+      <div class="grab"></div>
+      <h3 style="font-size:1.5rem;color:var(--blue)">Jakaminen Safarista</h3>
+      <p class="muted">iPhone ei päästä kotivalikon verkkosovelluksia jakovalikkoon. Pikakomennolla Peace saadaan sinne:</p>
+      <ol class="steps" style="margin:10px 0">
+        <li><span>Avaa <b>Pikakomennot</b>-appi ja luo uusi pikakomento (+).</span></li>
+        <li><span>Avaa pikakomennon tiedot (i) ja kytke päälle <b>Näytä jakotaulukossa</b>. Vastaanotettavaksi riittää <b>URL-osoitteet</b>.</span></li>
+        <li><span>Lisää toiminto <b>URL-koodaa</b> ja valitse koodattavaksi <b>Pikakomennon syöte</b>.</span></li>
+        <li><span>Lisää toiminto <b>Avaa URL-osoitteet</b> ja kirjoita osoitteeksi alla oleva osoite, jonka perään lisäät muuttujan <b>URL-koodattu teksti</b>.</span></li>
+        <li><span>Nimeä pikakomento <b>Peace</b>. Nyt reseptisivulla: Jaa → Peace.</span></li>
+      </ol>
+      <div class="cfrow"><input type="text" readonly value="${esc(base)}?url=" id="iosUrl" aria-label="Pikakomennon osoite"><button class="btn soft small" data-act="ioscopy">Kopioi</button></div>
+      <p class="muted" style="font-size:.84rem">Pikakomento avaa Peacen Safarissa. Jos käytät Peacea kotivalikosta, nopein tapa on kopioida reseptisivun linkki ja painaa Peacessa linkkipainiketta.</p>
+      <button class="btn ghost small" data-act="iosclose">Sulje</button>
+    </div></div>`;
+    root.onchange = null;
+    root.onclick = async ev => {
+      const t = ev.target.closest('[data-act]'); if (!t) return;
+      if (t.dataset.act === 'iosclose' && (t === ev.target || t.tagName === 'BUTTON')) { root.innerHTML = ''; return; }
+      if (t.dataset.act === 'ioscopy') { const v = $('#iosUrl').value; try { await navigator.clipboard.writeText(v); toast('Osoite kopioitu'); } catch (e) { $('#iosUrl').select(); toast('Kopioi osoite pitkällä painalluksella.'); } }
+    };
+  }
+  /* ---------- Reseptisivun luku linkistä ----------
+     Selain ei saa ladata toisen sivuston sisältöä suoraan, joten sivu luetaan lukupalvelun (r.jina.ai) kautta tekstiksi.
+     Palvelulle välittyy vain reseptisivun osoite. Tekstistä poimitaan reseptin osuus (otsikko, ainekset, valmistus). */
+  const URL_RE = /https?:\/\/[^\s<>"']+/i;
+  function linkOnly(t) {
+    const m = String(t || '').match(URL_RE); if (!m) return null;
+    const rest = String(t).replace(m[0], '').trim();
+    return rest.length < 160 && rest.split('\n').filter(x => x.trim()).length <= 2 ? m[0].replace(/[).,;]+$/, '') : null;
+  }
+  function recipeFromMarkdown(md) {
+    md = String(md || '');
+    const title = ((md.match(/^Title:\s*(.+)$/m) || [])[1] || '').split(/\s+[|–—]\s+/)[0].replace(/\s+-\s+[^-]{2,40}$/, '').replace(/\s+(resepti|recipe)$/i, '').trim();
+    let body = md.includes('Markdown Content:') ? md.slice(md.indexOf('Markdown Content:') + 17) : md;
+    body = body.replace(/!\[[^\]]*\]\([^)]*\)/g, '').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/<[^>]+>/g, '').replace(/https?:\/\/\S+/g, '')
+      .replace(/\*\*|__/g, '').replace(/^\s*\|.*\|\s*$/gm, m => m.replace(/\|/g, ' ').trim()).replace(/^[=-]{3,}\s*$/gm, '');
+    let lines = body.split('\n').map(l => l.replace(/^\s*[*+]\s+/, '- ').replace(/^#{1,6}\s*/, '').replace(/\s+/g, ' ').trim());
+    lines = lines.filter((l, i) => l || (i && lines[i - 1]));
+    const H_ING = /^(ainekset|ainesosat|aineet|tarvitset|tarvittavat ainekset|ingredients|ingredienser|zutaten)(?![\p{L}])[:\s]*/iu;
+    const H_STEP = /^(valmistus(ohje)?|ohjeet?|tee näin|näin (valmistat|teet)|työvaiheet|instructions|method|directions|preparation|steps)(?![\p{L}])/iu;
+    const H_END = /^(kommentit|kommentoi|comments|ravintosisältö|ravintoarvot|nutrition|arvostelut|reviews|jaa resepti|share|saatat pitää|you may also like|related|lue myös|katso myös|tilaa|newsletter|avainsanat|tags|more recipes|lisää reseptejä|tallenna|print)(?![\p{L}])/iu;
+    const QTY = /^(- )?\d+(?:[.,/]\d+)?\s*(?:[½¼¾⅓])?\s*(?:g|kg|dl|ml|l|tl|rkl|kpl|cups?|tbsp|tsp|oz|lb|pkt|prk|tlk|ps|rs)?\b/i;
+    let a = lines.findIndex(l => H_ING.test(l) && l.length < 40);
+    if (a < 0) { const q = lines.findIndex((l, i) => QTY.test(l) && QTY.test(lines[i + 1] || '')); a = q > 0 ? q - 1 : -1; }
+    if (a < 0) return { title, text: lines.join('\n').trim().slice(0, 6000) };
+    const st = lines.findIndex((l, i) => i > a && H_STEP.test(l) && l.length < 40);
+    let e = lines.length;
+    for (let i = (st > 0 ? st : a) + 1; i < lines.length; i++) if (H_END.test(lines[i]) && lines[i].length < 60) { e = i; break; }
+    e = Math.min(e, a + 140);
+    const text = [title].concat(lines.slice(a, e)).join('\n').replace(/\n{3,}/g, '\n\n').trim();
+    return { title, text };
+  }
+  async function readRecipeUrl(url) {
+    const r = S.rin;
+    setTab('recipe'); r.formOpen = true; r.review = null; r.busy = 'Haetaan reseptiä sivulta…'; r.ingDraft = ''; renderRecipe();
+    try {
+      const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 25000);
+      const res = await fetch('https://r.jina.ai/' + url, { signal: ctl.signal });
+      clearTimeout(to);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const rec = recipeFromMarkdown(await res.text());
+      if (!rec.text || rec.text.replace(/\s/g, '').length < 60) throw new Error('tyhjä');
+      r.busy = null; r.ingDraft = rec.text; r.nameDraft = rec.title || r.nameDraft || ''; r.fromWeb = url;
+      renderRecipe();
+      startReview();
+    } catch (e) {
+      r.busy = null; r.ingDraft = url; renderRecipe();
+      toast('Reseptiä ei saatu haettua sivulta. Kopioi reseptin teksti sivulta ja liitä se tähän.');
+    }
   }
   async function takeShared() {
+    const q = new URLSearchParams(location.search);
+    if (!q.has('share') && (q.get('url') || q.get('text'))) {
+      try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) { }
+      useShared({ title: q.get('title') || '', text: q.get('text') || '', url: q.get('url') || '' }, []);
+      return;
+    }
     if (!/[?&]share=1/.test(location.search) || !('caches' in window)) return;
     try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) { }
     try {
