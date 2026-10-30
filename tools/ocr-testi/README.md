@@ -63,3 +63,20 @@ Englannin oma malli toisi +1,4 prosenttiyksikköä mutta +11 Mt ladattavaa ja +4
 PP-OCRv5:n monikielinen ONNX-malli (tunnistus + luku) samalla testisarjalla: 78,5 % (Tesseract 90,7 %), noin 3× hitaampi
 ja +21 Mt ladattavaa. Malli kadottaa ä/ö-pisteitä ja sanavälejä. Ei otettu käyttöön. Suomelle tarkoitettua latin-mallia ei
 voitu tässä ympäristössä ladata kokeiltavaksi.
+
+## Toinen lukukierros ja laaduntarkistus 30.10.2026
+
+Jos ensimmäisessä lukemassa jää tuntemattomia sanoja, sama kuva luetaan uudelleen mustavalkoiseksi kynnystettynä (Otsu).
+Kunkin tuntemattoman sanan kohdalle valitaan toisen kierroksen lukema, jos sovellus tuntee sen. Tunnettuja sanoja ei muuteta.
+(`variant.js`, oletuksena päällä; `NOVOTE=1` ohittaa, `VOTE=otsu,gamma,sharp` kokeilee muita käsittelyjä.)
+
+| | rec / prec | huomaamatta jääneet | oikea tulos | aika |
+|---|---|---|---|---|
+| Ilman toista kierrosta | 0.907 / 0.935 | 5 | 26/28 | 5,9 s |
+| Toinen kierros (Otsu) | 0.908 / 0.936 | 4 | 27/28 | 8,2 s |
+| Kolme käsittelyä | 0.911 / 0.939 | 3 | 27/28 | 15,5 s (liian hidas puhelimelle) |
+
+Kuvien yhdistäminen tavallisella ocrMergeShots-yhdistäjällä heikensi tulosta (0.83–0.86), koska se on tehty eri kuville.
+
+Epätarkkuuden raja (Laplacen varianssi reunakohdissa, 900 px): testikuvien terävät versiot ≥ 499, σ = 2 sumennetut ≤ 203 → raja 150.
+Heijastusvaroitus vasta, kun yli 12 % kuvasta on palanut valkoiseksi (testikuvien 5–10 % heijastukset luettiin vielä hyvin).

@@ -10,7 +10,14 @@ module.exports = (A, L, shots, opt = {}) => {
     if (!p.hc) { const s = L.appScale(g); p = { im: en(s), info: { fallback: true } }; }
     log.push(p.info);
     if (opt.dir && process.env.DUMP) L.writePGM(require('path').join(opt.dir, `dbg_${k}.pgm`), p.im);
-    return L.tess(p.im, +(process.env.PSM || 4));
+    const r0 = L.tess(p.im, +(process.env.PSM || 4));
+    /* kuten sovellus: toinen kierros mustavalkoisesta versiosta, jos sanoja jäi tuntemattomiksi (NOVOTE=1 ohittaa) */
+    const VOTE = process.env.NOVOTE ? '' : (process.env.VOTE || 'otsu');
+    if (!VOTE) return r0;
+    if (r0.lines.every(l => l.words.every(w => A.ocrIsKnown(w.t)))) return r0;
+    const V = require('./variant');
+    const vars = String(VOTE).split(',').map(v => L.tess(V[v](p.im), +(process.env.PSM || 4)));
+    return V.vote(r0, vars, A.ocrIsKnown);
   });
   const groups = A.ocrMergeShots(res);
   let text = '', unsure = [];
