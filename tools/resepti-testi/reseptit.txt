@@ -1,0 +1,444 @@
+# Reseptien testisarja. Jokainen resepti: otsikkorivi "### nimi | aineksia | vaiheita | pakolliset sanat ainesluettelossa (pilkuin)".
+# Viides (valinnainen) kenttä: ainekset, joille odotetaan "tarkista pakkaus" -huomautusta.
+# Pakolliset sanat tarkistetaan muunnetusta ainesluettelosta (pienillä kirjaimilla, osamerkkijonona).
+### Makaronilaatikko | 8 | 5 | makaron,sipuli,suola
+Makaronilaatikko
+4 annosta
+400 g naudan jauhelihaa
+1 sipuli
+3 dl makaroneja
+2 kananmunaa
+6 dl maitoa
+1 tl suolaa
+1/2 tl mustapippuria
+2 rkl voita
+Valmistus
+1. Keitä makaronit pakkauksen ohjeen mukaan.
+2. Ruskista jauheliha ja sipuli pannulla. Mausta suolalla ja pippurilla.
+3. Sekoita makaronit ja jauheliha voideltuun uunivuokaan.
+4. Vatkaa kananmunat ja maito ja kaada seos vuokaan.
+5. Nostele pinnalle voinokareita ja paista 200 asteessa noin tunti.
+### Pulla ilman vaiheotsikkoa | 10 | 6 | hiiva,kardemumma,raesokeri,vehnäjauho
+Pullataikina
+5 dl maitoa
+50 g hiivaa
+1 kananmuna
+2 dl sokeria
+1 rkl kardemummaa
+1 tl suolaa
+noin 14 dl vehnäjauhoja
+200 g voita
+Voiteluun: 1 kananmuna
+Pinnalle raesokeria
+1. Lämmitä maito kädenlämpöiseksi ja liuota hiiva siihen.
+2. Lisää muna, sokeri, kardemumma ja suola.
+3. Vaivaa jauhot vähitellen taikinaan ja lisää lopuksi pehmeä voi.
+4. Anna kohota liinan alla 30 minuuttia.
+5. Leivo pullat, anna kohota, voitele munalla ja ripottele raesokeria.
+6. Paista 225 asteessa 10–12 minuuttia.
+### Kermaperunat | 6 | 3 | perun,valkosipul
+Kermaperunat (6 annosta)
+1 kg perunoita
+2 dl kuohukermaa
+2 dl maitoa
+1 valkosipulinkynsi
+100 g raastettua emmental-juustoa
+suolaa, valkopippuria
+Kuori ja viipaloi perunat. Hiero vuoka valkosipulilla.
+Lado perunat vuokaan, kaada päälle kerma ja maito ja mausta.
+Ripottele pinnalle juustoraaste ja paista 175 asteessa 1 h.
+### Lohikeitto | 8 | 3 | peruna,tilli
+Lohikeitto
+500 g lohta
+6 perunaa
+1 sipuli
+1 l vettä
+1 kalaliemikuutio
+2 dl kuohukermaa
+1 rkl voita
+tilliä
+Kuori ja paloittele perunat. Kuullota sipuli voissa.
+Lisää vesi, liemikuutio ja perunat ja keitä 15 min.
+Lisää kuutioitu lohi ja kerma. Hauduta 5 min ja ripottele päälle tilliä.
+### Juustokakku rivin sisäiset ainekset | 8 | 5 | keks,sokeri,sitruuna | keks
+Pohja: 200 g digestive-keksejä, 75 g voita
+Täyte:
+400 g maitorahkaa
+200 g tuorejuustoa
+2 dl kuohukermaa
+1 dl sokeria
+4 liivatelehteä
+1 sitruunan mehu
+Murskaa keksit ja sekoita sulatettuun voihin. Painele vuoan pohjalle.
+Liota liivatteet kylmässä vedessä. Vatkaa kerma vaahdoksi.
+Sekoita rahka, tuorejuusto, sokeri ja sitruunamehu. Sulata liivatteet sitruunamehussa ja lisää täytteeseen.
+Kääntele kermavaahto joukkoon ja kaada pohjan päälle.
+Anna hyytyä yön yli.
+### Uunipannukakku | 6 | 2 | vehnäjauho,sokeri,suola
+Uunipannukakku
+1 l maitoa
+4 kananmunaa
+4 dl vehnäjauhoja
+1 rkl sokeria
+1/2 tl suolaa
+50 g voita
+Vatkaa munat ja maito. Lisää kuivat aineet ja sulatettu voi.
+Kaada pellille ja paista 225 asteessa noin 30 min.
+### Kanacurry | 6 | 3 | kookosmaito,curry
+Kanacurry
+600 g broilerin rintafileetä
+1 prk (200 g) kermaviiliä
+1 tlk kookosmaitoa
+2 rkl currya
+1 rkl hunajaa
+2 rkl öljyä
+Paista broilerisuikaleet öljyssä. Lisää curry ja paista hetki.
+Lisää kookosmaito, kermaviili ja hunaja. Hauduta 10 minuuttia.
+Tarjoa riisin kanssa.
+### Raparperipiirakka murotaikina samalla rivillä | 7 | 3 | raparper,vehnäjauho,sokeri
+Raparperipiirakka
+Murotaikina: 150 g voita, 1 dl sokeria, 1 kananmuna, 3 dl vehnäjauhoja
+Täyte: 500 g raparperia, 2 dl kermaviiliä, 1 dl sokeria
+Sekoita pehmeä voi ja sokeri, lisää muna ja jauhot. Painele vuokaan.
+Levitä paloitellut raparperit pohjalle ja kaada päälle kermaviilin ja sokerin seos.
+Paista 200 asteessa 30 minuuttia.
+### Blogiresepti johdannolla ja määrä lopussa | 6 | 4 | vehnäjauho,sokeri,leivinjauhe
+Tämä mokkapalaresepti on lapsuuteni suosikki! Teen näitä aina synttäreille.
+Mokkapalat
+vehnäjauhoja 4 dl
+sokeria 2 dl
+leivinjauhetta 2 tl
+kaakaojauhetta 3 rkl
+maitoa 2 dl
+voita 200 g
+1. Sekoita kuivat aineet.
+2. Sulata voi ja lisää maito.
+3. Yhdistä ja levitä pellille.
+4. Paista 200 asteessa 15 minuuttia.
+### Lihapullat | 7 | 3 | korppujauho,sipuli,suola
+Lihapullat
+500 g jauhelihaa
+1 dl korppujauhoja
+1 dl kermaa
+1 kananmuna
+1 sipuli
+1 tl suolaa
+voita paistamiseen
+Turvota korppujauhot kermassa. Lisää muut ainekset ja sekoita tasaiseksi.
+Pyöritä pyöreiksi pulliksi.
+Paista voissa kypsiksi.
+### Valmistuotteita | 6 | 2 | pasta,tomaatti | pesto
+Pestopasta kanalla
+400 g pastaa
+1 prk vihreää pestoa
+2 kanaliemikuutiota
+1 tlk tomaattimurskaa
+100 g parmesaania
+300 g kanafileesuikaleita
+Keitä pasta. Paista kanasuikaleet ja lisää tomaattimurska, liemikuutiot ja pesto.
+Sekoita pastan joukkoon ja ripottele päälle parmesaani.
+### Pancakes | 7 | 4 | flour,baking powder,salt
+Fluffy Pancakes
+Serves 4
+1 1/2 cups all-purpose flour
+3 1/2 tsp baking powder
+1 tbsp sugar
+1/4 tsp salt
+1 1/4 cups milk
+1 egg
+3 tbsp butter, melted
+Instructions
+1. In a large bowl, sift together the flour, baking powder, salt and sugar.
+2. Make a well in the center and pour in the milk, egg and melted butter; mix until smooth.
+3. Heat a lightly oiled griddle over medium-high heat. Pour or scoop the batter onto the griddle.
+4. Brown on both sides and serve hot with honey.
+### Beef chili | 9 | 3 | bean,tomato,onion
+Beef Chili
+2 tbsp olive oil
+1 lb ground beef
+1 onion, chopped
+2 cloves garlic
+1 can (15 oz) kidney beans
+1 can (28 oz) crushed tomatoes
+2 tbsp chili powder
+1 cup beef broth
+Shredded cheddar cheese and sour cream, to serve
+Heat the oil in a large pot and brown the beef with the onion and garlic.
+Add beans, tomatoes, chili powder and broth. Simmer for 30 minutes.
+Serve topped with cheddar and a dollop of sour cream.
+### Brownies | 7 | 4 | sugar,cocoa,flour
+Brownies
+1/2 cup (113 g) unsalted butter
+1 cup granulated sugar
+2 large eggs
+1 teaspoon vanilla extract
+1/3 cup cocoa powder
+1/2 cup flour
+1/4 tsp salt
+Preheat oven to 350°F (175°C). Grease an 8-inch pan.
+Melt the butter, then stir in sugar, eggs and vanilla.
+Beat in cocoa, flour and salt. Spread into the pan.
+Bake for 20 to 25 minutes.
+### Caesar dressing | 6 | 1 | olive oil,lemon
+Caesar dressing
+2 anchovy fillets
+1 egg yolk
+1 tbsp Worcestershire sauce
+1/2 cup parmesan, grated
+1/2 cup olive oil
+Juice of 1 lemon
+Mash the anchovies, whisk in yolk, Worcestershire and lemon juice. Drizzle in oil while whisking. Stir in parmesan.
+### Chocolate chip cookies | 9 | 4 | flour,sugar,baking soda,chocolate | chocolate
+Chocolate Chip Cookies
+Ingredients
+2 1/4 cups all-purpose flour
+1 tsp baking soda
+1 tsp salt
+1 cup butter, softened
+3/4 cup granulated sugar
+3/4 cup packed brown sugar
+2 large eggs
+2 tsp vanilla extract
+2 cups semisweet chocolate chips
+Directions
+Preheat oven to 375°F.
+Whisk flour, baking soda and salt. In another bowl beat butter and sugars until creamy, then beat in eggs and vanilla.
+Gradually stir in the flour mixture and fold in chocolate chips.
+Drop by rounded tablespoons onto baking sheets and bake 9 to 11 minutes.
+### Mac and cheese | 6 | 3 | macaroni,flour,mustard
+Mac and Cheese
+8 oz elbow macaroni
+2 tbsp butter
+2 tbsp flour
+2 cups whole milk
+2 cups shredded cheddar
+1/2 tsp mustard powder
+Cook the macaroni until al dente and drain.
+Melt the butter in a saucepan, whisk in flour, then gradually add milk and cook until thickened.
+Stir in the cheese and mustard, then add the macaroni.
+### Chicken stir fry | 8 | 3 | broccoli,rice,garlic
+Chicken Stir-Fry
+1 lb chicken breast, sliced
+2 tbsp vegetable oil
+3 cups broccoli florets
+2 cloves garlic, minced
+2 tbsp soy sauce
+1 tbsp oyster sauce
+1 tsp fish sauce
+cooked rice, to serve
+Stir-fry the chicken in hot oil until golden.
+Add broccoli and garlic and cook 3 minutes.
+Stir in soy sauce, oyster sauce and fish sauce. Serve over rice.
+### Carbonara | 5 | 3 | spaghetti,pepper
+Spaghetti Carbonara
+400 g spaghetti
+150 g pancetta, diced
+3 large eggs
+50 g pecorino romano, grated
+freshly ground black pepper
+Cook the spaghetti. Fry the pancetta until crisp.
+Whisk eggs and pecorino.
+Toss the hot pasta with pancetta and egg mixture off the heat. Season with pepper.
+### Banana bread | 8 | 3 | banana,flour,baking soda
+Banana Bread
+3 ripe bananas, mashed
+1/3 cup melted butter
+1/2 cup sugar
+1 egg, beaten
+1 tsp vanilla
+1 tsp baking soda
+pinch of salt
+1 1/2 cups all-purpose flour
+Preheat the oven to 350°F (175°C) and butter a loaf pan.
+Mix butter into the mashed bananas, then sugar, egg and vanilla. Sprinkle baking soda and salt over and mix in the flour.
+Pour into the pan and bake for 60 minutes.
+### Tiramisu | 6 | 4 | coffee,sugar,ladyfinger | ladyfinger
+Tiramisu
+6 egg yolks
+3/4 cup white sugar
+2 cups mascarpone cheese
+2 cups heavy cream
+24 ladyfingers
+1 cup strong brewed coffee, cooled
+Whisk egg yolks and sugar until pale.
+Fold in mascarpone. Whip the cream and fold it in.
+Dip ladyfingers in coffee and layer with the cream.
+Dust with cocoa and chill overnight.
+### Shrimp tacos | 6 | 3 | tortilla,cabbage,lime
+Shrimp Tacos
+1 lb shrimp, peeled
+1 tbsp chili powder
+8 small corn tortillas
+2 cups shredded cabbage
+1/2 cup sour cream
+1 lime
+Season the shrimp with chili powder and cook 2 minutes per side.
+Warm the tortillas.
+Fill with shrimp, cabbage and sour cream, and squeeze lime on top.
+### Omelette numeroidut vaiheet ilman otsikkoa | 4 | 3 | salt,chives
+Cheese Omelette
+3 eggs
+1 tbsp butter
+30 g grated gruyere
+salt and chives
+1. Whisk the eggs with a pinch of salt.
+2. Melt the butter in a pan and pour in the eggs.
+3. Add the cheese, fold and sprinkle with chives.
+### Karjalanpiirakat | 7 | 4 | ruisjauho,riisi,suola
+Karjalanpiirakat
+Kuoritaikina: 2 dl vettä, 1 tl suolaa, 4 dl ruisjauhoja, 1 dl vehnäjauhoja
+Täyte:
+2 dl puuroriisiä
+1 l maitoa
+Voiteluun voisulaa
+1. Keitä riisi maitoon puuroksi ja mausta suolalla.
+2. Sekoita taikinan ainekset ja kauli ohuiksi levyiksi.
+3. Levitä puuro kuorille ja rypyttele reunat.
+4. Paista 275 asteessa ja voitele voisulalla.
+### Kinkkukiusaus | 6 | 3 | perun,sipuli
+Kinkkukiusaus
+1 kg perunoita
+200 g kinkkua
+1 sipuli
+3 dl ruokakermaa
+2 dl maitoa
+100 g juustoraastetta
+Kuori ja suikaloi perunat. Kuullota sipuli ja sekoita kinkun kanssa.
+Lado vuokaan kerroksittain ja kaada päälle kerma ja maito.
+Ripottele juusto pinnalle ja paista 200 asteessa tunti.
+### Mustikkakeitto ei muutoksia | 4 | 2 | mustik,sokeri,perunajauho
+Mustikkakeitto
+5 dl mustikoita
+1 l vettä
+1 dl sokeria
+3 rkl perunajauhoja
+Keitä mustikat, vesi ja sokeri.
+Suurusta perunajauhoilla, jotka on sekoitettu kylmään veteen.
+### Kaalilaatikko | 7 | 3 | kaal,riisi,siirap
+Kaalilaatikko
+1 kg kaalia
+400 g jauhelihaa
+1 dl puuroriisiä
+3 dl maitoa
+2 rkl siirappia
+1 tl suolaa
+2 rkl voita
+Keitä riisi maitoon. Paista jauheliha ja kaali.
+Sekoita kaikki ja mausta siirapilla ja suolalla.
+Paista 175 asteessa kaksi tuntia ja voitele välillä voilla.
+### Smoothie | 4 | 1 | mustik,banaan
+Marjasmoothie
+2 dl maustamatonta jogurttia
+1 banaani
+2 dl mustikoita
+1 rkl hunajaa
+Soseuta kaikki ainekset tehosekoittimessa.
+### Pizza | 6 | 3 | vehnäjauho,tomaatti
+Kinkkupizza
+pizzapohja (500 g vehnäjauhoja, 25 g hiivaa, 3 dl vettä)
+2 dl tomaattikastiketta
+150 g kinkkua
+1 prk ananasta
+200 g mozzarellaa
+oreganoa
+Kauli pohja pellille.
+Levitä kastike, kinkku, ananas ja juusto.
+Paista 250 asteessa 12 minuuttia.
+### Lasagna | 8 | 4 | noodles,marinara,onion
+Classic Lasagna
+12 lasagna noodles
+1 lb Italian sausage
+1 onion, diced
+24 oz marinara sauce
+15 oz ricotta cheese
+1 egg
+3 cups shredded mozzarella
+1/2 cup grated parmesan
+Brown the sausage with the onion, then stir in the marinara.
+Mix ricotta, egg and half of the parmesan.
+Layer noodles, ricotta mixture, sauce and mozzarella, repeating three times.
+Top with the rest of the parmesan and bake at 375°F for 45 minutes.
+### Fried rice | 7 | 3 | rice,peas,green onion
+Egg Fried Rice
+3 cups cooked rice
+2 eggs
+1 cup frozen peas and carrots
+2 green onions, sliced
+2 tbsp soy sauce
+1 tbsp oyster sauce
+1 tbsp sesame oil
+Scramble the eggs in a hot wok and set aside.
+Stir-fry the rice with peas, carrots and green onions.
+Add soy sauce, oyster sauce, sesame oil and the eggs and toss.
+### Mashed potatoes | 5 | 3 | potato,salt
+Creamy Mashed Potatoes
+2 lbs potatoes, peeled
+4 tbsp butter
+1/2 cup milk
+1/4 cup heavy cream
+salt and pepper, to taste
+Boil the potatoes until tender and drain.
+Mash with butter, then beat in warm milk and cream.
+Season with salt and pepper.
+### French toast | 6 | 3 | bread,cinnamon
+French Toast
+2 eggs
+1/2 cup milk
+1 tsp cinnamon
+1 tbsp sugar
+6 slices bread
+butter, for frying
+Whisk eggs, milk, cinnamon and sugar in a shallow dish.
+Dip each slice of bread in the mixture.
+Fry in butter until golden on both sides.
+### Fish tacos | 6 | 3 | tortilla,lime,cabbage
+Fish Tacos
+1 lb cod fillets
+1 tsp cumin
+8 flour tortillas
+2 cups shredded cabbage
+1/2 cup mayonnaise
+1 lime
+Season the cod with cumin and pan-fry for 3 minutes per side.
+Flake the fish and warm the tortillas.
+Top with cabbage, mayonnaise and a squeeze of lime.
+### Quiche | 6 | 3 | spinach,salt
+Bacon Quiche
+1 frozen pie crust
+6 slices bacon, cooked and crumbled
+4 eggs
+1 cup heavy cream
+1 cup spinach
+1/2 tsp salt
+Preheat the oven to 375°F (190°C).
+Whisk eggs, cream and salt. Stir in bacon and spinach.
+Pour into the crust and bake 35 minutes.
+### Hummus no changes | 5 | 1 | chickpea,tahini,lemon
+Hummus
+1 can chickpeas, drained
+1/4 cup tahini
+2 tbsp lemon juice
+1 clove garlic
+2 tbsp olive oil
+Blend everything until smooth, adding water as needed.
+### Panna cotta | 5 | 3 | sugar,vanilla
+Panna Cotta
+2 cups heavy cream
+1/2 cup milk
+1/3 cup sugar
+2 tsp gelatin powder
+1 tsp vanilla
+Sprinkle gelatin over the milk and let it bloom for 5 minutes.
+Heat cream and sugar, then stir in the gelatin mixture and vanilla.
+Pour into glasses and chill for 4 hours.
+### Ramen | 6 | 3 | noodles,soy,green onion
+Shoyu Ramen
+4 cups dashi
+2 tbsp soy sauce
+2 portions ramen noodles
+2 soft-boiled eggs
+100 g chashu pork
+2 green onions, sliced
+Heat the dashi with soy sauce.
+Cook the noodles and divide into bowls.
+Pour over the broth and top with eggs, pork and green onions.

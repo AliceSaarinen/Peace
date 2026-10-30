@@ -49,6 +49,15 @@ Useampi kuva korjaa nämä, ja sovellus merkitsee epävarmat sanat käyttäjäll
 Selaintesti (Chromium, kamerana video pyörivästä tölkistä): kaksi eri tuotetta, 15–16 automaattisesti otettua kuvaa,
 100 % sanoista oikein, ei ylimääräistä tekstiä.
 
+## Reseptin skannaus
+
+Selaintesti (kamera liikkuu pitkää reseptisivua alaspäin): 4 automaattista kuvaa, 100 % sanoista oikein, ei toistoja.
+
+## Englanninkieliset etiketit
+
+Suomen mallilla ja englanninkielisellä sanastolla 28 synteettistä englanninkielistä etikettiä: 85 % / 91 %, oikea vegaanisuustulos 26/28.
+Englannin oma malli toisi +1,4 prosenttiyksikköä mutta +11 Mt ladattavaa ja +40 % aikaa, joten sitä ei lisätty.
+
 ## PaddleOCR-kokeilu 29.10.2026
 
 PP-OCRv5:n monikielinen ONNX-malli (tunnistus + luku) samalla testisarjalla: 78,5 % (Tesseract 90,7 %), noin 3× hitaampi
