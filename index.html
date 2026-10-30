@@ -490,6 +490,8 @@ textarea.let:focus{background:#FFFDF9;border-color:#E3B7C4;box-shadow:none}
 .fbar button{flex:1 1 0;min-width:0;height:44px;border:1.5px solid var(--line);border-radius:12px;background:#FFFDF9;color:var(--ink);font-size:1.15rem;font-weight:800;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .fbar button:active{background:var(--rose-wash)}
 .fbar button{padding:0 2px}.fbar button.clr{flex:1.9 1 0;color:var(--rose-ink);font-size:.8rem}
+.le-undo{position:sticky;top:8px;z-index:5;display:flex;justify-content:flex-end;margin:0 0 6px}.le-undo[hidden]{display:none}.le-undo .btn{box-shadow:0 2px 8px rgba(120,80,60,.15)}
+.rwarn{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 @media (max-width:380px){.top .bq{width:96px;height:66px}}
 </style>
@@ -527,6 +529,7 @@ textarea.let:focus{background:#FFFDF9;border-color:#E3B7C4;box-shadow:none}
     <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 15.5v-11M7.5 9 12 4.5 16.5 9M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
     <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.2 1.2M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6.5 9.5 5.5 5.5 5.5-5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-swap" viewBox="0 0 24 24"><path d="M5 8h13m-3-3.5L18.5 8 15 11.5M19 16H6m3-3.5L5.5 16 9 19.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-joinu" viewBox="0 0 24 24"><path d="M5 4.5h14M12 20V9m-4.5 4.5L12 9l4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
@@ -566,7 +569,6 @@ textarea.let:focus{background:#FFFDF9;border-color:#E3B7C4;box-shadow:none}
 <div id="cropRoot"></div>
 <button id="timerPill" class="tpill" hidden data-cook-open></button>
 <div id="toast" class="toast" hidden></div>
-<div id="fbar" class="fbar" role="toolbar" aria-label="Tekstikentän työkalut"><button type="button" data-f="home" aria-label="Kursori alkuun">⇤</button><button type="button" data-f="wl" aria-label="Sana vasemmalle">«</button><button type="button" data-f="l" aria-label="Merkki vasemmalle">‹</button><button type="button" data-f="r" aria-label="Merkki oikealle">›</button><button type="button" data-f="wr" aria-label="Sana oikealle">»</button><button type="button" data-f="end" aria-label="Kursori loppuun">⇥</button><button type="button" class="clr" data-f="clr" aria-label="Tyhjennä koko teksti">Tyhjennä</button></div>
 <script>/* Akvarellityyliset kukat ja koristeet SVG-symboleina. Piirretään kerran sivun alussa. */
 (function (G) {
   const R = (a) => a * Math.PI / 180;
@@ -2727,10 +2729,14 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
   const JUNK = /^(katso myös|lue myös|muita reseptejä|you may also like|related|more recipes|käynnistä ajastin|kaynnista ajastin|ajastin|start timer|set timer|timer|katso video|video|mainos|advertisement|lisää ostoslistalle|lisää suosikkeihin|lisää kauppalistalle|arvostelut|kommentit|reseptin tekijä|kuva:|photo|kuvaaja|lähde|source|avainsanat|tags|ruokavalio|vaikeustaso|hinta|annoshinta|\d+([.,]\d+)?\s*(€|e\/annos)|\d+\s*(min|minuuttia|h|tuntia|tunti)\.?$|kopioi$|lataa |lisää ainekset|lisaa ainekset|määrä\s+ainesosa|maara\s+ainesosa|.*-sovellu|tulosta|jaa resepti|arvostele|cook mode|prevent your screen|jump to recipe|print recipe|pin recipe|save recipe|rate this recipe|nutrition|calories|prep time|cook time|total time|course|cuisine|keyword|author|servings\s*:|yield\s*:|equipment|notes?$|video|watch|share|tulosta|tallenna|arvostele|valmistusaika|kokonaisaika|ravintosisalto|kategoria)/i;
   const NOT_FOOD = /^\s*(\d+([.,]\d+)?\s*)?(minutes?|mins?\.?|min|minuutti[a]?|minuuttia|hours?|hrs?|h|tunti[a]?|tuntia|people|persons?|servings?|serves|henkea|henkiloa|hengelle|annosta|annoksia|portions?|kcal|calories|kalori\w*|prep|cook|total)\s*\.?\s*$|^(prep|cook|total|valmistusaika|kokonaisaika|kypsennysaika|uunissa)\b/;
   const STEP_VERB = /^(\d+[.)]\s*)?(lisää|sekoita|kaada|keitä|paista|vatkaa|anna|leikkaa|kuori|pese|hienonna|sulata|kuumenna|lämmitä|mausta|tarjoile|valmista|laita|nosta|siivilöi|sekoittele|hauduta|kypsennä|jäähdytä|levitä|yhdistä|ripottele|käännä|tarkista|viimeistele|huuhtele|pilko|paloittele|raasta|soseuta|liota|valuta|kuullota|ruskista|voitele|vuoraa|muotoile|kaulitse|nostata|pyöritä|aseta|jätä|peitä|purista|silppua|viipaloi|esilämmitä|vaivaa|leivo|murskaa|painele|lado|hiero|kääntele|liuota|turvota|kiehauta|tarjoa|koristele|nostele|kostuta|vatkaa|add|mix|stir|bake|cook|preheat|heat|serve|place|whisk|pour|combine|fold|let|remove|cut|chop|slice|bring|simmer|boil|transfer|season|drain|rinse|beat|blend|spread|sprinkle|cover|top|garnish|knead|roll|shape|grease|melt|toss|marinate|fry|roast|grill|saut[eé]|reduce|mash|drizzle|scoop|flip|chill|refrigerate|freeze|divide|brush|peel|dice|mince|grate|squeeze|sift|dip|dust|layer|fill|warm|cool|whip|dissolve|soak|arrange|press|crush|stir-fry)\b/i;
+  /* reseptisivujen ja -sovellusten painikkeet, merkinnät ja ominaisuuslaput ("- Runsaasti proteiinia", "Lisää ajastin") */
+  const FI_PAGE_JUNK = /^(ajastimet|ajastin|lisää ajastin|lisaa ajastin|aloita ajastin|muistiinpanot|omat muistiinpanot|lisää muistiinpano|lisaa muistiinpano|muistiinpano|runsaasti \S+|hyvä \S+ lähde|hyva \S+ lahde|\S+ lähde$|kuitupitoinen|proteiinipitoinen|vähärasvainen|vaharasvainen|vähäsuolainen|gluteeniton|laktoositon|maidoton|kananmunaton|munaton|pähkinätön|vegaaninen|kasvis|kasvisruoka|arkiruoka|juhlaruoka|helppo|keskivaikea|vaativa|edullinen|nopea|pakastettava|sopii pakastettavaksi|uuni\s*\d+\s*°?\s*c?|\d+\s*°\s*c$|valmistusaika|kypsennysaika|aktiivinen työaika|työaika|kokonaisaika|annoksia\s*:?$|annokset$|resepti$|reseptit$|tallenna resepti|tallennettu|lisää kokoelmaan|lisaa kokoelmaan|jaa$|tulosta resepti|kokkaustila|näytä enemmän|nayta enemman|näytä vähemmän|lue lisää|siirry reseptiin|ostoslista|lisää ostoslistaan|arvio|arviot|\d+ arviota?|\(\d+\)$|osta aineksia|tilaa ainekset)$/i;
   const PAGE_JUNK = /^(step by step|get ahead|freezable|easy|more effort|a challenge|method$|ingredients$|nutrition|per serving|low|medium|high|vegetarian|vegan|healthy|dairy-free|gluten-free|egg-free|nut-free|(kcal|fat|saturates|carbs|sugars|fibre|fiber|protein|salt)\s*[\d.,]+\s*(g|mg)?\s*(low|med|medium|high)?$|[\d.,]+\s*(g|kcal|mg)$|prep:|cook:|serves \d+$|makes \d+$|by [A-Z]|recipe from|top tip|tips?$|alternatives?$|you('ll| will) need|frequently asked|faq|related recipes|reviews?$|comments?$)/i;
   /* Luettelomerkit rivin alussa: pallurat, viivat, nuolet, tähdet, ruudut ja valintamerkit */
   const BULLET_RE = /^\s*(?:[-‐‑‒–—―•●○◦⦁∙·⋅▪▫■□◆◇◈►▻▸▹▶‣⁃⁌⁍➢➤➔→⇒*+>»«~✓✔✗☐☑☒▢❖❥♡♥❀✿❁★☆✦✧◉◎⊙]|\.(?=\s))\s*/;
   function splitLines(text, bset) {
+    /* rivinvaihtoon katkennut sana ("Liha-" + "perunasoselaatikko", "vehnä-" + "jauhoja") liitetään yhteen */
+    text = String(text || '').replace(/\r/g, '').replace(/([\p{L}]{2,})-[ \t]*\n[ \t]*(?=[a-zäöå])/gu, '$1-');
     return String(text || '').replace(/\r/g, '').replace(/\t+/g, ' ').split('\n').map(l => {
       l = l.replace(/\s+/g, ' ').trim();
       if (!BULLET_RE.test(l) && /^[^\p{L}\p{N}\s(\[]{1,3}\s*(?=[\d½¼¾⅓])/u.test(l) && !/^[-–+]\d+([.,]\d+)?\s*°/.test(l)) {
@@ -2832,7 +2838,7 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
       /* Vinkit ja huomiot menevät muistiinpanoihin */
       if (TIP_RE.test(prepText(l))) { out.push({ t: l, k: 'skip', k0: 'skip', note: true }); return; }
       if (TOOL_HEAD.test(l) && l.length < 40) { section = 'tools'; return; }
-      if (JUNK.test(l) || PAGE_JUNK.test(l)) { const s2 = l.match(/(servings|serves|yield|annokset|annoksia|makes)\s*:?\s*(\d+)/i); if (s2 && servings == null) servings = parseInt(s2[2], 10); push(l, 'skip'); return; }
+      if (JUNK.test(l) || PAGE_JUNK.test(l) || FI_PAGE_JUNK.test(l.replace(/^[-•*·–]\s*/, '').trim())) { const s2 = l.match(/(servings|serves|yield|annokset|annoksia|makes)\s*:?\s*(\d+)/i); if (s2 && servings == null) servings = parseInt(s2[2], 10); push(l, 'skip'); return; }
       const sv = l.match(/(\d+)\s*(annosta|annos|hengelle|henkilölle|henkiloa|henkeä|kpl|kappaletta|sämpylää|sampylaa|pullaa|palaa|muffinssia|keksiä|servings?|serves|portions?|pieces?)/i) || l.match(/(?:serves|makes|yields|riittää|tekee|annoksia|määrä)\s*:?\s*(\d+)/i);
       /* annosmäärä: "4 annosta", "Serves 4". "2 portions ramen noodles" on aines, ei annosmäärä */
       const svRest = sv ? l.slice((sv.index || 0) + sv[0].length).replace(/^[\s:.,)-]+/, '') : '';
@@ -2888,7 +2894,7 @@ if (typeof module !== 'undefined') module.exports = globalThis.VegData;
     });
     if (stepsText && stepsText.trim()) {
       splitLines(stepsText).forEach(l => {
-        if (ign.has(prepText(l).trim()) || JUNK.test(l) || PAGE_JUNK.test(l) || /^\d{1,2}[.)]?$/.test(l) || STEP_HEAD.test(l) && l.length < 40) { if (!STEP_HEAD.test(l)) push(l, 'skip'); return; }
+        if (ign.has(prepText(l).trim()) || JUNK.test(l) || PAGE_JUNK.test(l) || FI_PAGE_JUNK.test(l.replace(/^[-•*·–]\s*/, '').trim()) || /^\d{1,2}[.)]?$/.test(l) || STEP_HEAD.test(l) && l.length < 40) { if (!STEP_HEAD.test(l)) push(l, 'skip'); return; }
         const vm = l.match(/^(vaihe|step|steg|schritt)\s*\d+\s*[:.)-]?\s*(.*)$/i);
         if (vm) { if (vm[2] && vm[2].length > 3) push(vm[2], 'step'); return; }
         push(l.replace(/^\d+[.)]\s*/, ''), 'step');
@@ -4164,7 +4170,7 @@ Täytä kakku mansikoilla ja kermalla.`;
     document.addEventListener('input', () => placeBar());
     decorateFields(document);
   }
-  initFbar();
+  decorateFields(document); /* kursorin siirtopalkki poistettu käyttäjän toiveesta: iPhonella kursori siirtyy painamalla välilyöntiä pitkään */
   /* Tekstikentät kasvavat sisällön mukana */
   function grow(el) {
     if (!el || el.tagName !== 'TEXTAREA' || !el.getClientRects().length) return;
@@ -5628,7 +5634,7 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     catch (e) { toast('Kameraa ei saatu auki. Salli kameran käyttö selaimen asetuksista.'); return; }
     const root = $('#cropRoot');
     root.innerHTML = `<div class="crop scan" role="dialog" aria-modal="true" aria-label="${REC ? 'Skannaa resepti' : 'Skannaa ainesosat'}">
-      <div class="stagewrap"><div class="sview"><video playsinline muted autoplay></video><div class="sframe"></div><div class="sflash"></div></div></div>
+      <div class="stagewrap"><div class="sview" data-k="shot"><video playsinline muted autoplay></video><div class="sframe"></div><div class="sflash"></div></div></div>
       <p class="shint" aria-live="polite">${REC ? 'Aseta reseptin alku kehykseen ja paina Aloita.' : 'Aseta ainesosaluettelon alku kehykseen ja paina Aloita.'}</p><p hidden class="shint2">${REC ? 'Pidä puhelin reseptin yläpäässä ja siirrä sitä hitaasti alaspäin niin, että koko resepti kulkee kehyksen läpi.' : 'Kierrä tuotetta hitaasti niin, että koko ainesosaluettelo kulkee kehyksen läpi. Pitkässä luettelossa siirrä kameraa hitaasti alaspäin.'}</p>
       <div class="sprog" aria-hidden="true"><i></i></div>
       <div class="cbar"><button class="btn ghost" data-k="no" aria-label="Peruuta">${icon('i-x')}</button><span class="scount" aria-live="polite">0 kuvaa</span><button class="btn primary" data-k="ok" disabled hidden>${icon('i-ok')}Valmis</button><button class="btn primary" data-k="go">${icon('i-scan')}Aloita</button></div></div>`;
@@ -5638,7 +5644,7 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     try { await video.play(); } catch (e) { }
     const frames = []; let started = false;
     const go = root.querySelector('[data-k="go"]');
-    let prev = null, acc = { x: 0, y: 0 }, maxSharp = 0, timer = 0, done = false, busyGrab = false, still = 0;
+    let prev = null, acc = { x: 0, y: 0 }, maxSharp = 0, timer = 0, done = false, busyGrab = false, still = 0, lastGrab = 0, startedAt = 0;
     const small = document.createElement('canvas'), sg = small.getContext('2d', { willReadFrequently: true });
     const stop = () => { done = true; clearInterval(timer); stream.getTracks().forEach(t => t.stop()); root.innerHTML = ''; document.body.style.overflow = ''; };
     const grab = async () => {
@@ -5648,7 +5654,7 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       cv.getContext('2d').drawImage(video, 0, 0, cv.width, cv.height);
       const blob = await new Promise(res => cv.toBlob(res, 'image/jpeg', 0.92));
       if (!blob || done) return;
-      frames.push(blob);
+      frames.push(blob); lastGrab = Date.now();
       cnt.textContent = `${frames.length} kuva${frames.length === 1 ? '' : 'a'}`;
       bar.style.width = Math.min(100, frames.length / MAXF * 100) + '%';
       ok.disabled = false;
@@ -5675,8 +5681,12 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       const moved = Math.max(Math.abs(acc.x) / w, Math.abs(acc.y) / h);
       const sharpOk = cur.sharp >= maxSharp * 0.6;
       if (window.__scanLog) window.__scanLog.push([Date.now(), acc.x, acc.y, +cur.sharp.toFixed(1), +maxSharp.toFixed(1), frames.length]);
-      /* ensimmäinen kuva heti kun kuva on tarkka ja paikallaan, sitten aina kun tekstiä on siirtynyt tarpeeksi */
-      if ((!frames.length && still >= 3 && sharpOk) || (frames.length && ((moved >= STEP && sharpOk) || moved >= Math.min(0.55, STEP * 1.8)))) {
+      /* ensimmäinen kuva heti Aloita-painalluksen jälkeen (käsivaralla puhelin ei ole koskaan täysin paikallaan),
+         sitten aina kun tekstiä on siirtynyt tarpeeksi. Varalla: jos kuvaa ei ole tullut hetkeen ja kamera on liikkunut, kuva otetaan silti. */
+      const now = Date.now();
+      const first = !frames.length && (now - startedAt > 350 && (still >= 1 || sharpOk || now - startedAt > 1200));
+      const stalled = frames.length && now - lastGrab > 1800 && moved >= STEP * 0.45;
+      if (first || stalled || (frames.length && ((moved >= STEP && sharpOk) || moved >= Math.min(0.55, STEP * 1.8)))) {
         busyGrab = true; acc = { x: 0, y: 0 };
         try { await grab(); } finally { busyGrab = false; }
       }
@@ -5693,9 +5703,10 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       const k = (e.target.closest('[data-k]') || {}).dataset; if (!k || !k.k) return;
       if (k.k === 'no') stop();
       if (k.k === 'ok') finish();
+      if (k.k === 'shot' && started && !busyGrab && video.videoWidth) { busyGrab = true; acc = { x: 0, y: 0 }; grab().finally(() => { busyGrab = false; }); }
       if (k.k === 'go' && !started) {
         /* skannaus alkaa vasta, kun käyttäjä on asettanut kameran luettelon alkuun */
-        started = true; prev = null; acc = { x: 0, y: 0 }; still = 0;
+        started = true; prev = null; acc = { x: 0, y: 0 }; still = 0; startedAt = Date.now();
         go.hidden = true; ok.hidden = false;
         hint.textContent = root.querySelector('.shint2').textContent;
       }
@@ -6150,15 +6161,39 @@ hiilihydraatit sokereita proteiini suolaa kuitua
   const LE = {
     kinds: { rv: ['ing', 'head', 'step', 'tool', 'skip'], ei: ['ing', 'head', 'tool'], es: null },
     rows(n) { return n === 'rv' ? (S.rin.review && S.rin.review.lines) : n === 'ei' ? (S.ed && S.ed.ings) : n === 'es' ? (S.ed && S.ed.steps) : null; },
-    active: {}, caret: {}, pick: {}
+    active: {}, caret: {}, pick: {},
+    /* kumoamishistoria rivilistaa kohden (uusi tarkistus = uusi lista = tyhjä historia) */
+    hist: new WeakMap(), editSnap: {}
   };
+  const leStack = rows => { if (!LE.hist.has(rows)) LE.hist.set(rows, []); return LE.hist.get(rows); };
+  function lePush(n, snap) {
+    const rows = LE.rows(n); if (!rows) return;
+    const st = leStack(rows), js = snap || JSON.stringify(rows);
+    if (st[st.length - 1] === js) return;
+    st.push(js); if (st.length > 150) st.shift();
+  }
+  function leUndo(n) {
+    const rows = LE.rows(n); if (!rows) return;
+    leCommitEdit(n);
+    const st = leStack(rows); if (!st.length) return;
+    rows.splice(0, rows.length, ...JSON.parse(st.pop()));
+    LE.pick[n] = null; LE.editSnap[n] = null;
+    leRedraw(n); toast(st.length ? `Muutos peruttu (${st.length} jäljellä)` : 'Muutos peruttu');
+  }
+  /* kirjoitettu muutos tallentuu historiaan, kun rivistä siirrytään pois tai tehdään muu muutos */
+  function leCommitEdit(n) {
+    const rows = LE.rows(n), snap = LE.editSnap[n]; if (!rows || !snap) return;
+    if (JSON.stringify(rows) !== snap) lePush(n, snap);
+    LE.editSnap[n] = null;
+  }
   const LEGEND = ` <span class="legend"><span>${icon('i-joinu')}yhdistä ylös</span><span>${icon('i-joind')}alas</span><span>${icon('i-cut')}jaa</span><span>${icon('i-plus')}uusi</span><span>${icon('i-trash')}poista</span></span>`;
   const lineOf = i => C.ingText(i) + (i.note ? ' (' + i.note + ')' : '');
   function leHTML(n, hint) { return `<div class="le-wrap" data-le="${n}">${leInner(n, hint)}</div>`; }
   function leInner(n, hint) {
     const rows = LE.rows(n) || [], kinds = LE.kinds[n], act = LE.active[n];
     let num = 0;
-    return `${hint ? `<p class="le-hint">${hint}</p>` : ''}<ul class="le${kinds ? '' : ' nok'}">${rows.map((x, i) => `<li class="le-row le-${x.k}${act === i ? ' on' : ''}${LE.pick[n] === i ? ' picking' : ''}" data-i="${i}">
+    const nUndo = leStack(rows).length + (LE.editSnap[n] && JSON.stringify(rows) !== LE.editSnap[n] ? 1 : 0);
+    return `${hint ? `<p class="le-hint">${hint}</p>` : ''}<div class="le-undo"${nUndo ? '' : ' hidden'}><button type="button" class="btn soft small" data-le-act="undo">${icon('i-undo')}Kumoa muutos</button></div><ul class="le${kinds ? '' : ' nok'}">${rows.map((x, i) => `<li class="le-row le-${x.k}${act === i ? ' on' : ''}${LE.pick[n] === i ? ' picking' : ''}" data-i="${i}">
       ${kinds ? `<button type="button" class="kpill k-${x.k}" data-le-act="kind" aria-expanded="${LE.pick[n] === i}" aria-label="Rivin tyyppi: ${LEKIND[x.k]}. Valitse toinen napauttamalla.">${LEKIND[x.k]}</button>` : `<span class="le-num" aria-hidden="true">${++num}</span>`}
       <textarea class="let" rows="1" data-le-i="${i}" aria-label="Rivi ${i + 1}">${esc(x.t)}</textarea>
       <button type="button" class="le-del" data-le-act="del" aria-label="Poista rivi">${icon('i-trash')}</button>
@@ -6195,8 +6230,10 @@ hiilihydraatit sokereita proteiini suolaa kuitua
   }
   function leOp(n, op, i, pos, val) {
     const rows = LE.rows(n); if (!rows) return;
-    const snap = rows.map(x => Object.assign({}, x));
-    const undo = msg => toast(msg, 'Kumoa', () => { rows.splice(0, rows.length, ...snap); leRedraw(n); });
+    if (op === 'undo') { leUndo(n); return; }
+    leCommitEdit(n);
+    if (op !== 'kind') lePush(n);
+    const undo = msg => toast(msg, 'Kumoa', () => leUndo(n));
     const kinds = LE.kinds[n], def = kinds ? (rows[i] ? rows[i].k : (rows.length ? rows[rows.length - 1].k : kinds[0])) : 'step';
     const kd = def === 'skip' || def === 'head' ? (kinds ? kinds[0] : 'step') : def;
     switch (op) {
@@ -6235,7 +6272,9 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     const w = e.target.closest('.le-wrap');
     w.querySelectorAll('.le-row.on').forEach(x => x.classList.remove('on'));
     e.target.closest('.le-row').classList.add('on'); LE.active[L.n] = L.i;
+    if (!LE.editSnap[L.n]) { const rows = LE.rows(L.n); if (rows) LE.editSnap[L.n] = JSON.stringify(rows); }
   });
+  document.addEventListener('focusout', e => { if (!e.target.classList || !e.target.classList.contains('let')) return; const L = leOf(e.target); if (L) setTimeout(() => { if (!(document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('let'))) leCommitEdit(L.n); }, 0); });
   const leCaret = e => { if (!e.target.classList || !e.target.classList.contains('let')) return; const L = leOf(e.target); if (L) LE.caret[L.n] = { i: L.i, pos: e.target.selectionStart }; };
   ['keyup', 'click', 'select', 'focusin'].forEach(ev => document.addEventListener(ev, leCaret));
   document.addEventListener('input', e => {
@@ -6244,6 +6283,7 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     const v = e.target.value, nl = v.indexOf('\n');
     if (nl >= 0) { rows[L.i].t = v.replace(/\n/g, ''); leOp(L.n, 'enter', L.i, nl); return; }
     rows[L.i].t = v; leCaret(e); leCount(L.n);
+    const u = e.target.closest('.le-wrap') && e.target.closest('.le-wrap').querySelector('.le-undo'); if (u) u.hidden = false;
   });
   /* liitetty pelkkä reseptisivun linkki haetaan heti */
   document.addEventListener('paste', e => {
@@ -6292,9 +6332,10 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     if (r.restrictions == null) r.restrictions = S.settings.defRestrictions.slice();
     const sel = RESTR.filter(x => r.restrictions.includes(x[0]));
     const compact = S.current && !r.review && !r.busy && !r.formOpen && !(r.ingDraft || '').trim();
+    const reviewing = !!r.review && !r.formOpen;
     v.innerHTML = `
       ${vh('Tee reseptistä vegaaninen')}
-      ${compact ? `<div class="card compactform"><button class="btn soft" data-act="rnew">${icon('i-plus')}Muunna uusi resepti</button></div>` : `<div class="card">
+      ${reviewing ? '' : compact ? `<div class="card compactform"><button class="btn soft" data-act="rnew">${icon('i-plus')}Muunna uusi resepti</button></div>` : `<div class="card">
         <div class="iconpick">
           <label aria-label="Kuvaa resepti" title="Kuvaa resepti">${icon('i-cam')}<input id="rOcrCam" type="file" accept="image/*" capture="environment"></label>
           <label aria-label="Valitse reseptin kuva" title="Valitse reseptin kuva">${icon('i-img')}<input id="rOcrGal" type="file" accept="image/*" multiple></label>
@@ -6333,7 +6374,7 @@ hiilihydraatit sokereita proteiini suolaa kuitua
   }
   function startReview(force) {
     const r = S.rin;
-    r.nameDraft = $('#rName').value; r.ingDraft = $('#rIng').value; r.stepDraft = '';
+    if ($('#rName')) r.nameDraft = $('#rName').value; if ($('#rIng')) r.ingDraft = $('#rIng').value; r.stepDraft = '';
     if (!r.ingDraft.trim()) { toast('Liitä ensin resepti.'); return; }
     if (r.ocrRaw) { const n = learnOcr(r.ocrRaw, r.ingDraft); r.ocrRaw = null; if (n) setTimeout(() => toast(`Opittu ${n} korjaus${n > 1 ? 'ta' : ''} tekstintunnistukseen`), 1200); }
     const fromPhoto = !!r.ocrRaw0; r.ocrRaw0 = null;
@@ -6344,10 +6385,14 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     r.review.title = r.nameDraft.trim();
     if (!r.review.title && r.review.titleGuess) { r.review.title = r.nameDraft = r.review.titleGuess; }
     /* selkeä resepti muunnetaan heti; rivit näytetään tarkistettaviksi vain, jos tulkinta on epävarma */
+    /* Muunna tekee aina valmiin reseptin. Epävarmasta tulkinnasta kerrotaan valmiin reseptin yläreunassa,
+       ja rivit voi korjata sieltä. Rivien tarkistus avautuu suoraan vain, jos aineksia ei löytynyt lainkaan. */
     const why = force ? 'pyydetty' : reviewNeed(r.review, fromPhoto, fromWeb);
-    if (!why) { r.formOpen = false; convertRecipe(); return; }
-    r.reviewWhy = why === 'pyydetty' ? '' : why;
-    renderRecipe(); scrollToEl('#reviewBox');
+    const noIng = !r.review.lines.some(x => x.k === 'ing');
+    if (!force && !noIng) { r.formOpen = false; r.pendingWhy = why || null; convertRecipe(); return; }
+    r.reviewWhy = why === 'pyydetty' ? '' : (noIng ? 'Reseptistä ei löytynyt aineksia. Merkitse ainesrivit napauttamalla rivin tyyppiä.' : why);
+    r.formOpen = false;
+    renderRecipe(); scrollToEl('#reviewBox', true);
   }
   /* Milloin rivien tulkinta kannattaa näyttää: kuvasta luettu, ei aineksia tai vaiheita, tai ohitettu rivi näyttää ainekselta */
   function reviewNeed(rv, fromPhoto, fromWeb) {
@@ -6375,6 +6420,7 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     /* englanninkielinen resepti pysyy oletuksena englanninkielisenä (ainekset ja ohjeet samalla kielellä) */
     const rec = C.convertParsed(p, all, r.restrictions, S.settings.avoid, { lang: RR.isEnglish(all) ? 'en' : 'fi', fb: S.settings.subFb || {} });
     if (!rv.title) rec.title = 'Nimetön resepti';
+    rec.warn = r.pendingWhy || null; r.pendingWhy = null;
     S.current = Object.assign({ id: uid(), ts: Date.now(), saved: false, restrictions: r.restrictions.slice(), original: all.trim().slice(0, 20000), shopping: { checked: [] } }, rec);
     S.servings = S.current.servings; S.units = S.current.lang === 'en' && /\b(cups?|tbsp|tsp|oz|lb)\b/i.test(all) && S.settings.units === 'metric' ? 'us' : S.settings.units; S.openIng = null;
     r.review = null; r.ingDraft = ''; r.stepDraft = ''; r.nameDraft = ''; r.formOpen = false; r.reviewWhy = '';
@@ -6558,6 +6604,7 @@ hiilihydraatit sokereita proteiini suolaa kuitua
           ${(r.restrictions || []).map(k => `<span class="tag lilac">${esc(RLABEL(k))}</span>`).join('')}
         </div>
       </div>
+      ${r.warn && r.mode !== 'ai' ? `<div class="note warm rwarn"><span class="grow">${esc(r.warn.replace(/,? ja paina (sitten )?Muunna vegaaniseksi/, ''))}</span><div class="row"><button class="btn soft small" data-act="rreview">${icon('i-edit')}Korjaa rivit</button><button class="btn ghost small" data-act="rwarnok">Kaikki kunnossa</button></div></div>` : ''}
       <div class="toolbar">
         <div class="stepper"><button data-act="sv-" aria-label="Vähemmän">−</button><input id="svIn" type="number" inputmode="numeric" min="1" value="${S.servings}" aria-label="Annosmäärä"><span>${esc(r.servingsLabel || 'annosta')}</span><button data-act="sv+" aria-label="Enemmän">+</button></div>
         <div class="row">
@@ -7470,8 +7517,9 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       }
       case 'iosshare': openIosShare(); break;
       case 'rnew': S.rin.formOpen = true; renderRecipe(); { const ta = $('#rIng'); if (ta) ta.focus(); } break;
-      case 'rreview': { const r = S.current; if (!r || !r.original) break; S.rin.ingDraft = r.original; S.rin.nameDraft = r.title || ''; S.rin.formOpen = true; startReview(true); break; }
-      case 'rvcancel': syncReview(); S.rin.review = null; renderRecipe(); break;
+      case 'rreview': { const r = S.current; if (!r || !r.original) break; S.rin.ingDraft = r.original; S.rin.nameDraft = r.title === 'Nimetön resepti' ? '' : (r.title || ''); startReview(true); window.scrollTo({ top: 0, behavior: 'smooth' }); break; }
+      case 'rvcancel': syncReview(); S.rin.review = null; if (!S.current) S.rin.formOpen = true; renderRecipe(); break;
+      case 'rwarnok': if (S.current) { S.current.warn = null; if (S.current.saved) put('recipes', S.current); else saveDraft(); renderRecipe(); } break;
       case 'rvk': { syncReview(); const x = S.rin.review.lines[parseInt(t.dataset.i, 10)]; x.k = KNEXT[x.k]; const y = window.scrollY; renderRecipe(); window.scrollTo(0, y); break; }
       case 'rstop': if (convertCtl) convertCtl.abort(); break;
       case 'rclearimg': syncRecipe(); S.rin.file = null; S.rin.thumb = null; renderRecipe(); break;
