@@ -5035,11 +5035,46 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     const known = ws.filter(ocrIsKnown).length;
     return known / ws.length + Math.min(0.3, (t.match(/,/g) || []).length * 0.1) + (/\bE\s?\d{3}/.test(t) ? 0.2 : 0);
   }
-  function ocrSelect(lines) {
+  /* ---------- Rivin kieli: suomi, englanti tai ruotsi ----------
+     Monikielisessä pakkauksessa muunkieliset rivit jätetään pois, kun pakkauksessa on suomenkielinen osa. */
+  let LANGV = null;
+  function langVocab() {
+    if (LANGV) return LANGV;
+    const set = txt => new Set(String(txt).split(/\s+/).map(w => ocrN(w.replace(/[^\p{L}]/gu, ''))).filter(w => w.length >= 3));
+    const fi = set(OCR_VOCAB_TXT + ' ' + OCR_COMMON_TXT + ' ainesosat sisältää saattaa pieniä määriä valmistettu tehtaassa jossa käsitellään myös josta tyydyttyneitä hiilihydraatit sokereita proteiini suola rasva energia säilytys parasta ennen'), en = set(OCR_EN_TXT + ' ingredients contains may traces made factory which also handles of from and with flakes powder flour oil fat syrup extract juice concentrate flavouring flavoring raising agents emulsifier acidity regulator wholegrain vegetable rapeseed sunflower spices');
+    const sv = set('ingredienser innehåller kan spår av och samt socker vatten mjölk mjölkpulver ägg salt vetemjöl havreflingor fullkornshavreflingor rapsolja solrosolja vegetabiliskt fett glukossirap smör grädde lök morot vitlök kryddor svartpeppar majsstärkelse potatisstärkelse ärtprotein jäst jästextrakt arom aromer surhetsreglerande medel emulgeringsmedel förtjockningsmedel konserveringsmedel vasslepulver helmjölkspulver kakaosmör kakaomassa smörfett tomatpuré rökarom rödbetsjuice koncentrat näringsvärde förvaring bäst före');
+    [...en].forEach(w => { if (fi.has(w)) { fi.delete(w); en.delete(w); } });
+    [...sv].forEach(w => { if (fi.has(w)) { fi.delete(w); sv.delete(w); } else if (en.has(w)) { en.delete(w); sv.delete(w); } });
+    return (LANGV = { fi, en, sv });
+  }
+  function lineLang(t) {
+    const V = langVocab(); let fi = 0, en = 0, sv = 0;
+    (String(t).match(/[\p{L}]{3,}/gu) || []).forEach(w0 => {
+      const w = ocrN(w0); if (V.fi.has(w)) fi++; else if (V.sv.has(w)) sv++; else if (V.en.has(w)) en++;
+      if (/å/i.test(w0)) sv += 0.5; else if (/[äö]/i.test(w0)) fi += 0.3;
+    });
+    const n = fi + en + sv; if (n < 1.5) return null;
+    if (fi >= (en + sv) * 1.2) return 'fi';
+    if (en > (fi + sv) * 1.5) return 'en';
+    if (sv > (fi + en) * 1.5) return 'sv';
+    return null;
+  }
+  /* koko kuvasarjan kieli: suomi, jos suomenkielinen otsikko tai selvästi suomenkielisiä rivejä löytyy */
+  function docLang(groups) {
+    const ls = groups.flatMap(g => g.map(l => l.t || (l.words || []).map(w => w.t).join(' ')));
+    if (ls.some(t => /\b(ainesosat|ainekset|aineosat)\b/i.test(t))) return 'fi';
+    const c = { fi: 0, en: 0, sv: 0 }; ls.forEach(t => { const l = lineLang(t); if (l) c[l]++; });
+    return c.fi >= 2 ? 'fi' : c.en >= 2 ? 'en' : null;
+  }
+  function ocrSelect(lines, lang) {
     /* 1) roskamerkit pois, rivit tekstiksi */
     const L = lines.map(l => { const ws = (l.words || [{ t: l.t, conf: 90 }]).filter(ocrTokOk); return { t: ws.map(w => w.t).join(' '), words: ws }; }).filter(l => l.t.trim());
     const conf = new Map(); L.forEach(l => l.words.forEach(w => { const k = ocrN(w.t.replace(/[^\p{L}\p{N}]/gu, '')); if (k) conf.set(k, Math.min(conf.get(k) ?? 100, w.conf)); }));
     let lines2 = L.map(l => { let t = l.t; try { t = fixOcrText(t); } catch (e) { } return t; });
+    /* monikielinen pakkaus: muunkieliset rivit pois (otsikkorivit jäävät, jotta osion raja löytyy) */
+    if (lang) lines2 = lines2.filter(t => { const g = lineLang(t); return !g || g === lang || /\b(ainesosat|ainekset|ingredients?|ingredienser)\b/i.test(t); });
+    /* ravintoarvorivit pois myös ilman otsikkoa ("Hiilihydraatit 62 g, josta sokereita 21 g") */
+    lines2 = lines2.filter(t => !(((t.match(/\d+(?:[.,]\d+)?\s*(?:g|kj|kcal|mg)\b/gi) || []).length >= 2 || /\b(josta tyydyttyn|josta sokere|hiilihydraat|varav mättat|varav socker|kolhydrat|of which (saturates|sugars)|carbohydrate)/i.test(t)) && !/\b(ainesosat|ingredients?)\b/i.test(t)));
     /* 2) alkusana sumealla haulla ("Aimesosat", "Ainesosal" …) */
     let start = -1;
     for (let i = 0; i < lines2.length && start < 0; i++) {
@@ -5231,6 +5266,33 @@ hiilihydraatit sokereita proteiini suolaa kuitua
         return { words: ws, t: ws.map(w => w.t).join(' '), cy: med(ws.map(cy)), x0: ws[0].x0 }; });
       const h = med(g.words.map(w => w.y1 - w.y0)) || 30;
       lines.sort((a, b) => a.cy - b.cy);
+      /* Lieriön ympäri kulkevan rivin jatkopala: kaarevalla pinnalla kuvien pystysiirtymä vaihtelee, joten rivin loppuosa
+         voi osua rivinvälin verran väärään kohtaan. Rivin keskeltä alkava pala liitetään riviin, jonka loppuun se jatkuu. */
+      if (lines.length > 2) {
+        const X0 = Math.min(...lines.map(l => l.x0)), X1 = Math.max(...lines.map(l => Math.max(...l.words.map(w => w.x1))));
+        const gaps = lines.slice(1).map((l, i) => l.cy - lines[i].cy).filter(d => d > h * 0.6);
+        const sp = med(gaps) || h * 1.5;
+        const x1Of = l => Math.max(...l.words.map(w => w.x1));
+        for (;;) {
+          /* paras pari koko rivistöstä kerrallaan: lähin jatkokohta ensin */
+          let best = null;
+          lines.forEach(F => {
+            if (!(F.x0 > X0 + (X1 - X0) * 0.2)) return;
+            lines.forEach(C => {
+              if (C === F || C.x0 >= F.x0) return;
+              const gap = F.x0 - x1Of(C);
+              if (gap < -h * 1.2 || gap > h * 5 || Math.abs(C.cy - F.cy) > sp * 1.6) return;
+              const score = Math.abs(gap) + Math.abs(C.cy - F.cy) * 0.5;
+              if (!best || score < best.score) best = { F, C, score };
+            });
+          });
+          if (!best) break;
+          const { F, C } = best;
+          C.words = C.words.concat(F.words).sort((p, q) => p.x0 - q.x0);
+          C.t = C.words.map(w => w.t).join(' ');
+          lines.splice(lines.indexOf(F), 1);
+        }
+      }
       return lines;
     });
   }
@@ -5339,13 +5401,53 @@ hiilihydraatit sokereita proteiini suolaa kuitua
     return out;
   }
   /* Poimitaan ainesosaluettelo: alkaen "Ainesosat", loppuen esim. ruotsinkieliseen osaan tai ravintosisältöön */
-  function pickIngredients(t) {
+  function pickIngredients(t, prefer) {
     t = String(t || '').replace(/\r/g, '').replace(/-\n(?=[a-zäöå])/g, '').replace(/[ \t]+/g, ' ');
-    const st = t.search(/ainesosat|ainekset|aineosat|ingredients?\b/i);
-    if (st >= 0) t = t.slice(st);
-    const en = t.slice(10).search(/\n?\s*(ingredienser|ravintosisält|ravintoarvo|näringsvärde|naringsvarde|säilytys|sailytys|förvaring|valmistaja|tillverkare|parasta ennen|bäst före|nutrition|energia\s*\d|energi\s*\d|energy\s*\d|best before|use by|store in|storage:|keep refrigerated|once opened|manufactured (by|for)|produced (by|for)|distributed by|packed (by|for|in a protective))/i);
+    const secs = langSections(t);
+    if (secs.length) {
+      const order = (prefer ? [prefer] : []).concat(LANG_PREF);
+      const sec = order.map(l => secs.find(x => x.lang === l)).find(Boolean) || secs[0];
+      t = t.slice(sec.start, sec.end);
+      /* kielikoodi pois alusta ("FI: Vesi, …" → "Ainesosat: Vesi, …") */
+      t = t.replace(/^(FI|EN|GB|UK|SV|SE|DE|EE|ET|FR|NL|ES|IT|PL|LT|LV|DK|DA|NO)\s*[:\-–]\s*/i, sec.lang === 'fi' ? 'Ainesosat: ' : sec.lang === 'en' ? 'Ingredients: ' : '');
+    }
+    const en = t.slice(10).search(ING_END);
     if (en >= 0) t = t.slice(0, en + 10);
     return t.replace(/\n+/g, ' ').replace(/\s+([,.;)])/g, '$1').replace(/\s{2,}/g, ' ').trim();
+  }
+  /* Monikielinen pakkaus: ainesosaluettelo poimitaan yhdellä kielellä. Järjestys: suomi, englanti, ruotsi, sitten
+     ensimmäinen löytyvä. Osion alku tunnistetaan otsikosta ("Ainesosat", "Ingredients", "Ingredienser", "Zutaten"…)
+     tai kielikoodista ("FI:", "EN:", "SE:"); osio loppuu seuraavan kielen alkuun tai esim. ravintosisältöön. */
+  const LANG_MARK = [
+    ['fi', /(?:^|[\s.;,(])((?:ainesosat|ainekset|aineosat|ainesosa|raaka-aineet)\b|FI\s*[:\-–]\s)/giu],
+    ['en', /(?:^|[\s.;,(])((?:ingredients?)\b|(?:EN|GB|UK)\s*[:\-–]\s)/giu],
+    ['sv', /(?:^|[\s.;,(])((?:ingredienser)\b|(?:SV|SE)\s*[:\-–]\s)/giu],
+    ['de', /(?:^|[\s.;,(])((?:zutaten)\b|DE\s*[:\-–]\s)/giu],
+    ['et', /(?:^|[\s.;,(])((?:koostisosad|koostis)\b|(?:EE|ET)\s*[:\-–]\s)/giu],
+    ['fr', /(?:^|[\s.;,(])((?:ingr[ée]dients)\b|FR\s*[:\-–]\s)/giu],
+    ['nl', /(?:^|[\s.;,(])((?:ingredi[eë]nten)\b|NL\s*[:\-–]\s)/giu],
+    ['es', /(?:^|[\s.;,(])((?:ingredientes)\b|ES\s*[:\-–]\s)/giu],
+    ['it', /(?:^|[\s.;,(])((?:ingredienti)\b|IT\s*[:\-–]\s)/giu],
+    ['pl', /(?:^|[\s.;,(])((?:sk[łl]adniki)\b|PL\s*[:\-–]\s)/giu],
+    ['lt', /(?:^|[\s.;,(])((?:sudedamosios dalys|sud[ėe]tis)\b|LT\s*[:\-–]\s)/giu],
+    ['lv', /(?:^|[\s.;,(])((?:sast[āa]vda[ļl]as|sast[āa]vs)\b|LV\s*[:\-–]\s)/giu],
+    ['da', /(?:^|[\s.;,(])((?:DK|DA|NO)\s*[:\-–]\s)/giu]
+  ];
+  const LANG_PREF = ['fi', 'en', 'pre', 'sv'];
+  const ING_END = /\n?\s*(ravintosisält|ravintoarvo|näringsvärde|naringsvarde|näringsinnehåll|säilytys|sailytys|förvaring|valmistaja|tillverkare|parasta ennen|bäst före|nutrition|nährwert|energia\s*\d|energi\s*\d|energy\s*\d|best before|use by|store in|storage:|keep refrigerated|once opened|manufactured (by|for)|produced (by|for)|distributed by|packed (by|for|in a protective))/i;
+  function langSections(t) {
+    const marks = [];
+    LANG_MARK.forEach(([lang, re]) => { re.lastIndex = 0; let m; while ((m = re.exec(t))) { const at = m.index + m[0].indexOf(m[1]); marks.push({ lang, at, head: m[1] }); } });
+    marks.sort((a, b) => a.at - b.at);
+    /* sama kohta kahdesti (esim. "Ingredienser" sekä sv että da) → ensimmäinen */
+    const uniq = marks.filter((m, i) => !i || m.at !== marks[i - 1].at);
+    const secs = uniq.map((m, i) => ({ lang: m.lang, start: m.at, end: i + 1 < uniq.length ? uniq[i + 1].at : t.length }));
+    /* otsikoton luettelo ennen ensimmäistä kieliotsikkoa (esim. suomenkielinen ilman "Ainesosat"-sanaa, sitten "Ingredienser:") */
+    if (secs.length && secs[0].start > 0) {
+      const pre = t.slice(0, secs[0].start);
+      if ((pre.match(/,/g) || []).length >= 2) secs.unshift({ lang: (typeof lineLang === 'function' && lineLang(pre)) || 'pre', start: 0, end: secs[0].start });
+    }
+    return secs;
   }
   /* Ruotsinkielinen ainesosaluettelo talteen varmistusta varten: jos suomenkielinen sana on luettu huonosti,
      ruotsinkielisestä osasta voi silti löytyä esim. "mjölk" tai "ägg" */
@@ -5572,10 +5674,10 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       if (edited) {
         /* käyttäjä on jo korjannut tekstiä: uuden kuvan teksti liitetään korjatun perään */
         txt = c.draft.trim(); (c.unsure || []).forEach(u => unsure.push(u));
-        ocrMergeShots([shot]).forEach(g => add(ocrSelect(g)));
+        ocrMergeShots([shot]).forEach(g => add(ocrSelect(g, docLang([g]))));
       } else {
-        const gs = ocrMergeShots(c.shots); groups = gs.length;
-        gs.forEach(g => add(ocrSelect(g)));
+        const gs = ocrMergeShots(c.shots), dl = docLang(gs); groups = gs.length;
+        gs.forEach(g => add(ocrSelect(g, dl)));
         if (append && c.draft && c.draft.trim() && c.shots.length === 1) txt = ocrJoin(c.draft.trim(), txt);
       }
       c.busy = null;
@@ -5825,8 +5927,8 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       const shots = await Promise.race([work, stall]);
       clearInterval(wd);
       let txt = '', unsure = [];
-      const gs = ocrMergeShots(shots);
-      gs.forEach(g => { const s1 = ocrSelect(g); txt = ocrJoin(txt, s1.text); s1.unsure.forEach(u => { if (!unsure.includes(u)) unsure.push(u); }); });
+      const gs = ocrMergeShots(shots), dl = docLang(gs);
+      gs.forEach(g => { const s1 = ocrSelect(g, dl); txt = ocrJoin(txt, s1.text); s1.unsure.forEach(u => { if (!unsure.includes(u)) unsure.push(u); }); });
       c.busy = null;
       if (!txt || txt.replace(/^Ainesosat:\s*/i, '').length < 8) { renderCheck(); toast('Kuvista ei löytynyt tekstiä. Kokeile uudelleen lähempää ja paremmassa valossa.'); return; }
       c.shots = shots; c.draft = txt; c.ocrOut = txt; c.ocrRaw = txt;

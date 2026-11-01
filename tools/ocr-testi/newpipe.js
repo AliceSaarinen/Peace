@@ -19,9 +19,9 @@ module.exports = (A, L, shots, opt = {}) => {
     const vars = String(VOTE).split(',').map(v => L.tess(V[v](p.im), +(process.env.PSM || 4)));
     return V.vote(r0, vars, A.ocrIsKnown);
   });
-  const groups = A.ocrMergeShots(res);
+  const groups = A.ocrMergeShots(res), dl = A.docLang ? A.docLang(groups) : null;
   let text = '', unsure = [];
-  groups.forEach(lines => { const s = A.ocrSelect(lines); text = A.ocrJoin(text, s.text); unsure.push(...s.unsure); });
+  groups.forEach(lines => { const s = A.ocrSelect(lines, dl); text = A.ocrJoin(text, s.text); unsure.push(...s.unsure); });
   if (process.env.LOG) console.error(JSON.stringify(log), groups.length);
   return { text, unsure, log };
 };

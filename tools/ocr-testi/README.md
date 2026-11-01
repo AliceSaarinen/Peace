@@ -80,3 +80,18 @@ Kuvien yhdistäminen tavallisella ocrMergeShots-yhdistäjällä heikensi tulosta
 
 Epätarkkuuden raja (Laplacen varianssi reunakohdissa, 900 px): testikuvien terävät versiot ≥ 499, σ = 2 sumennetut ≤ 203 → raja 150.
 Heijastusvaroitus vasta, kun yli 12 % kuvasta on palanut valkoiseksi (testikuvien 5–10 % heijastukset luettiin vielä hyvin).
+
+## Monikielinen lieriö 1.11.2026
+
+Uusi tapaus `multi`: purkin ympäri kiertävä etiketti, jossa englanti, suomi, ruotsi ja ravintoarvot useana rivinä,
+kuva noin 30° välein (kuten skannaustilassa). Korjaukset: ainesosaluettelo poimitaan yhdellä kielellä (suomi, englanti,
+otsikoton, ruotsi), muunkieliset rivit ja otsikottomat ravintoarvorivit pois, ja lieriön ympäri kulkevan rivin jatkopala
+liitetään oikeaan riviin, vaikka kuvien pystysiirtymä heittää.
+
+| multi | rec | prec |
+|---|---|---|
+| ennen | 0.846 | 0.417 |
+| kielen valinta | 0.846 | 0.821 |
+| + rivin jatkopalat | 0.866 | 0.842 |
+
+Koko sarja: 0.903 / 0.924, oikea tulos 30/32 (muut tapaukset ennallaan).

@@ -15,19 +15,23 @@ PRODUCTS = [
   dict(title='KAURAKEKSI', claim='Rapeat ja herkulliset keksit koko perheelle!',
        ing='Ainesosat: täysjyväkaurahiutaleet (32 %), vehnäjauho, sokeri, kasvirasva (palmu, rypsi), MAITOJAUHE, glukoosisiirappi, kananmuna, suola, nostatusaineet (E500, E503), emulgointiaine (soijalesitiini), aromi.',
        may='Saattaa sisältää pieniä määriä pähkinää ja seesaminsiementä.',
-       sv='Ingredienser: fullkornshavreflingor (32 %), vetemjöl, socker, vegetabiliskt fett (palm, raps), MJÖLKPULVER, glukossirap, ägg, salt.'),
+       sv='Ingredienser: fullkornshavreflingor (32 %), vetemjöl, socker, vegetabiliskt fett (palm, raps), MJÖLKPULVER, glukossirap, ägg, salt.',
+       en='Ingredients: wholegrain oat flakes (32 %), wheat flour, sugar, vegetable fat (palm, rapeseed), MILK powder, glucose syrup, egg, salt, raising agents (E500, E503), emulsifier (soy lecithin), flavouring.'),
   dict(title='TOMAATTIKEITTO', claim='Lämmitä ja nauti. Ei lisättyjä säilöntäaineita.',
        ing='Ainesosat: vesi, tomaattipyree (35 %), sipuli, porkkana, rypsiöljy, kerma (MAITO), sokeri, suola, maissitärkkelys, valkosipuli, basilika, mustapippuri, happamuudensäätöaine (sitruunahappo).',
        may='Saattaa sisältää selleriä.',
-       sv='Ingredienser: vatten, tomatpuré (35 %), lök, morot, rapsolja, grädde (MJÖLK), socker, salt.'),
+       sv='Ingredienser: vatten, tomatpuré (35 %), lök, morot, rapsolja, grädde (MJÖLK), socker, salt.',
+       en='Ingredients: water, tomato puree (35 %), onion, carrot, rapeseed oil, cream (MILK), sugar, salt, maize starch, garlic, basil, black pepper, acidity regulator (citric acid).'),
   dict(title='SUKLAAPATUKKA', claim='Uusi ja entistä parempi resepti!',
        ing='Ainesosat: sokeri, kaakaovoi, täysmaitojauhe, kaakaomassa, herajauhe (MAITO), voirasva, emulgointiaine (auringonkukkalesitiini), vaniljauute, gelatiini, karmiini, mehiläisvaha.',
        may='Saattaa sisältää hasselpähkinää, mantelia ja vehnää.',
-       sv='Ingredienser: socker, kakaosmör, helmjölkspulver, kakaomassa, vasslepulver (MJÖLK), smörfett, gelatin.'),
+       sv='Ingredienser: socker, kakaosmör, helmjölkspulver, kakaomassa, vasslepulver (MJÖLK), smörfett, gelatin.',
+       en='Ingredients: sugar, cocoa butter, whole MILK powder, cocoa mass, whey powder (MILK), butterfat, emulsifier (sunflower lecithin), vanilla extract, gelatine, carmine, beeswax.'),
   dict(title='KASVISPIHVI', claim='Proteiinia kasveista. Valmis kahdessa minuutissa.',
        ing='Ainesosat: vesi, herneproteiini (18 %), rypsiöljy, perunatärkkelys, kaurahiutale, sipuli, metyyliselluloosa, suola, hiivauute, savuaromi, punajuurimehutiiviste, mustapippuri, mausteet.',
        may='Valmistettu tehtaassa, jossa käsitellään myös kananmunaa ja maitoa.',
-       sv='Ingredienser: vatten, ärtprotein (18 %), rapsolja, potatisstärkelse, havreflingor, lök, salt.'),
+       sv='Ingredienser: vatten, ärtprotein (18 %), rapsolja, potatisstärkelse, havreflingor, lök, salt.',
+       en='Ingredients: water, pea protein (18 %), rapeseed oil, potato starch, oat flakes, onion, methylcellulose, salt, yeast extract, smoke flavouring, beetroot juice concentrate, black pepper, spices.'),
 ]
 NUTR = 'Ravintosisältö 100 g: Energia 1850 kJ / 440 kcal, Rasva 17 g, josta tyydyttyneitä 8,1 g, Hiilihydraatit 62 g, josta sokereita 21 g, Proteiini 7,4 g, Suola 0,9 g.'
 TAIL = 'Säilytys kuivassa ja viileässä. Parasta ennen: katso pakkauksen pohja. Valmistaja: Esimerkki Oy, Teollisuuskatu 5, 00510 Helsinki.'
@@ -41,7 +45,7 @@ def wrap(draw, text, font, width):
     if cur: lines.append(cur)
     return lines
 
-def label(p, width, fsize, rng, extra=True, bold_kw=True):
+def label(p, width, fsize, rng, extra=True, bold_kw=True, pre=None):
     """Tasainen etiketti. Palauttaa (kuva, gt)."""
     fi = rng.randrange(len(FONTS))
     f = ImageFont.truetype(FONTS[fi], fsize); fb = ImageFont.truetype(BOLD[fi], fsize)
@@ -51,6 +55,7 @@ def label(p, width, fsize, rng, extra=True, bold_kw=True):
     blocks = []
     if extra:
         blocks += [(p['title'], ft, int(fsize * 2.7)), (p['claim'], f, lh), ('', f, lh // 2)]
+    for t in (pre or []): blocks += [(t, f, lh), ('', f, lh // 2)]
     blocks += [(p['ing'], f, lh), (p['may'], f, lh)]
     if extra:
         blocks += [('', f, lh // 2), (p['sv'], fs, int(lh * .9)), ('', f, lh // 2), (NUTR, fs, int(lh * .9)), (TAIL, fs, int(lh * .9))]
@@ -173,7 +178,16 @@ def main():
             sc = 1.6
             shots = [shade(flat_view(L, int(620 * sc), int(win * sc), rng, y0=y, persp=.03, scale=sc), rng) for y in ys]
             save(f'tall_s{seed}_{pi}', shots, gt, dict(kind='tall'))
-            n += 6
+            # 7) monikielinen lieriö (englanti, suomi, ruotsi, ravintoarvot), skannaustila: kuva noin 30° välein
+            R3 = rng.uniform(380, 480); W3 = int(R3 * 2 * math.pi * .8)
+            lab, gt = label(p, W3, fs, rng, extra=True, pre=[p['en']]); L = np.array(lab)
+            f3 = rng.uniform(2.6, 3.0) * R3; D3 = 4.0 * R3
+            outw3 = int(2 * R3 * f3 / D3 * 1.15); outh3 = int(L.shape[0] * f3 / (D3 - R3) * 1.15)
+            span3 = (W3 / R3) / 2 - 0.55
+            rots3 = list(np.arange(-span3, span3 + 1e-6, 0.5))
+            shots = [shade(cylinder_view(L, R3, D3, f3, rng.uniform(-.2, .2) * L.shape[0], r, outw3, outh3, rng), rng) for r in rots3]
+            save(f'multi_s{seed}_{pi}', shots, gt, dict(kind='multi', R=R3, rots=[float(r) for r in rots3]))
+            n += 7
     print(n, 'cases')
 
 main()
