@@ -492,6 +492,7 @@ textarea.let:focus{background:#FFFDF9;border-color:#E3B7C4;box-shadow:none}
 .fbar button{padding:0 2px}.fbar button.clr{flex:1.9 1 0;color:var(--rose-ink);font-size:.8rem}
 .le-undo{position:sticky;top:8px;z-index:5;display:flex;justify-content:flex-end;margin:0 0 6px}.le-undo[hidden]{display:none}.le-undo .btn{box-shadow:0 2px 8px rgba(120,80,60,.15)}
 .rwarn{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.sdiag{margin:6px 12px 0;font-size:.8rem;color:#fff;background:rgba(0,0,0,.45);border-radius:8px;padding:6px 8px;text-align:center}.sdiag[hidden],.cbar [hidden]{display:none!important}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 @media (max-width:380px){.top .bq{width:96px;height:66px}}
 </style>
@@ -5637,23 +5638,32 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       <div class="stagewrap"><div class="sview" data-k="shot"><video playsinline muted autoplay></video><div class="sframe"></div><div class="sflash"></div></div></div>
       <p class="shint" aria-live="polite">${REC ? 'Aseta reseptin alku kehykseen ja paina Aloita.' : 'Aseta ainesosaluettelon alku kehykseen ja paina Aloita.'}</p><p hidden class="shint2">${REC ? 'Pidä puhelin reseptin yläpäässä ja siirrä sitä hitaasti alaspäin niin, että koko resepti kulkee kehyksen läpi.' : 'Kierrä tuotetta hitaasti niin, että koko ainesosaluettelo kulkee kehyksen läpi. Pitkässä luettelossa siirrä kameraa hitaasti alaspäin.'}</p>
       <div class="sprog" aria-hidden="true"><i></i></div>
-      <div class="cbar"><button class="btn ghost" data-k="no" aria-label="Peruuta">${icon('i-x')}</button><span class="scount" aria-live="polite">0 kuvaa</span><button class="btn primary" data-k="ok" disabled hidden>${icon('i-ok')}Valmis</button><button class="btn primary" data-k="go">${icon('i-scan')}Aloita</button></div></div>`;
+      <div class="cbar"><button class="btn ghost" data-k="no" aria-label="Peruuta">${icon('i-x')}</button><span class="scount" aria-live="polite">0 kuvaa</span><button class="btn soft" data-k="shot" hidden>${icon('i-cam')}Ota kuva</button><button class="btn primary" data-k="ok" disabled hidden>${icon('i-ok')}Valmis</button><button class="btn primary" data-k="go">${icon('i-scan')}Aloita</button></div>
+      <p class="sdiag" hidden aria-live="polite"></p></div>`;
     document.body.style.overflow = 'hidden';
     const video = root.querySelector('video'), cnt = root.querySelector('.scount'), ok = root.querySelector('[data-k="ok"]'), bar = root.querySelector('.sprog i'), hint = root.querySelector('.shint'), flash = root.querySelector('.sflash');
     video.srcObject = stream;
     try { await video.play(); } catch (e) { }
     const frames = []; let started = false;
-    const go = root.querySelector('[data-k="go"]');
+    const go = root.querySelector('[data-k="go"]'), shotBtn = root.querySelector('.cbar [data-k="shot"]'), diag = root.querySelector('.sdiag');
+    let lastErr = '', ticks = 0;
+    const showDiag = msg => { diag.hidden = false; diag.textContent = msg; };
     let prev = null, acc = { x: 0, y: 0 }, maxSharp = 0, timer = 0, done = false, busyGrab = false, still = 0, lastGrab = 0, startedAt = 0;
     const small = document.createElement('canvas'), sg = small.getContext('2d', { willReadFrequently: true });
     const stop = () => { done = true; clearInterval(timer); stream.getTracks().forEach(t => t.stop()); root.innerHTML = ''; document.body.style.overflow = ''; };
     const grab = async () => {
       /* täysikokoinen kuva JPEG-muodossa (muistia säästäen) */
-      const vw = video.videoWidth, vh = video.videoHeight, k = Math.min(1, 1920 / Math.max(vw, vh));
+      if (video.paused) { try { await video.play(); } catch (e) { } }
+      const vw = video.videoWidth, vh = video.videoHeight;
+      if (!vw || !vh) { showDiag('Kameran kuva ei käynnistynyt (0×0). Sulje skanneri ja avaa se uudelleen, tai ota kuvat kamerakuvakkeella.'); return; }
+      const k = Math.min(1, 1920 / Math.max(vw, vh));
       const cv = document.createElement('canvas'); cv.width = Math.round(vw * k); cv.height = Math.round(vh * k);
       cv.getContext('2d').drawImage(video, 0, 0, cv.width, cv.height);
-      const blob = await new Promise(res => cv.toBlob(res, 'image/jpeg', 0.92));
-      if (!blob || done) return;
+      let blob = await new Promise(res => { try { cv.toBlob(res, 'image/jpeg', 0.92); } catch (e) { lastErr = 'toBlob: ' + e.message; res(null); } });
+      /* varalla dataURL, jos toBlob ei toimi */
+      if (!blob && !done) { try { const u = cv.toDataURL('image/jpeg', 0.92); blob = await (await fetch(u)).blob(); } catch (e) { lastErr = 'dataURL: ' + e.message; } }
+      if (!blob) { showDiag('Kuvan tallennus epäonnistui' + (lastErr ? ' (' + lastErr + ')' : '') + '.'); return; }
+      if (done) return;
       frames.push(blob); lastGrab = Date.now();
       cnt.textContent = `${frames.length} kuva${frames.length === 1 ? '' : 'a'}`;
       bar.style.width = Math.min(100, frames.length / MAXF * 100) + '%';
@@ -5662,8 +5672,11 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       if (frames.length === (REC ? 2 : 3)) hint.textContent = REC ? 'Hyvä! Jatka alaspäin, kunnes resepti on lopussa, ja paina Valmis.' : 'Hyvä! Jatka kiertämistä, kunnes luettelo on lopussa, ja paina Valmis.';
       if (frames.length >= MAXF) finish();
     };
-    const tick = async () => {
-      if (done || busyGrab || !video.videoWidth || !started) return;
+    const tick = async () => { try { await tick0(); } catch (e) { lastErr = String(e && e.message || e); busyGrab = false; } };
+    const tick0 = async () => {
+      if (done || busyGrab || !started) return;
+      ticks++;
+      if (!video.videoWidth) { if (video.paused) video.play().catch(() => { }); if (Date.now() - startedAt > 2500) showDiag(`Kameran kuva ei käynnistynyt (${video.videoWidth}×${video.videoHeight}, tila ${video.readyState}). Sulje skanneri ja avaa uudelleen, tai ota kuvat kamerakuvakkeella.`); return; }
       const w = SCAN_W, h = Math.max(8, Math.round(SCAN_W * video.videoHeight / video.videoWidth));
       if (small.width !== w) { small.width = w; small.height = h; }
       const cur = scanGray(video, sg, w, h);
@@ -5699,15 +5712,20 @@ hiilihydraatit sokereita proteiini suolaa kuitua
       const fs = frames.slice(); stop(); if (fs.length) (REC ? ocrRecipeFrames : ocrFrames)(fs);
     };
     timer = setInterval(tick, 110);
+    /* tilarivi: jos kuvia ei synny, kerrotaan syy (helpottaa vianetsintää puhelimella) */
+    const diagT = setInterval(() => { if (done) { clearInterval(diagT); return; } if (started && !frames.length && Date.now() - startedAt > 3000) showDiag(`Ei vielä kuvia · kamera ${video.videoWidth}×${video.videoHeight} · tila ${video.readyState}${video.paused ? ' · pysähtynyt' : ''} · mittauksia ${ticks}${lastErr ? ' · virhe: ' + lastErr : ''}`); else if (frames.length && !lastErr) diag.hidden = true; }, 1000);
     root.querySelector('.scan').addEventListener('click', e => {
       const k = (e.target.closest('[data-k]') || {}).dataset; if (!k || !k.k) return;
       if (k.k === 'no') stop();
       if (k.k === 'ok') finish();
-      if (k.k === 'shot' && started && !busyGrab && video.videoWidth) { busyGrab = true; acc = { x: 0, y: 0 }; grab().finally(() => { busyGrab = false; }); }
+      if (k.k === 'shot' && started && !busyGrab) { busyGrab = true; acc = { x: 0, y: 0 }; grab().catch(e => { lastErr = String(e && e.message || e); showDiag('Kuvaus epäonnistui: ' + lastErr); }).finally(() => { busyGrab = false; }); }
       if (k.k === 'go' && !started) {
         /* skannaus alkaa vasta, kun käyttäjä on asettanut kameran luettelon alkuun */
         started = true; prev = null; acc = { x: 0, y: 0 }; still = 0; startedAt = Date.now();
-        go.hidden = true; ok.hidden = false;
+        go.hidden = true; ok.hidden = false; shotBtn.hidden = false;
+        /* iPhone sallii videon käynnistyksen varmimmin painalluksen yhteydessä; ensimmäinen kuva otetaan suoraan */
+        try { const pp = video.play(); if (pp && pp.catch) pp.catch(e => { lastErr = 'play: ' + e.message; }); } catch (e) { }
+        setTimeout(() => { if (!done && !frames.length && !busyGrab) { busyGrab = true; acc = { x: 0, y: 0 }; grab().catch(e => { lastErr = String(e && e.message || e); }).finally(() => { busyGrab = false; }); } }, 500);
         hint.textContent = root.querySelector('.shint2').textContent;
       }
     });
